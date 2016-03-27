@@ -1,0 +1,9 @@
+{
+    "private": true,
+    "scripts": {
+        "bower": "node_modules/.bin/bower"
+    },
+    "devDependencies": {
+        "bower": "1.7.7"
+    }
+}
