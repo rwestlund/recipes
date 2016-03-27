@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="recipes">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+    <title>Recipes</title>
+
+    <!-- Chrome for Android theme color -->
+    <meta name="theme-color" content="#2E3AA1">
+
+    <!-- Tile color for Win8 -->
+    <meta name="msapplication-TileColor" content="#3372DF">
+
+    <!-- Add to homescreen for Chrome on Android -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Recipes">
+    <link rel="icon" sizes="192x192" href="images/touch/chrome-touch-icon-192x192.png">
+
+    <!-- Add to homescreen for Safari on iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Recipes">
+    <link rel="apple-touch-icon" href="images/touch/apple-touch-icon.png">
+
+    <!-- Tile icon for Win8 (144x144) -->
+    <meta name="msapplication-TileImage"
+        content="images/touch/ms-touch-icon-144x144-precomposed.png">
+
+    <!--<link rel="stylesheet" href="styles/main.css">-->
+    <link rel="stylesheet" href="./bc/bootstrap/dist/css/bootstrap.css">
+
+    <script src="../bc/webcomponentsjs/webcomponents-lite.js"></script>
+    <!--<script src="../bc/webcomponentsjs/webcomponents.js"></script> -->
+
+    <!-- Google Font: Montserrat -->
+    <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700'
+        rel='stylesheet' type='text/css'>
+
+    <!-- Google Font: Open Sans -->
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans'
+        rel='stylesheet' type='text/css'>
+
+    <script>
+        window.Polymer = window.Polymer || {};
+        window.Polymer.dom = 'shady';
+    </script>
+
+    <link rel="import" href="elements/elements.html">
+</head>
+
+<body unresolved class="fullbleed layout vertical">
+
+    <template is="dom-bind" id="app">
+        <style is="custom-style" include="global-styles"></style>
+        <style is="custom-style" include="utility-styles"></style>
+	
+        <!-- the drawer panel holds the nav drawer and the main toolbar -->
+        <paper-drawer-panel 
+                drawer-width="200px" 
+                class="mainContentBackground"
+                responsive-width="1035px">
+            <!-- the first header panel is for the drawer -->
+            <paper-header-panel drawer>
+                <paper-toolbar>
+                    <div class="middle middle-container center horizontal layout">
+                        <div class="menu-header-text">Menu</div>
+                    </div>
+                </paper-toolbar>
+                 <!-- man navbar with page links -->
+                <paper-menu class="list" attr-for-selected="data-route"
+                    selected="" paper-drawer-toggle>
+
+                    <a data-route="recipes" href="/" paper-drawer-toggle>
+                        <iron-icon icon="icons:home"></iron-icon>
+                        <span>Dashboard</span>
+                    </a>
+                    <a data-route="users" href="/users" hidden$="[[!isUserAdmin(userRole)]]">
+                        <iron-icon icon="social:people"></iron-icon>
+                        <span>Users</span>
+                    </a>
+                    <a data-route="about" href="/about" hidden$="[[!isUserAdmin(userRole)]]">
+                        <iron-icon icon="icons:list"></iron-icon>
+                        <span>Logs</span>
+                    </a>
+                    <a data-route="logout" href="/auth/logout">
+                        <iron-icon icon="maps:directions-run"></iron-icon>
+                        <span>Logout</span>
+                    </a>
+
+                </paper-menu>
+            </paper-header-panel>
+
+            <!-- the second header panel is the main page, including
+                the main toolbar -->
+            <paper-header-panel main>
+                <!-- main toolbar -->
+                <paper-toolbar id="mainToolbar" >
+                    <paper-icon-button id="paperToggle" icon="menu"
+                        paper-drawer-toggle></paper-icon-button>
+                    <span class="flex"></span>
+
+                    <div class="top-right-bar">
+                        <span class="user-name">
+                            <iron-icon icon="icons:account-circle"></iron-icon>
+                            <span class="user-label">Signed in as </span>
+                            <span>{{userFirstAndLastName}}</span>
+                        </span>
+                    </div>
+                            
+                    <cookie-display 
+                        cookie-name="username"
+                        cookie-value="{{userFirstAndLastName}}"
+                        style="display: none;">
+                    </cookie-display>
+                    <cookie-display 
+                        cookie-name="role"
+                        cookie-value="{{userRole}}">
+                    </cookie-display>
+                    <!-- Application name -->
+                    <div class="middle middle-container center horizontal layout">
+                        <div class="app-name">
+                            <span>Recipes</span>
+                            <span class="control-panel-label">Navigation</span>
+                        </div>
+                    </div>
+                </paper-toolbar>
+
+                <!-- main page content -->
+                <div>
+                    <iron-pages attr-for-selected="data-route" selected="{{route}}">
+
+                        <section data-route="recipes">
+                        </section>
+
+                        <section data-route="about">
+                        </section>
+                        <template is="dom-if" if="[[isUserAdmin(userRole)]]">
+                            <section data-route="users">
+                                <user-collection><user-collection>
+                            </section>
+
+                        </template>
+
+                    </iron-pages>
+                </div>
+            </paper-header-panel>
+        </paper-drawer-panel>
+
+    </template>
+
+    <!--<script src="scripts/app.js"></script>-->
+
+  <script>
+    var app = document.querySelector('#app');
+
+    app.isUserAdmin = function (role) {
+        return (role === 'admin');
+    };
+
+  </script>
+</body>
+
+</html>

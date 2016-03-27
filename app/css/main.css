@@ -1,0 +1,87 @@
+/* Jon Doltar
+ * 2016-02
+ */
+
+body {
+    background: #fafafa;
+    font-size: 14px !important;
+    font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color: #333;
+}
+
+/*Disable scrolling when dialog is open*/
+@media (max-width: 750px) {
+    body.dialog-is-open #mainContainer{
+        /*overflow: hidden;
+        z-index: 0;*/
+    }
+}
+
+
+
+/* These provide the backgrounds for the main content and drawer */
+.mainContentBackground #main #mainContainer {
+    background-color: #fafafa;
+}
+.mainContentBackground #drawer #mainContainer{
+    background-color: #ffffff;
+}
+
+logout-button {
+    color: white;
+}
+
+.menu-header-text {
+    font-size: 1.2em;
+}
+
+/**************************************************
+* Top bar - user and socket connection status
+**************************************************/
+
+.top-right-bar .socket-connected {
+    color: #39EF16;
+    --iron-icon-fill-color: #39EF16;
+}
+.top-right-bar .socket-disconnected {
+    color: #FF3030;
+    --iron-icon-fill-color: #FF3030;
+}
+
+@media (max-width: 500px) {
+    .control-panel-label {
+        display: none;
+    }
+}
+
+@media (max-width: 650px) {
+
+    .app-name {
+        font-size: 16px !important;
+    }
+    .top-right-bar {
+        font-size: 0.9em !important;
+    }
+
+    /* user info  */
+    .top-right-bar .user-name {
+        margin-right: 5px;
+    }
+    /* Connected/Disconnected label  */
+    .top-right-bar .socket-status > span {
+        display: none;
+    }
+
+    /* User label "signed in as"  */
+    .top-right-bar .user-label {
+        display: none;
+    }
+
+}
+
+@media (min-width: 601px) {
+    /* user info  */
+    .top-right-bar .user-name {
+        margin-right: 15px;
+    }
+}

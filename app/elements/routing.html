@@ -1,0 +1,35 @@
+<script src="../bc/page/page.js"></script>
+<script>
+  window.addEventListener('WebComponentsReady', function() {
+
+    // We use Page.js for routing. This is a Micro
+    // client-side router inspired by the Express router
+    // More info: https://visionmedia.github.io/page.js/
+    page('/', function () {
+      app.route = 'recipes';
+      app.scrollPageToTop();
+    });
+
+    page('/users', function () {
+      app.route = 'users';
+      app.scrollPageToTop();
+    });
+
+    page('/recipes', function () {
+      app.route = 'recipes';
+      app.scrollPageToTop();
+    });
+
+    page('/recipe/:id', function (data) {
+      app.route = 'recipe-details';
+      app.params = data.params;
+      app.scrollPageToTop();
+    });
+
+    // add #! before urls
+    page({
+      hashbang: true
+    });
+
+  });
+</script>

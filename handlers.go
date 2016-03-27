@@ -15,11 +15,10 @@ import (
  * GET /recipes/3
  */
 func recipe(res http.ResponseWriter, req *http.Request) {
+    /* Get id parameter. */
     params := mux.Vars(req)
-    var id uint32
-    var err error
     bigid, err := strconv.ParseUint(params["id"], 10, 32)
-    id = uint32(bigid)
+    var id uint32 = uint32(bigid)
 
     res.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
@@ -36,10 +35,11 @@ func recipe(res http.ResponseWriter, req *http.Request) {
     j, e := json.Marshal(recipe)
     if e != nil {
         res.WriteHeader(500)
-    } else {
-        /* Send good response. */
-        res.Write(j)
+        return
     }
+
+    /* If we made it here, send good response. */
+    res.Write(j)
 }
 
 /*
@@ -47,4 +47,5 @@ func recipe(res http.ResponseWriter, req *http.Request) {
  * GET /
  */
 func home(res http.ResponseWriter, req *http.Request) {
+    http.ServeFile(res, req, "app/home.html")
 }

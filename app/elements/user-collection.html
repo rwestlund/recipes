@@ -1,0 +1,422 @@
+<!--
+    Randy Westlund and Jon Doltar
+    2016-02
+-->
+<!-- this module shows a list of users -->
+
+<link rel="import" href="../../bc/polymer/polymer.html">
+
+<!-- External styles for this element -->
+<link rel="import" href="../css/user-collection-style.html">
+
+<dom-module id="user-collection">
+    <!-- Include the external styles for this element -->
+    <style is="custom-style" include="user-collection-style"></style>
+    <template>
+        <style>
+            :host {
+                display: block;
+                /*margin: 5px;*/
+            }
+            #filterInputField {
+                width 200px;
+                float: right;
+            }
+            .page-title-text {
+                font-size: 2em;
+                color: #AAA;
+            }
+            .local-account-icon iron-icon {
+                --iron-icon-height: 2.3em;
+                --iron-icon-width: 2.3em;
+                --iron-icon-fill-color: rgba(188, 188, 188, 0.8);
+            }
+            paper-fab {
+                --paper-fab-keyboard-focus-background: #E9E9E9;
+            }
+        </style>
+        <cookie-display 
+            cookie-name="role"
+            cookie-value="{{userRole}}">
+        </cookie-display>
+
+        <spinner-observer
+            id="manualCleaningSpinner"
+            class="card-progress"
+            active="{{progressActive}}">
+        </spinner-observer>
+        <!-- a filter box -->
+        <div class="layout horizontal center end-justified mv-lg">
+            <!-- <div class="flex self-start page-title-text">Users</div> -->
+            <paper-input
+                id="filterInputField"
+                type="text" maxlength="60"
+                value="{{filterVal::input}}"
+                placeholder="filter">
+            </paper-input>
+
+            <paper-fab mini
+                icon="social:person-add"
+                on-tap="openEditUserDialog"
+                hidden$="[[!isUserAdmin(userRole)]]"
+                title="add user"
+                class="add-user-button pull-right ml-lg mt-lg">
+            </paper-fab>
+        </div>
+
+        <div class="row">
+            <template is="dom-repeat" items={{users}} as="user"
+                    filter="{{searchFilter(filterVal)}}">
+                <div class="item" on-tap="itemClick">
+                    <div class="layout horizontal center start-justified">
+
+                        <div class="avatar layout horizontal center center-justified">
+                            <iron-icon class="user-icon" icon="social:person">
+                            </iron-icon>
+                        </div>
+
+                        <div class="flex">
+                            <div class="layout vertical ml-lg">
+                                <div class="user-name">
+                                    [[displayNameOrEmail(user)]]
+                                </div>
+                                <div class="user-type">{{user.role}}</div>
+                            </div>
+                        </div>
+                        <div>
+                            <div hidden$="[[!isGoogleAccount(user.type)]]">
+                                <img src="../images/g-logo.png" class="google-icon"
+                                    width="40px" height="28px">
+                            </div>
+                            <div hidden$="[[!isLocalAccount(user.type)]]" class="local-account-icon">
+                                <iron-icon class="type-icon" icon="icons:account-circle">
+                                </iron-icon>
+                            </div>
+                        </div>
+                    </div>
+
+                    <iron-collapse id="collapse" opened="{{user.expanded}}">
+                        <hr />
+                        <div class="layout horizontal center start-justified pl-lg">
+                            <div class="">
+                                <div class="flex layout vertical">
+                                    <!-- only show email for google accounts -->
+                                    <template is="dom-if"
+                                            if="{{isGoogleAccount(user.type)}}">
+                                        <div>
+                                            <span class="user-info-label">Email:</span>
+                                            {{user.email}}
+                                        </div>
+                                    </template>
+                                    <div>
+                                        <span class="user-info-label">Type:</span>
+                                        {{user.type}}
+                                    </div>
+                                    <div>
+                                        <span class="user-info-label">Last Activity:</span>
+                                        {{toDateStringPretty(user.lastlog)}}
+                                    </div>
+                                    <div>
+                                        <span class="user-info-label">Created:</span>
+                                        {{toDateStringPretty(user.date_created)}}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex">
+                                <paper-fab mini
+                                    icon="icons:create"
+                                    on-tap="openEditUserDialog"
+                                    hidden$="[[!isUserAdmin(userRole)]]"
+                                    title="edit user"
+                                    class="add-user-button ml-lg pull-right mt-lg"
+                                    data-id$="{{user.id}}">
+                                </paper-fab>
+
+                                <paper-fab mini
+                                    icon="icons:delete"
+                                    on-tap="deleteUserClick"
+                                    hidden$="[[!isUserAdmin(userRole)]]"
+                                    title="delete user"
+                                    class="add-user-button ml-lg pull-right mt-lg"
+                                    data-id$="{{user.id}}">
+                                </paper-fab>
+                            </div>
+                        </div>
+                    </iron-collapse>
+                </div>
+            </template>
+        </div>
+
+        <!-- Dialogs -->
+
+        <paper-dialog id="deleteUserConfirmationDialog" class="layout vertical">
+            <div>
+                <h2>Delete User</h2>
+            </div>
+            <div class="flex flex-ratio-12">
+                <paper-dialog-scrollable>
+                    <div class="layout vertical">
+                        <div>Are you sure you want to delete user
+                            <span class="bold">{{userToDelete.name}}</span>?
+                        </div>
+                    </div>
+
+                </paper-dialog-scrollable>
+            </div>
+
+            <div class="flex-none self-end buttons">
+                <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button on-tap="deleteUserConfirmClick" dialog-confirm>
+                    Delete
+                </paper-button>
+            </div>
+        </paper-dialog>
+
+        <paper-dialog id="editUserDialog" class="layout vertical">
+            <div>
+                <h2 hidden$="{{!newUser}}">Add User</h2>
+                <h2 hidden$="{{newUser}}">Edit User</h2>
+            </div>
+            <div class="flex flex-ratio-12">
+                <paper-dialog-scrollable>
+                    <div class="layout vertical">
+                        <div>
+                            <div class="layout horizontal">
+                                <paper-dropdown-menu id="accountTypeSelect"
+                                        label="Account Type"
+                                        disabled$="{{!newUser}}" class="mr">
+                                    <paper-menu id="accountTypeSelectMenu"
+                                            class="dropdown-content"
+                                            attr-for-selected="value"
+                                            selected="{{accountTypeSelected}}">
+                                        <paper-item value="local">Local</paper-item>
+                                        <paper-item value="google">Google</paper-item>
+                                    </paper-menu>
+                                </paper-dropdown-menu>
+                                <paper-dropdown-menu id="accountRoleSelect"
+                                        label="Account Role" class="ml">
+                                    <paper-menu id="accountRoleSelectMenu"
+                                            class="dropdown-content"
+                                            attr-for-selected="value"
+                                            selected="{{accountRoleSelected}}">
+                                        <paper-item value="user">User</paper-item>
+                                        <paper-item value="admin">Admin</paper-item>
+                                        <paper-item value="guest">Guest</paper-item>
+                                    </paper-menu>
+                                </paper-dropdown-menu>
+                            </div>
+                        </div>
+                        <div>
+                            <paper-input
+                                id="userEmailAddress"
+                                label="Email" maxlength="40"
+                                hidden$="{{!isGoogleAccount(accountTypeSelected)}}">
+                            </paper-input>
+                            <paper-input
+                                id="userFirstAndLastName"
+                                label="Name" maxlength="30"
+                                hidden$="{{!isLocalAccount(accountTypeSelected)}}">
+                            </paper-input>
+                        </div>
+                    </div>
+                </paper-dialog-scrollable>
+            </div>
+
+
+            <div class="flex-none self-end buttons">
+                <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button on-tap="createUserClick" dialog-confirm
+                        hidden="[[!newUser]]">Add</paper-button>
+                <paper-button on-tap="saveUserClick" dialog-confirm
+                        hidden="[[newUser]]">Save</paper-button>
+            </div>
+        </paper-dialog>
+
+
+        <paper-toast
+                id="userSuccess"
+                class="success-toast"
+                text="{{successMessage}}"
+                duration="4000">
+        </paper-toast>
+        <paper-toast
+                id="userError"
+                class="error-toast"
+                text="{{errorMessage}}"
+                duration="4000">
+        </paper-toast>
+
+
+    </template>
+
+    <script>
+        (function () {
+            'use strict';
+            Polymer({
+                is: 'user-collection',
+                behaviors: [UvbaseBehaviors.UserBehavior],
+                properties: {
+                    users: {
+                        type: Object,
+                        notify: true
+                    }
+                },
+                ready: function () {
+                    this.set('accountTypeSelected', '');
+                    var that = this;
+
+                    this.set('progressActive', true);
+
+                    this.getUsers().then(function(users) {
+                        that.set('users', users);
+                        that.set('progressActive', false);
+                    }, function (error) {
+                        // notify error
+                        that.set('errorMessage', 'Error getting users');
+                        that.$.userError.open();
+                        that.set('progressActive', false);
+                    });
+                },
+
+                itemClick: function (event) {
+                    var item = event.currentTarget;
+                    var collapse = Polymer.dom(item).querySelector('iron-collapse');
+                    collapse.toggle();
+                },
+
+                openEditUserDialog: function (e) {
+                    // prohibit containing div from firing its on-tap handler
+                    e.stopPropagation();
+
+                    var currentTarget = e.currentTarget;
+                    var idAttr = currentTarget.attributes['data-id'];
+                    var id;
+                    if(idAttr) id = Number(idAttr.value);
+
+                    // if we are editing an existing user
+                    if(id) {
+                        var userToEdit;
+                        this.users.forEach(function(user) {
+                            if(id === user.id) userToEdit = user;
+                        });
+                        this.set('userToEdit', userToEdit);
+                        this.$.userFirstAndLastName.value = userToEdit.name;
+                        this.$.userEmailAddress.value = userToEdit.email;
+                        this.$.accountTypeSelectMenu.selected = userToEdit.type;
+                        this.$.accountRoleSelectMenu.selected = userToEdit.role;
+                        this.set('newUser', false);
+                    }
+                    // otherwise initialize form with defaults
+                    else {
+                        this.$.userFirstAndLastName.value = '';
+                        this.$.userEmailAddress.value = '';
+                        this.$.accountTypeSelectMenu.selected =
+                            this.constants.accountTypeEnum.google;
+                        this.$.accountRoleSelectMenu.selected =
+                            this.constants.userRoleEnum.user;
+                        this.set('newUser', true);
+                    }
+                    this.$.editUserDialog.open();
+                },
+
+                createUserClick: function () {
+                    var user = {
+                        name: this.$.userFirstAndLastName.value,
+                        email: this.$.userEmailAddress.value,
+                        type: this.$.accountTypeSelectMenu.selected,
+                        role: this.$.accountRoleSelectMenu.selected
+                    };
+
+                    this.set('progressActive', true);
+
+                    var that = this;
+                    this.createUser(user)
+                        .then(function(newUser) {
+                            that.push('users', newUser);
+                            // notify success
+                            that.set('successMessage', 'User created');
+                            that.$.userSuccess.open();
+                            that.set('progressActive', false);
+                        }, function (err) {
+                            // notify error
+                            that.set('errorMessage', 'Error creating user');
+                            that.$.userError.open();
+                            that.set('progressActive', false);
+                        });
+
+                },
+
+                saveUserClick: function () {
+                    this.set('userToEdit.name', this.$.userFirstAndLastName.value);
+                    this.set('userToEdit.email', this.$.userEmailAddress.value);
+                    this.set('userToEdit.type', this.$.accountTypeSelectMenu.selected);
+                    this.set('userToEdit.role', this.$.accountRoleSelectMenu.selected);
+
+                    this.set('progressActive', true);
+
+                    var that = this;
+                    this.saveUser(this.userToEdit)
+                        .then(function(newuser) {
+                            // update users list
+                            for(var i = 0; i < that.users.length; i++) {
+                                if(that.users[i].id === newuser.id) {
+                                    that.splice('users', i, 1, newuser);
+                                }
+                            }
+                            // notify success
+                            that.set('successMessage', 'User saved');
+                            that.$.userSuccess.open();
+                            that.set('progressActive', false);
+                        }, function (err) {
+                            // notify error
+                            that.set('errorMessage', 'Error saving user');
+                            that.$.userError.open();
+                            that.set('progressActive', false);
+                        });
+                },
+
+                deleteUserClick: function (e) {
+                    // prohibit containing div from firing its on-tap handler
+                    e.stopPropagation();
+
+                    var currentTarget = e.currentTarget;
+                    var id = Number(currentTarget.attributes['data-id'].value);
+
+                    if (id) {
+                        var userToDelete;
+                        this.users.forEach(function(user) {
+                            if (id === user.id) userToDelete = user;
+                        });
+                        this.set('userToDelete', userToDelete);
+                    }
+                    this.$.deleteUserConfirmationDialog.open();
+                },
+
+                deleteUserConfirmClick: function () {
+
+                    this.set('progressActive', true);
+
+                    var that = this;
+                    this.deleteUser(this.userToDelete.id)
+                        .then(function() {
+                            // remove from users list
+                            for(var i = 0; i < that.users.length; i++) {
+                                if(that.users[i].id === that.userToDelete.id) {
+                                    that.splice('users', i, 1);
+                                }
+                            }
+                            // notify success
+                            that.set('successMessage', 'User deleted');
+                            that.$.userSuccess.open();
+                            that.set('progressActive', false);
+                        }, function (err) {
+                            // notify error
+                            that.set('errorMessage', 'Error deleting user');
+                            that.$.userError.open();
+                            that.set('progressActive', false);
+                        });
+                },
+            });
+        })();
+    </script>
+</dom-module>

@@ -1,0 +1,110 @@
+<!--
+        Jon Doltar
+        2016-02
+-->
+
+
+<!-- Global styles -->
+<link rel="import" href="global-styles.html">
+<!-- Utility styles -->
+<link rel="import" href="utility-styles.html">
+
+<dom-module id="user-collection-style">
+    <template>
+        <style is="custom-style" include="global-styles"></style>
+        <style is="custom-style" include="utility-styles"></style>
+        <style is="custom-style">
+
+            iron-list {
+                padding-top: 64px;
+                --iron-list-items-container: {
+                    max-width: 800px;
+                    margin: auto;
+                    margin-top: 60px;
+                    margin-bottom: 60px;
+                    border-bottom: 1px solid #ddd;
+                };
+            }
+            .item {
+                padding: 20px;
+                background-color: white;
+                border: 1px solid #ddd;
+                cursor: pointer;
+                margin-bottom: 10px;
+            }
+            .avatar {
+                height: 60px;
+                width: 60px;
+                border-radius: 30px;
+                box-sizing: border-box;
+                background-color: #DDD;
+                margin-left: 35px;
+             /* margin-top: 10px;
+                margin-bottom: 10px;*/
+            }
+            .user-icon {
+                --iron-icon-height: 3em;
+                --iron-icon-width: 3em;
+            }
+            .type-icon {
+                --iron-icon-height: 2em;
+                --iron-icon-width: 2em;
+            }
+            .google-icon {
+                width: 28px;
+                height: 28px;
+            }
+            .user-name {
+                font-size: 16px;
+                font-weight: bold;
+            }
+            .user-info-label {
+                font-weight: bold;
+                width: 95px;
+                text-align: right;
+                display: inline-block;
+                margin-right: 5px;
+            }
+            .add-user-button {
+                --paper-fab-background: #DDD;
+                color: #373a3c;
+            }
+            .bold {
+                font-weight: bold;
+            }
+
+            paper-dialog-scrollable {
+                min-height: 80px;
+            }
+
+
+            @media (max-width: 750px) {
+
+                paper-dialog {
+                    position: fixed;
+                    margin: 0px 0px;
+                    top: 56px;
+                    right: 0px;
+                    left: 0px;
+                    bottom: 0px;
+                    width: 100%;
+                    height: 100%;
+                    overflow: auto;
+                }
+            }
+
+            @media (min-width: 751px) {
+
+                #editUserDialog {
+                    width: 500px;
+                    min-height: 300px;
+                }
+                #deleteUserConfirmationDialog {
+                    width: 500px;
+                    min-height: 200px;
+                }
+            }
+
+        </style>
+    </template>
+</dom-module>

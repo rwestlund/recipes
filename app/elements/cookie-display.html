@@ -1,0 +1,48 @@
+<!--
+    Randy Westlund
+    2016-02
+-->
+<!-- this module shows the current value of a cookie --> 
+<link rel="import" href="/bc/polymer/polymer.html">
+
+<dom-module id="cookie-display">
+    <template>
+        <style is="custom-style">
+            :host {
+                display: none;
+            }
+
+        </style>
+    </template>
+
+    <script>
+        (function () {
+            'use strict';
+            Polymer({
+                is: 'cookie-display',
+                properties: {
+                    cookieName: String,
+                    cookieValue: {
+                        type: String,
+                        computed: "read_cookie(cookieName)",
+                        notify: true
+                    },
+                },
+                ready: function () {
+                },
+
+                read_cookie: function(name) {
+                    var cstring = decodeURIComponent(document.cookie);
+                    var parts = cstring.split(';');
+                    var search_str = name + '=';
+                    for (var i = 0; i < parts.length; i++) {
+                        while (parts[i].charAt(0) === ' ') parts[i] = parts[i].substring(1);
+                        if (parts[i].indexOf(search_str) !== -1)
+                            return parts[i].substring(search_str.length);
+                    }
+                    return '';
+                }
+            });
+        })();
+    </script>
+</dom-module>

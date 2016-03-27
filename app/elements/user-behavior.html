@@ -1,0 +1,99 @@
+<!--
+    Randy Westlund
+    2016-01
+-->
+
+<script>
+var UvbaseBehaviors = UvbaseBehaviors || {};
+UvbaseBehaviors.UserBehavior = [{
+
+    properties: {
+        user: {
+            type: Object
+        },
+    },
+    
+    created: function() {
+        
+    },
+
+    ready: function () {
+    },
+
+    searchFilter: function(filterVal) {
+        // set filter to null to disable filtering
+        if (!filterVal) return null;
+        // return a filter function for the current search string
+        filterVal = filterVal.toLowerCase();
+        return function(user) {
+            var name = user.name.toLowerCase();
+            var email = user.email.toLowerCase();
+            return ((name.indexOf(filterVal) != -1)
+                || (email.indexOf(filterVal) != -1));
+        };
+    },
+
+    getUser: function(id) {
+        return new Promise(function(resolve, reject) {
+            $.getJSON("/users/" + id).then(resolve, reject);
+        });
+    },
+
+    getUsers: function() {
+        return new Promise(function(resolve, reject) {
+            $.getJSON("/users").then(resolve, reject);
+        });
+    },
+
+    createUser: function(user) {
+        return new Promise(function(resolve, reject) {
+            $.ajax({
+                type: 'POST',
+                url: "/users/",
+                data: JSON.stringify(user),
+                contentType: 'application/json',
+                dataType: 'json',
+            }).then(resolve, reject);
+        });
+    },
+
+    saveUser: function(user) {
+        return new Promise(function(resolve, reject) {
+            $.ajax({
+                type: 'PUT',
+                url: "/users/" + user.id,
+                data: JSON.stringify(user),
+                contentType: 'application/json',
+                dataType: 'json',
+            }).then(resolve, reject);
+        });
+    },
+
+    deleteUser: function(id) {
+        return new Promise(function(resolve, reject) {
+            $.ajax({
+                type: 'DELETE',
+                url: '/users/' + id,
+            }).then(resolve, reject);
+        });
+    },
+
+    // Template variables
+    isGoogleAccount: function (type) {
+        return type === 'google';
+    },
+
+    isLocalAccount: function (type) {
+        return type === 'local';
+    },
+
+    toDateStringPretty: function (timestamp) {
+        if(timestamp) {
+            var date = new Date(timestamp)
+            return date.toDateString() + ' ' + date.toLocaleTimeString();
+        }
+        else return '(no activity recorded)';
+    },
+},
+UvbaseBehaviors.GlobalBehavior];
+</script>
