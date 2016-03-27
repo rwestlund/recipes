@@ -1,4 +1,4 @@
-package main
+package defs
 
 type Recipe struct {
     Id          uint32 `json:"id"`
