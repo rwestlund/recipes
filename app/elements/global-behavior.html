@@ -1,0 +1,221 @@
+<!--
+    Jon Doltar
+    2016-01
+-->
+
+<script>
+var RecipeBehaviors = RecipeBehaviors || {};
+RecipeBehaviors.GlobalBehavior = {
+
+    listeners: {
+        'iron-overlay-opened': 'handleCustomOpen',
+        'iron-overlay-closed': 'handleCustomClose'
+
+    },
+
+    properties: {
+
+    },
+
+    created: function() {
+
+        var constants = {};
+
+        constants.modeEnum = {
+            safetyShutdown: 0x00,
+            standby: 0x01,
+            maintenance: 0x02,
+            cleaningAir: 0x04,
+            cleaningSurfaces: 0x05,
+        };
+
+        constants.componentEnum = {
+            none: 0x00,
+            light: 0x01,
+            shutter: 0x02,
+            fan: 0x03,
+            sensor: 0x04,
+            power: 0x05
+        };
+
+        constants.shutterEnum = {
+            closed: 0x00,
+            closing: 0x01,
+            opening: 0x02,
+            open: 0x03,
+            failed: 0x04,
+        };
+
+        constants.resetReasonEnum = {
+            unknown: 0x00,
+            normal: 0x01,
+            watchdog: 0x02,
+            brownout: 0x03,
+            pin: 0x04
+        };
+
+        constants.userRoleEnum = {
+            admin: 'admin',
+            user: 'user',
+            guest: 'guest',
+        };
+
+        constants.accountTypeEnum = {
+            local: 'local',
+            google: 'google',
+        };
+
+        // a log message consists of a broad category and a specific type, plus an
+        // address, user_id, and timestamp, which are common
+        constants.logCategoryEnum = {
+            // for scheduled events
+            cleaning:   'cleaning',
+            // for CRUD on schedules themselves
+            schedule:   'schedule',
+            // for updating unit details or settings
+            unit:       'unit',
+            // for CRUD on users
+            user:       'user',
+            // for exceptions and other log levels
+            console:    'console'
+        };
+
+        constants.logEventEnum = {
+            // cleaning events caused by controller or received from unit
+            surfaces:   'surfaces',
+            air:        'air',
+            interrupted:'interrupted',
+            resumed:    'resumed',
+            ended:      'ended',
+            // unit events caused by user commands in the UI
+            labels:     'labels',
+            limits:     'limits',
+            schedule:   'schedule',
+            disableSchedule: 'disable_schedule',
+            neighbors:  'neighbors',
+            cooldown:  'cooldown',
+            group:      'group',
+            maintenance:'maintenance',
+            manual:     'manual',
+            // users, schedules, maybe unit created
+            created:    'created',
+            updated:    'updated',
+            deleted:    'deleted',
+            // console log levels
+            info:    'info',
+            warn:    'warn',
+            error:    'error',
+        };
+        this.set('constants', constants);
+    },
+
+    ready: function () {
+        this.setUpAjax();
+    },
+
+    printDebug: function () {
+
+
+    },
+
+    handleCustomOpen: function () {
+        var body = Polymer.dom(document).querySelector('body');
+        this.toggleClass('dialog-is-open', true, body);
+    },
+
+    handleCustomClose: function () {
+        var body = Polymer.dom(document).querySelector('body');
+        this.toggleClass('dialog-is-open', false, body);
+    },
+
+    setUpAjax: function() {
+
+        //setup ajax error handling, applies to all requests
+        var that = this;
+        $.ajaxSetup({
+            statusCode: {
+                401: function (xhr, status, error) {
+                    // call global ajax handler
+                    that.globalAjaxHandler(xhr);
+                }
+            }
+        });
+    },
+    // this gets called whenever a request fails
+    // gets called from both iron-ajax and jquery.ajax
+    globalAjaxHandler: function(xhr) {
+
+        switch(xhr.status) {
+            case 401: 
+                window.location.href ='/auth/login';
+                break;
+        }
+    },
+
+    isUserAdmin: function(role) {
+        return (role === this.constants.userRoleEnum.admin);
+    },
+
+    isUserGuest: function(role) {
+        return (role === this.constants.userRoleEnum.guest);
+    },
+
+    displayNameOrEmail: function (user) {
+        return user.name || user.email;
+    },
+
+    capitalizeFirstLetter: function (str) {
+        // replace underscores with spaces
+        str = str.split('_').join(' ');
+        // captilize it
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    },
+    // iterate through enum and generate array we can repeat over
+    convertEnumToArray: function(enumKey) {
+        if(!enumKey) return [];
+        var obj = this.constants[enumKey];
+
+        var array = [];
+        var keys = Object.keys(obj);
+
+        for(var i = 0; i < keys.length; i++) {
+            var value, pretty = value = obj[keys[i]];
+            // capitalize the first character
+            pretty = this.capitalizeFirstLetter(pretty);
+
+            array.push({
+                key: keys[i],
+                value: value,
+                pretty: pretty,
+            });
+        }
+        return array;
+    },
+    userMenuFilter: function (user) {
+        return !!user.name;
+    },
+    formatTimestamp: function (timestamp) {
+        var date = new Date(timestamp);
+        return date.toDateString() + ' ' + date.toLocaleTimeString();
+    },
+    sortUnits: function(a, b) {
+        if(a.name < b.name) return -1;
+        if(a.name > b.name) return 1;
+        return 0;
+    },
+    sortUsers: function(a, b) {
+        var nameA = a.name || a.email;
+        var nameB = b.name || b.email;
+        if(nameA < nameB) return -1;
+        if(nameA > nameB) return 1;
+        return 0;
+    },
+
+    addLeadingZero: function(val) {
+        val = Number(val);
+        if(0 <= val && val <= 9) return '0' + val;
+        else return val;
+    },
+
+};
+</script>

@@ -27,4 +27,10 @@ var routes = Routes {
         "/recipes/{id:[0-9]+}",
         recipe,
     },
+    Route {
+        "recipes",
+        []string{ "GET", "HEAD" },
+        "/recipes",
+        recipes,
+    },
 }

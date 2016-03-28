@@ -1,7 +1,6 @@
 package main
 
 import (
-    //"log"
     "strconv"
     "net/http"
     "encoding/json"
@@ -9,6 +8,30 @@ import (
     "github.com/rwestlund/recipes/db"
     "github.com/gorilla/mux"
 )
+
+/*
+ * Request a list of recipes
+ * GET /recipes
+ */
+func recipes(res http.ResponseWriter, req *http.Request) {
+    res.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+    var recipes []defs.Recipe
+    var err error
+    recipes, err = db.FetchRecipes()
+    if err != nil {
+        res.WriteHeader(500)
+        return
+    }
+    j, e := json.Marshal(recipes)
+    if e != nil {
+        res.WriteHeader(500)
+        return
+    }
+    /* If we made it here, send good response. */
+    res.Write(j)
+}
+
 
 /*
  * Request a specific recipe.

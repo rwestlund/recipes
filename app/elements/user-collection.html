@@ -10,9 +10,9 @@
 <link rel="import" href="../css/user-collection-style.html">
 
 <dom-module id="user-collection">
-    <!-- Include the external styles for this element -->
-    <style is="custom-style" include="user-collection-style"></style>
     <template>
+        <!-- Include the external styles for this element -->
+        <style is="custom-style" include="user-collection-style"></style>
         <style>
             :host {
                 display: block;
@@ -254,7 +254,7 @@
             'use strict';
             Polymer({
                 is: 'user-collection',
-                behaviors: [UvbaseBehaviors.UserBehavior],
+                behaviors: [RecipeBehaviors.UserBehavior],
                 properties: {
                     users: {
                         type: Object,
