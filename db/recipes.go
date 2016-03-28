@@ -1,22 +1,37 @@
 package db
 
 import (
+    "strconv"
     "database/sql"
     "encoding/json"
     "github.com/rwestlund/recipes/defs"
 )
 
 /* Fetch all recipes from the database. */
-func FetchRecipes () ([]defs.Recipe, error) {
-    /* Read recipes from database. */
-    rows, err := DB.Query(`SELECT id, revision, amount, author_id, directions,
-                ingredients, notes, oven, source, summary,
-                time, title
-            FROM recipes`)
-    defer rows.Close()
+func FetchRecipes (filter *defs.RecipeFilter) ([]defs.Recipe, error) {
+    /* Build query paramters dynamically. */
+    var where_text string = "WHERE"
+    var params []interface{};
+
+    if filter.Title != "" {
+        params = append(params, filter.Title)
+        where_text += " title ILIKE '%' || $" +
+                strconv.Itoa(len(params)) + " || '%'"
+    }
+    /* SQL to select recipes. */
+    var query_text string = `SELECT id, revision, amount, author_id, directions,
+                ingredients, notes, oven, source, summary, time, title
+            FROM recipes `
+    if len(params) > 0 {
+        query_text += where_text
+    }
+    query_text += " ORDER BY title"
+    /* Run the actual query. */
+    rows, err := DB.Query(query_text, params...)
     if err != nil {
         return nil, err
     }
+    defer rows.Close()
 
     /* The array we're going to fill. The append() builtin will approximately
      * double the capacity when it needs to reallocate, but we can save some

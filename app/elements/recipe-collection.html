@@ -4,7 +4,7 @@
 -->
 <!-- this module shows a list of recipes -->
 
-<link rel="import" href="bc/polymer/polymer.html">
+<link rel="import" href="../bc/polymer/polymer.html">
 
 <dom-module id="recipe-collection">
     <template>
@@ -30,83 +30,42 @@
             <paper-input
                 id="filterInputField"
                 type="text" maxlength="60"
-                value="{{filterVal::input}}"
+                value="{{titleFilter}}"
                 placeholder="filter">
             </paper-input>
         </div>
 
         <iron-ajax auto method="GET"
                 url="/recipes"
-                params="{{recipeParams}}"
+                params="{{recipeFilter}}"
                 handle-as="json"
                 last-response="{{recipes}}"
-                debounce-duration="300"
+                debounce-duration="600"
                 on-error="onAjaxError"
                 loading="{{loading}}">
         </iron-ajax>
 
-        <p>recipes go here</p>
-
         <div class="row">
-            <template is="dom-repeat" items={{recipes}} as="recipe"
-                    filter="{{searchFilter(filterVal)}}">
+            <template is="dom-repeat" items={{recipes}} as="recipe">
                 <div class="item" on-tap="itemClick">
                     <div class="layout horizontal center start-justified">
-
-                        <div class="avatar layout horizontal center center-justified">
-                            <iron-icon class="user-icon" icon="social:person">
-                            </iron-icon>
-                        </div>
 
                         <div class="flex">
                             <div class="layout vertical ml-lg">
                                 <div class="user-name">
                                     {{recipe.title}}
                                 </div>
-                                <div class="user-type">{{user.summary}}</div>
+                                <div class="user-type">{{recipe.summary}}</div>
                             </div>
                         </div>
                     </div>
 
-                    <iron-collapse id="collapse" opened="{{user.expanded}}">
+                    <iron-collapse id="collapse" opened="{{recipe.expanded}}">
                         <hr />
-                        <div class="layout horizontal center start-justified pl-lg">
-                            <div class="">
-                                <div class="flex layout vertical">
-                                    <div>
-                                        <span class="user-info-label">Type:</span>
-                                        {{user.type}}
-                                    </div>
-                                    <div>
-                                        <span class="user-info-label">Last Activity:</span>
-                                        {{toDateStringPretty(user.lastlog)}}
-                                    </div>
-                                    <div>
-                                        <span class="user-info-label">Created:</span>
-                                        {{toDateStringPretty(user.date_created)}}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </iron-collapse>
                 </div>
             </template>
         </div>
-
-        <!--<paper-toast-->
-                <!--id="userSuccess"-->
-                <!--class="success-toast"-->
-                <!--text="{{successMessage}}"-->
-                <!--duration="4000">-->
-        <!--</paper-toast>-->
-        <!--<paper-toast-->
-                <!--id="userError"-->
-                <!--class="error-toast"-->
-                <!--text="{{errorMessage}}"-->
-                <!--duration="4000">-->
-        <!--</paper-toast>-->
-
-
     </template>
 
     <script>
@@ -118,13 +77,25 @@
                 properties: {
                     logs: {
                         type: Object,
+                    },
+                    titleFilter: {
+                        type: String,
+                        value: ''
+                    },
+                    recipeFilter: {
+                        type: Object,
+                        computed: "computeRecipeFilter(titleFilter)"
                     }
                 },
                 ready: function () {
-                    this.set('accountTypeSelected', '');
-                    this.set('progressActive', true);
                 },
-
+                computeRecipeFilter: function(titleFilter) {
+                    var o = {
+                        title: titleFilter
+                    };
+                    console.log(o);
+                    return o;
+                },
                 itemClick: function (event) {
                     var item = event.currentTarget;
                     var collapse = Polymer.dom(item).querySelector('iron-collapse');

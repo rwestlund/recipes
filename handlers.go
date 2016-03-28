@@ -2,6 +2,7 @@ package main
 
 import (
     "strconv"
+    "log"
     "net/http"
     "encoding/json"
     "github.com/rwestlund/recipes/defs"
@@ -16,15 +17,22 @@ import (
 func recipes(res http.ResponseWriter, req *http.Request) {
     res.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
+    /* Get query params. */
+    var filter defs.RecipeFilter = defs.RecipeFilter{
+        Title: req.URL.Query().Get("title"),
+    }
+
     var recipes []defs.Recipe
     var err error
-    recipes, err = db.FetchRecipes()
+    recipes, err = db.FetchRecipes(&filter)
     if err != nil {
+        log.Println(err)
         res.WriteHeader(500)
         return
     }
     j, e := json.Marshal(recipes)
     if e != nil {
+        log.Println(e)
         res.WriteHeader(500)
         return
     }

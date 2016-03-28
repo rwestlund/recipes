@@ -15,3 +15,7 @@ type Recipe struct {
     Title       string `json:"title"`
 }
 
+type RecipeFilter struct {
+    Title       string
+}
+
