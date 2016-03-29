@@ -16,12 +16,6 @@ type Routes []Route
 /* Define the actual routes here. */
 var routes = Routes {
     Route {
-        "home",
-        []string{ "GET", "HEAD" },
-        "/",
-        home,
-    },
-    Route {
         "recipe",
         []string{ "GET", "HEAD" },
         "/recipes/{id:[0-9]+}",

@@ -8,6 +8,7 @@
 
 <dom-module id="recipe-collection">
     <template>
+        <style is="custom-style" include="global-styles"></style>
         <style>
             :host {
                 display: block;
@@ -22,6 +23,21 @@
             .recipe-title {
                 margin-bottom: 0;
             }
+            div.recipe-summary {
+                margin-bottom: 0.5em;
+            }
+            hr.recipe-divider {
+                color: gray;
+            }
+            .recipe-col {
+                 min-width: 300px;
+            }
+            ul.ingredients-list > li {
+                margin-bottom: 0.3em;
+            }
+            ol.directions-list > li {
+                margin-bottom: 1em;
+            }
         </style>
 
         <!-- a filter box -->
@@ -31,7 +47,7 @@
                     params="{{recipeFilter}}"
                     handle-as="json"
                     last-response="{{recipes}}"
-                    debounce-duration="600"
+                    debounce-duration="500"
                     on-error="onAjaxError"
                     loading="{{loadingRecipes}}">
             </iron-ajax>
@@ -45,17 +61,19 @@
             </paper-input>
         </div>
 
-            <template is="dom-repeat" items={{recipes}} as="recipe">
+        <!--<template is="dom-repeat" items={{recipes}} as="recipe">-->
+        <iron-list class="flex" items="[[recipes]]" as="recipe">
+            <template>
+                <paper-material>
                 <div on-tap="itemClick">
                     <h3 class="recipe-title">{{recipe.title}}</h3>
-                    <div>{{recipe.summary}}</div>
+                    <div class="recipe-summary">{{recipe.summary}}</div>
 
                     <iron-collapse id="collapse" opened="{{recipe.expanded}}">
-                        <hr />
                         <div class="layout horizontal wrap">
-                            <div>
-                                <h4>Ingredients</h4>
-                                <ul>
+                            <div class="flex-6 recipe-col">
+                                <strong>Ingredients</strong>
+                                <ul class="ingredients-list">
                                     <template is="dom-repeat"
                                             items="{{recipe.ingredients}}"
                                             as="i">
@@ -63,9 +81,9 @@
                                     </template>
                                 </ul>
                             </div>
-                            <div>
-                                <h4>Directions</h4>
-                                <ol>
+                            <div class="flex-6 recipe-col">
+                                <strong>Directions</strong>
+                                <ol class="directions-list">
                                     <template is="dom-repeat"
                                             items="{{recipe.directions}}"
                                             as="d">
@@ -76,7 +94,12 @@
                         </div>
                     </iron-collapse>
                 </div>
+                </paper-material>
+                <!--<br />-->
+                <!--<hr class="recipe-divider"/>-->
             </template>
+        </iron-list>
+        <!--</template>-->
     </template>
 
     <script>
@@ -101,9 +124,8 @@
                 ready: function () {
                 },
                 computeRecipeFilter: function(titleFilter) {
-                    var o = {
-                        title: titleFilter
-                    };
+                    var o = { };
+                    if (titleFilter) o.title = titleFilter;
                     return o;
                 },
                 itemClick: function (event) {

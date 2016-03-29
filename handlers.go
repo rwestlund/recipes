@@ -72,11 +72,3 @@ func recipe(res http.ResponseWriter, req *http.Request) {
     /* If we made it here, send good response. */
     res.Write(j)
 }
-
-/*
- * Load the home page and main app.
- * GET /
- */
-func home(res http.ResponseWriter, req *http.Request) {
-    http.ServeFile(res, req, "app/home.html")
-}
