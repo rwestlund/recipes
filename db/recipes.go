@@ -9,8 +9,13 @@ import (
 
 /* Fetch all recipes from the database. */
 func FetchRecipes (filter *defs.RecipeFilter) ([]defs.Recipe, error) {
-    /* Build query paramters dynamically. */
-    var where_text string = "WHERE"
+    /* SQL to select recipes. */
+    var query_text string = `SELECT id, revision, amount, author_id, directions,
+                ingredients, notes, oven, source, summary, time, title
+            FROM recipes `
+
+    /* Build where_text. */
+    var where_text string
     var params []interface{};
 
     if filter.Title != "" {
@@ -18,14 +23,23 @@ func FetchRecipes (filter *defs.RecipeFilter) ([]defs.Recipe, error) {
         where_text += " title ILIKE '%' || $" +
                 strconv.Itoa(len(params)) + " || '%'"
     }
-    /* SQL to select recipes. */
-    var query_text string = `SELECT id, revision, amount, author_id, directions,
-                ingredients, notes, oven, source, summary, time, title
-            FROM recipes `
-    if len(params) > 0 {
-        query_text += where_text
+
+    /* Apply where_text. */
+    if where_text != "" {
+        query_text += "WHERE " + where_text
     }
-    query_text += " ORDER BY title"
+    query_text += " ORDER BY title "
+
+    /* Apply count. */
+    if filter.Count != 0 {
+        params = append(params, filter.Count)
+        query_text += " LIMIT $" + strconv.Itoa(len(params))
+    }
+    /* Apply skip. */
+    if filter.Skip != 0 {
+        params = append(params, filter.Count * filter.Skip)
+        query_text += " OFFSET $" + strconv.Itoa(len(params))
+    }
     /* Run the actual query. */
     rows, err := DB.Query(query_text, params...)
     if err != nil {

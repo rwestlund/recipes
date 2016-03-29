@@ -17,9 +17,16 @@ import (
 func recipes(res http.ResponseWriter, req *http.Request) {
     res.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-    /* Get query params. */
+    /* We can ignore the error because count=0 means disabled. */
+    var bigcount uint64
+    bigcount, _ = strconv.ParseUint(req.URL.Query().Get("count"), 10, 32)
+    var bigskip uint64
+    bigskip, _ = strconv.ParseUint(req.URL.Query().Get("skip"), 10, 32)
+    /* Build RecipeFilter from query params. */
     var filter defs.RecipeFilter = defs.RecipeFilter{
         Title: req.URL.Query().Get("title"),
+        Count: uint32(bigcount),
+        Skip: uint32(bigskip),
     }
 
     var recipes []defs.Recipe

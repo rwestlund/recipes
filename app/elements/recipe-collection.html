@@ -38,20 +38,33 @@
             ol.directions-list > li {
                 margin-bottom: 1em;
             }
+            .nav-button {
+                margin-left: 0.8em;
+                margin-right: 0.8em;
+            }
         </style>
 
         <!-- a filter box -->
-        <div class="layout horizontal center end-justified mv-lg">
+        <div class="layout horizontal center end-justified">
             <iron-ajax auto method="GET"
                     url="/recipes"
                     params="{{recipeFilter}}"
                     handle-as="json"
                     last-response="{{recipes}}"
-                    debounce-duration="500"
+                    debounce-duration="100"
                     on-error="onAjaxError"
+                    on-response="newRecipesReceived"
                     loading="{{loadingRecipes}}">
             </iron-ajax>
-            <paper-spinner active="{{loadingRecipes}}" alt="loading recipes...">
+            <paper-button raised on-tap="previous" disabled$="{{!skip}}">
+                <iron-icon icon="icons:arrow-back"></iron-icon>
+            </paper-button>
+            <span class="nav-button">Page {{pageNumber}}</span>
+            <paper-button raised on-tap="next" disabled$="{{disableNext}}">
+                <iron-icon icon="icons:arrow-forward"></iron-icon>
+            </paper-button>
+            <paper-spinner class="nav-button" active="{{loadingRecipes}}"
+                    alt="loading recipes...">
             </paper-spinner>
             <paper-input
                 id="filterInputField"
@@ -60,6 +73,7 @@
                 placeholder="filter">
             </paper-input>
         </div>
+
 
         <!--<template is="dom-repeat" items={{recipes}} as="recipe">-->
         <iron-list class="flex" items="[[recipes]]" as="recipe">
@@ -95,8 +109,6 @@
                     </iron-collapse>
                 </div>
                 </paper-material>
-                <!--<br />-->
-                <!--<hr class="recipe-divider"/>-->
             </template>
         </iron-list>
         <!--</template>-->
@@ -112,21 +124,56 @@
                     logs: {
                         type: Object,
                     },
+                    count: {
+                        type: Number,
+                        value: 10
+                    },
+                    skip: {
+                        type: Number,
+                        value: 0
+                    },
+                    pageNumber: {
+                        type: Number,
+                        computed: "computePageNumber(skip)"
+                    },
                     titleFilter: {
                         type: String,
                         value: ''
                     },
                     recipeFilter: {
                         type: Object,
-                        computed: "computeRecipeFilter(titleFilter)"
+                        computed: "computeRecipeFilter(count, skip, titleFilter)"
+                    },
+                    disableNext: {
+                        type: Boolean,
+                        computed: "computeDisableNext(recipes, count)"
                     }
                 },
                 ready: function () {
                 },
-                computeRecipeFilter: function(titleFilter) {
-                    var o = { };
+                computeRecipeFilter: function(count, skip, titleFilter) {
+                    var o = { count: count };
+                    if (skip) o.skip = skip;
                     if (titleFilter) o.title = titleFilter;
                     return o;
+                },
+                computeDisableNext: function(recipes, count) {
+                    var val = this.recipes.length < this.count;
+                    return val;
+                },
+                computePageNumber: function(skip) {
+                    return skip + 1;
+                },
+                previous: function() {
+                    if (this.skip) this.skip--;
+                },
+                next: function() {
+                    this.skip++;
+                },
+                // When new recipes are received, back up a page if the
+                // current one is blank.
+                newRecipesReceived: function() {
+                    if (!this.recipes.length && this.skip) this.skip--;
                 },
                 itemClick: function (event) {
                     var item = event.currentTarget;
