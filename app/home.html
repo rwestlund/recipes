@@ -30,7 +30,6 @@
         content="images/touch/ms-touch-icon-144x144-precomposed.png">
 
     <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="bc/bootstrap/dist/css/bootstrap.css">
 
     <script src="bc/webcomponentsjs/webcomponents-lite.js"></script>
 
@@ -53,50 +52,12 @@
 <body unresolved class="fullbleed layout vertical">
 
     <template is="dom-bind" id="app">
-        <style is="custom-style" include="global-styles"></style>
-        <style is="custom-style" include="utility-styles"></style>
-	
-        <!--[> the drawer panel holds the nav drawer and the main toolbar <]-->
-        <!--<paper-drawer-panel -->
-                <!--drawer-width="200px" -->
-                <!--class="mainContentBackground"-->
-                <!--responsive-width="1035px">-->
-            <!--[> the first header panel is for the drawer <]-->
-            <!--<paper-header-panel drawer>-->
-                <!--<paper-toolbar>-->
-                    <!--<div class="middle middle-container center horizontal layout">-->
-                        <!--<div class="menu-header-text">Menu</div>-->
-                    <!--</div>-->
-                <!--</paper-toolbar>-->
-                 <!--[> man navbar with page links <]-->
-                <!--<paper-menu class="list" attr-for-selected="data-route"-->
-                    <!--selected="" paper-drawer-toggle>-->
-
-                    <!--<a data-route="recipes" href="/" paper-drawer-toggle>-->
-                        <!--<iron-icon icon="icons:home"></iron-icon>-->
-                        <!--<span>Recipes</span>-->
-                    <!--</a>-->
-                    <!--<a data-route="users" href="/users" hidden$="[[!isUserAdmin(userRole)]]">-->
-                        <!--<iron-icon icon="social:people"></iron-icon>-->
-                        <!--<span>Users</span>-->
-                    <!--</a>-->
-                    <!--<a data-route="logout" href="/auth/logout">-->
-                        <!--<iron-icon icon="maps:directions-run"></iron-icon>-->
-                        <!--<span>Logout</span>-->
-                    <!--</a>-->
-
-                <!--</paper-menu>-->
-            <!--</paper-header-panel>-->
-
-            <!-- the second header panel is the main page, including
-                the main toolbar -->
-            <paper-header-panel main>
                 <!-- main toolbar -->
                 <paper-toolbar id="mainToolbar" >
-                    <paper-icon-button id="paperToggle" icon="menu"
-                        paper-drawer-toggle></paper-icon-button>
+                    <div class="middle">
+                        <span>Recipes</span>
+                    </div>
                     <span class="flex"></span>
-
                     <div class="top-right-bar">
                         <span class="user-name">
                             <iron-icon icon="icons:account-circle"></iron-icon>
@@ -104,23 +65,17 @@
                             <span>{{userFirstAndLastName}}</span>
                         </span>
                     </div>
-                            
-                    <cookie-display 
-                        cookie-name="username"
-                        cookie-value="{{userFirstAndLastName}}"
-                        style="display: none;">
-                    </cookie-display>
-                    <cookie-display 
-                        cookie-name="role"
-                        cookie-value="{{userRole}}">
-                    </cookie-display>
+
+                    <!--<cookie-display-->
+                        <!--cookie-name="username"-->
+                        <!--cookie-value="{{userFirstAndLastName}}"-->
+                        <!--style="display: none;">-->
+                    <!--</cookie-display>-->
+                    <!--<cookie-display-->
+                        <!--cookie-name="role"-->
+                        <!--cookie-value="{{userRole}}">-->
+                    <!--</cookie-display>-->
                     <!-- Application name -->
-                    <div class="middle middle-container center horizontal layout">
-                        <div class="app-name">
-                            <span>Recipes</span>
-                            <span class="control-panel-label">Navigation</span>
-                        </div>
-                    </div>
                 </paper-toolbar>
 
                 <!-- main page content -->
@@ -128,8 +83,7 @@
                     <iron-pages attr-for-selected="data-route" selected="{{route}}">
 
                         <section data-route="recipes">
-                            <recipe-collection>
-                            </recipe-collection>
+                            <recipe-collection></recipe-collection>
                         </section>
 
                         <section data-route="about">
@@ -143,8 +97,6 @@
 
                     </iron-pages>
                 </div>
-            </paper-header-panel>
-        </paper-drawer-panel>
 
     </template>
 

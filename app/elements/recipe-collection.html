@@ -8,25 +8,35 @@
 
 <dom-module id="recipe-collection">
     <template>
-        <!-- Include the external styles for this element -->
-        <!--<style is="custom-style" include="../css/user-collection-style"></style>-->
         <style>
             :host {
                 display: block;
-                /*margin: 5px;*/
             }
             #filterInputField {
                 width 200px;
                 float: right;
             }
-            .page-title-text {
-                font-size: 2em;
-                color: #AAA;
+            div.recipe-item {
+                margin-bottom: 1em;
+            }
+            .recipe-title {
+                margin-bottom: 0;
             }
         </style>
 
         <!-- a filter box -->
         <div class="layout horizontal center end-justified mv-lg">
+            <iron-ajax auto method="GET"
+                    url="/recipes"
+                    params="{{recipeFilter}}"
+                    handle-as="json"
+                    last-response="{{recipes}}"
+                    debounce-duration="600"
+                    on-error="onAjaxError"
+                    loading="{{loadingRecipes}}">
+            </iron-ajax>
+            <paper-spinner active="{{loadingRecipes}}" alt="loading recipes...">
+            </paper-spinner>
             <paper-input
                 id="filterInputField"
                 type="text" maxlength="60"
@@ -35,37 +45,38 @@
             </paper-input>
         </div>
 
-        <iron-ajax auto method="GET"
-                url="/recipes"
-                params="{{recipeFilter}}"
-                handle-as="json"
-                last-response="{{recipes}}"
-                debounce-duration="600"
-                on-error="onAjaxError"
-                loading="{{loading}}">
-        </iron-ajax>
-
-        <div class="row">
             <template is="dom-repeat" items={{recipes}} as="recipe">
-                <div class="item" on-tap="itemClick">
-                    <div class="layout horizontal center start-justified">
-
-                        <div class="flex">
-                            <div class="layout vertical ml-lg">
-                                <div class="user-name">
-                                    {{recipe.title}}
-                                </div>
-                                <div class="user-type">{{recipe.summary}}</div>
-                            </div>
-                        </div>
-                    </div>
+                <div on-tap="itemClick">
+                    <h3 class="recipe-title">{{recipe.title}}</h3>
+                    <div>{{recipe.summary}}</div>
 
                     <iron-collapse id="collapse" opened="{{recipe.expanded}}">
                         <hr />
+                        <div class="layout horizontal wrap">
+                            <div>
+                                <h4>Ingredients</h4>
+                                <ul>
+                                    <template is="dom-repeat"
+                                            items="{{recipe.ingredients}}"
+                                            as="i">
+                                        <li>{{i}}</li>
+                                    </template>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4>Directions</h4>
+                                <ol>
+                                    <template is="dom-repeat"
+                                            items="{{recipe.directions}}"
+                                            as="d">
+                                        <li>{{d}}</li>
+                                    </template>
+                                </ol>
+                            </div>
+                        </div>
                     </iron-collapse>
                 </div>
             </template>
-        </div>
     </template>
 
     <script>
@@ -93,7 +104,6 @@
                     var o = {
                         title: titleFilter
                     };
-                    console.log(o);
                     return o;
                 },
                 itemClick: function (event) {
