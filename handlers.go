@@ -64,6 +64,7 @@ func recipe(res http.ResponseWriter, req *http.Request) {
     recipe, err = db.FetchRecipe(id)
     if err != nil {
         res.WriteHeader(500)
+        log.Println(err)
         return
     } else if recipe == nil {
         res.WriteHeader(404)
@@ -72,6 +73,7 @@ func recipe(res http.ResponseWriter, req *http.Request) {
 
     j, e := json.Marshal(recipe)
     if e != nil {
+        log.Println(err)
         res.WriteHeader(500)
         return
     }

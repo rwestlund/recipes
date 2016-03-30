@@ -13,10 +13,6 @@
             :host {
                 display: block;
             }
-            #filterInputField {
-                width 200px;
-                float: right;
-            }
             div.recipe-item {
                 margin-bottom: 1em;
             }
@@ -42,10 +38,19 @@
                 margin-left: 0.8em;
                 margin-right: 0.8em;
             }
+            .recipe-card {
+                padding-left: 0.5em;
+                padding-right: 0.5em;
+                padding-top: 0.1em;
+                padding-bottom: 0.1em;
+             }
+            span.recipe-tags {
+                color: gray;
+            }
         </style>
 
         <!-- a filter box -->
-        <div class="layout horizontal center end-justified">
+        <div class="layout horizontal center">
             <iron-ajax auto method="GET"
                     url="/recipes"
                     params="{{recipeFilter}}"
@@ -56,34 +61,42 @@
                     on-response="newRecipesReceived"
                     loading="{{loadingRecipes}}">
             </iron-ajax>
+            <!-- Navigation icons. -->
             <paper-button raised on-tap="previous" disabled$="{{!skip}}">
                 <iron-icon icon="icons:arrow-back"></iron-icon>
             </paper-button>
-            <span class="nav-button">Page {{pageNumber}}</span>
             <paper-button raised on-tap="next" disabled$="{{disableNext}}">
                 <iron-icon icon="icons:arrow-forward"></iron-icon>
             </paper-button>
+            <span class="nav-button">Page {{pageNumber}}</span>
+            <!--<span class="flex"></span>-->
             <paper-spinner class="nav-button" active="{{loadingRecipes}}"
                     alt="loading recipes...">
             </paper-spinner>
-            <paper-input
-                id="filterInputField"
-                type="text" maxlength="60"
-                value="{{titleFilter}}"
-                placeholder="filter">
+            <!--<span class="flex"></span>-->
+            <!-- Search box. -->
+            <paper-input class="flex" label="Filter"
+                type="text" value="{{titleFilter}}">
+                <paper-icon-button suffix icon="icons:clear" on-tap="clearFilter">
+                </paper-icon-button>
             </paper-input>
         </div>
 
-
-        <!--<template is="dom-repeat" items={{recipes}} as="recipe">-->
-        <iron-list class="flex" items="[[recipes]]" as="recipe">
-            <template>
-                <paper-material>
-                <div on-tap="itemClick">
-                    <h3 class="recipe-title">{{recipe.title}}</h3>
+        <template is="dom-repeat" items={{recipes}} as="recipe">
+            <paper-material>
+                <div class="recipe-card" on-tap="itemClick">
+                    <div class="layout horizontal end end-justified wrap">
+                        <h3 class="recipe-title">{{recipe.title}}</h3>
+                        <!--<div class="layout horizontal end-justified">-->
+                            <span class="flex"></span>
+                            <span class="recipe-tags">
+                                {{formatRecipeTags(recipe.tags)}}
+                            </span>
+                        <!--</div>-->
+                    </div>
                     <div class="recipe-summary">{{recipe.summary}}</div>
 
-                    <iron-collapse id="collapse" opened="{{recipe.expanded}}">
+                    <iron-collapse id="collapse" opened="{{recipe._expanded}}">
                         <div class="layout horizontal wrap">
                             <div class="flex-6 recipe-col">
                                 <strong>Ingredients</strong>
@@ -108,10 +121,8 @@
                         </div>
                     </iron-collapse>
                 </div>
-                </paper-material>
-            </template>
-        </iron-list>
-        <!--</template>-->
+            </paper-material>
+        </template>
     </template>
 
     <script>
@@ -126,7 +137,7 @@
                     },
                     count: {
                         type: Number,
-                        value: 10
+                        value: 20
                     },
                     skip: {
                         type: Number,
@@ -169,6 +180,12 @@
                 },
                 next: function() {
                     this.skip++;
+                },
+                clearFilter: function() {
+                    this.titleFilter = "";
+                },
+                formatRecipeTags: function(tags) {
+                    return tags.join(", ");
                 },
                 // When new recipes are received, back up a page if the
                 // current one is blank.

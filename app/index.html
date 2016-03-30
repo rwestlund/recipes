@@ -52,52 +52,52 @@
 <body unresolved class="fullbleed layout vertical">
 
     <template is="dom-bind" id="app">
-                <!-- main toolbar -->
-                <paper-toolbar id="mainToolbar" >
-                    <div class="middle">
-                        <span>Recipes</span>
-                    </div>
-                    <span class="flex"></span>
-                    <div class="top-right-bar">
-                        <span class="user-name">
-                            <iron-icon icon="icons:account-circle"></iron-icon>
-                            <span class="user-label">Signed in as </span>
-                            <span>{{userFirstAndLastName}}</span>
-                        </span>
-                    </div>
+        <!-- main toolbar -->
+        <paper-toolbar id="mainToolbar" >
+            <div class="middle">
+                <span>Recipes</span>
+            </div>
+            <span class="flex"></span>
+            <div class="top-right-bar">
+                <span class="user-name">
+                    <iron-icon icon="icons:account-circle"></iron-icon>
+                    <span class="user-label">Signed in as </span>
+                    <span>{{userFirstAndLastName}}</span>
+                </span>
+            </div>
 
-                    <!--<cookie-display-->
-                        <!--cookie-name="username"-->
-                        <!--cookie-value="{{userFirstAndLastName}}"-->
-                        <!--style="display: none;">-->
-                    <!--</cookie-display>-->
-                    <!--<cookie-display-->
-                        <!--cookie-name="role"-->
-                        <!--cookie-value="{{userRole}}">-->
-                    <!--</cookie-display>-->
-                    <!-- Application name -->
-                </paper-toolbar>
+            <!--<cookie-display-->
+                <!--cookie-name="username"-->
+                <!--cookie-value="{{userFirstAndLastName}}"-->
+                <!--style="display: none;">-->
+            <!--</cookie-display>-->
+            <!--<cookie-display-->
+                <!--cookie-name="role"-->
+                <!--cookie-value="{{userRole}}">-->
+            <!--</cookie-display>-->
+            <!-- Application name -->
+        </paper-toolbar>
 
-                <!-- main page content -->
-                <div>
-                    <iron-pages attr-for-selected="data-route" selected="{{route}}">
+        <!-- main page content -->
+        <div>
+            <iron-pages attr-for-selected="data-route" selected="{{route}}">
 
-                        <section data-route="recipes">
-                            <recipe-collection></recipe-collection>
-                        </section>
+                <section data-route="recipes">
+                    <recipe-collection></recipe-collection>
+                </section>
 
-                        <section data-route="about">
-                        </section>
-                        <template is="dom-if" if="[[isUserAdmin(userRole)]]">
-                            <section data-route="users">
-                                <user-collection><user-collection>
-                            </section>
+                <section data-route="about">
+                </section>
+                <template is="dom-if" if="[[isUserAdmin(userRole)]]">
+                    <section data-route="users">
+                        <user-collection><user-collection>
+                    </section>
 
-                        </template>
+                </template>
 
-                    </iron-pages>
-                </div>
-
+            </iron-pages>
+        </div>
+        <br />
     </template>
 
     <script src="/js/app.js"></script>
