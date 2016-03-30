@@ -14,9 +14,9 @@ func scan_recipe(row *sql.Rows) (*defs.Recipe, error) {
     /* The recipe we're going to read in. */
     var r defs.Recipe
 
-    err := row.Scan(&r.Id, &r.Revision, &r.Amount, &r.Author_id, &directions,
+    err := row.Scan(&r.Id, &r.Revision, &r.Amount, &r.AuthorId, &directions,
             &ingredients, &r.Notes, &r.Oven, &r.Source, &r.Summary,
-            &r.Time, &r.Title, &tags)
+            &r.Time, &r.Title, &tags, &r.AuthorName)
     if err != nil {
         return nil, err
     }
@@ -41,8 +41,10 @@ var query_rows string = `SELECT recipes.id, recipes.revision,
             recipes.amount, recipes.author_id, recipes.directions,
             recipes.ingredients, recipes.notes, recipes.oven,
             recipes.source, recipes.summary, recipes.time, recipes.title,
-            json_agg(tags.tag)
+            json_agg(tags.tag), users.name
         FROM recipes
+        JOIN users
+            ON recipes.author_id = users.id
         LEFT JOIN tags
             ON recipes.id = tags.recipe_id `
 
@@ -65,7 +67,7 @@ func FetchRecipes(filter *defs.RecipeFilter) ([]defs.Recipe, error) {
     if where_text != "" {
         query_text += " WHERE " + where_text
     }
-    query_text += " GROUP BY recipes.id ORDER BY title "
+    query_text += " GROUP BY recipes.id, users.name ORDER BY title "
 
     /* Apply count. */
     if filter.Count != 0 {
@@ -107,7 +109,8 @@ func FetchRecipe (id uint32) (*defs.Recipe, error) {
     /* Read recipe from database. */
     var rows *sql.Rows
     var err error
-    rows, err = DB.Query(query_rows + " WHERE id = $1 GROUP BY recipes.id", id)
+    rows, err = DB.Query(query_rows +
+            " WHERE id = $1 GROUP BY recipes.id, users.name", id)
     if err != nil {
         return nil, err
     }

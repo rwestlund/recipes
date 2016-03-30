@@ -4,7 +4,7 @@ type Recipe struct {
     Id          uint32      `json:"id"`
     Revision    uint32      `json:"revision"`
     Amount      string      `json:"amount"`
-    Author_id   uint32      `json:"author_id"`
+    AuthorId    uint32      `json:"author_id"`
     Directions  []string    `json:"directions"`
     Ingredients []string    `json:"ingredients"`
     Notes       string      `json:"notes"`
@@ -13,7 +13,9 @@ type Recipe struct {
     Summary     string      `json:"summary"`
     Time        string      `json:"time"`
     Title       string      `json:"title"`
+    /* Fields from other tables. */
     Tags        []string    `json:"tags"`
+    AuthorName  string      `json:"author_name"`
 }
 
 type RecipeFilter struct {

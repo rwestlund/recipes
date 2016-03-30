@@ -27,6 +27,7 @@
             }
             .recipe-col {
                  min-width: 300px;
+                 padding:1em;
             }
             ul.ingredients-list > li {
                 margin-bottom: 0.3em;
@@ -98,7 +99,7 @@
 
                     <iron-collapse id="collapse" opened="{{recipe._expanded}}">
                         <div class="layout horizontal wrap">
-                            <div class="flex-6 recipe-col">
+                            <div class="flex-4 recipe-col">
                                 <strong>Ingredients</strong>
                                 <ul class="ingredients-list">
                                     <template is="dom-repeat"
@@ -108,7 +109,7 @@
                                     </template>
                                 </ul>
                             </div>
-                            <div class="flex-6 recipe-col">
+                            <div class="flex-4 recipe-col">
                                 <strong>Directions</strong>
                                 <ol class="directions-list">
                                     <template is="dom-repeat"
@@ -117,6 +118,40 @@
                                         <li>{{d}}</li>
                                     </template>
                                 </ol>
+                            </div>
+                            <!-- Info column. -->
+                            <div class="flex-4 recipe-col">
+                                <template is="dom-if" if="{{recipe.amount}}">
+                                    <strong>Amount</strong>
+                                    <div>{{recipe.amount}}</div>
+                                    <br />
+                                </template>
+                                <template is="dom-if" if="{{recipe.time}}">
+                                    <strong>Time</strong>
+                                    <div>{{recipe.time}}</div>
+                                    <br />
+                                </template>
+                                <template is="dom-if" if="{{recipe.oven}}">
+                                    <Strong>Oven</Strong>
+                                    <div>{{recipe.oven}}</div>
+                                    <br />
+                                </template>
+                                <strong>Author</strong>
+                                <div>{{recipe.author_name}}</div>
+                                <br />
+                                <template is="dom-if" if="{{recipe.source}}">
+                                    <strong>Source</strong>
+                                    <div>{{recipe.source}}</div>
+                                    <br />
+                                </template>
+                                <strong>Revision</strong>
+                                <div>{{recipe.revision}}</div>
+                                <br />
+                                <template is="dom-if" if="{{recipe.notes}}">
+                                    <strong>Notes</strong>
+                                    <div>{{recipe.notes}}</div>
+                                    <br />
+                                </template>
                             </div>
                         </div>
                     </iron-collapse>
