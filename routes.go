@@ -19,12 +19,18 @@ var routes = Routes {
         "recipe",
         []string{ "GET", "HEAD" },
         "/recipes/{id:[0-9]+}",
-        recipe,
+        handle_recipe,
     },
     Route {
         "recipes",
         []string{ "GET", "HEAD" },
         "/recipes",
-        recipes,
+        handle_recipes,
+    },
+    Route {
+        "users",
+        []string{ "GET", "HEAD" },
+        "/users",
+        handle_users,
     },
 }

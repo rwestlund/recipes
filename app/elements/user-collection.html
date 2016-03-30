@@ -4,7 +4,7 @@
 -->
 <!-- this module shows a list of users -->
 
-<link rel="import" href="../../bc/polymer/polymer.html">
+<link rel="import" href="../bc/polymer/polymer.html">
 
 <!-- External styles for this element -->
 <link rel="import" href="../styles/user-collection-style.html">
@@ -35,117 +35,92 @@
                 --paper-fab-keyboard-focus-background: #E9E9E9;
             }
         </style>
-        <cookie-display 
-            cookie-name="role"
-            cookie-value="{{userRole}}">
-        </cookie-display>
+        <!--<cookie-display -->
+            <!--cookie-name="role"-->
+            <!--cookie-value="{{userRole}}">-->
+        <!--</cookie-display>-->
 
-        <spinner-observer
-            id="manualCleaningSpinner"
-            class="card-progress"
-            active="{{progressActive}}">
-        </spinner-observer>
+        <!--<spinner-observer-->
+            <!--id="manualCleaningSpinner"-->
+            <!--class="card-progress"-->
+            <!--active="{{progressActive}}">-->
+        <!--</spinner-observer>-->
         <!-- a filter box -->
         <div class="layout horizontal center end-justified mv-lg">
-            <!-- <div class="flex self-start page-title-text">Users</div> -->
-            <paper-input
-                id="filterInputField"
-                type="text" maxlength="60"
-                value="{{filterVal::input}}"
-                placeholder="filter">
+            <div class="flex self-start page-title-text">Users</div> 
+            <paper-spinner class="nav-button" active="{{loadingUsers}}"
+                    alt="loading users...">
+            </paper-spinner>
+            <paper-input label="Filter" type="text" maxlength="60"
+                    value="{{userNameFilter}}">
             </paper-input>
 
             <paper-fab mini
                 icon="social:person-add"
                 on-tap="openEditUserDialog"
-                hidden$="[[!isUserAdmin(userRole)]]"
                 title="add user"
                 class="add-user-button pull-right ml-lg mt-lg">
             </paper-fab>
         </div>
+        <iron-ajax auto method="GET"
+                url="/users"
+                params="{{usersFilter}}"
+                handle-as="json"
+                last-response="{{users}}"
+                debounce-duration="100"
+                on-error="onAjaxError"
+                on-response="newUsersReceived"
+                loading="{{loadingUsers}}">
+        </iron-ajax>
 
-        <div class="row">
-            <template is="dom-repeat" items={{users}} as="user"
-                    filter="{{searchFilter(filterVal)}}">
-                <div class="item" on-tap="itemClick">
-                    <div class="layout horizontal center start-justified">
+            <template is="dom-repeat" items={{users}} as="user">
+                <div class="item">
 
+                    <div class="layout horizontal center start-justified pl-lg">
                         <div class="avatar layout horizontal center center-justified">
                             <iron-icon class="user-icon" icon="social:person">
                             </iron-icon>
                         </div>
-
-                        <div class="flex">
-                            <div class="layout vertical ml-lg">
-                                <div class="user-name">
-                                    [[displayNameOrEmail(user)]]
+                        <div class="">
+                            <div class="flex layout vertical">
+                                <div>
+                                    <span class="user-info-label">Name:</span>
+                                    {{user.name}}
                                 </div>
-                                <div class="user-type">{{user.role}}</div>
+                                <div>
+                                    <span class="user-info-label">Email:</span>
+                                    {{user.email}}
+                                </div>
+                                <div>
+                                    <span class="user-info-label">Last Activity:</span>
+                                    {{toDateStringPretty(user.lastlog)}}
+                                </div>
+                                <div>
+                                    <span class="user-info-label">Created:</span>
+                                    {{toDateStringPretty(user.date_created)}}
+                                </div>
                             </div>
                         </div>
-                        <div>
-                            <div hidden$="[[!isGoogleAccount(user.type)]]">
-                                <img src="../images/g-logo.png" class="google-icon"
-                                    width="40px" height="28px">
-                            </div>
-                            <div hidden$="[[!isLocalAccount(user.type)]]" class="local-account-icon">
-                                <iron-icon class="type-icon" icon="icons:account-circle">
-                                </iron-icon>
-                            </div>
+                        <div class="flex">
+                            <paper-fab mini
+                                icon="icons:create"
+                                on-tap="openEditUserDialog"
+                                title="edit user"
+                                class="add-user-button ml-lg pull-right mt-lg"
+                                data-id$="{{user.id}}">
+                            </paper-fab>
+
+                            <paper-fab mini
+                                icon="icons:delete"
+                                on-tap="deleteUserClick"
+                                title="delete user"
+                                class="add-user-button ml-lg pull-right mt-lg"
+                                data-id$="{{user.id}}">
+                            </paper-fab>
                         </div>
                     </div>
-
-                    <iron-collapse id="collapse" opened="{{user.expanded}}">
-                        <hr />
-                        <div class="layout horizontal center start-justified pl-lg">
-                            <div class="">
-                                <div class="flex layout vertical">
-                                    <!-- only show email for google accounts -->
-                                    <template is="dom-if"
-                                            if="{{isGoogleAccount(user.type)}}">
-                                        <div>
-                                            <span class="user-info-label">Email:</span>
-                                            {{user.email}}
-                                        </div>
-                                    </template>
-                                    <div>
-                                        <span class="user-info-label">Type:</span>
-                                        {{user.type}}
-                                    </div>
-                                    <div>
-                                        <span class="user-info-label">Last Activity:</span>
-                                        {{toDateStringPretty(user.lastlog)}}
-                                    </div>
-                                    <div>
-                                        <span class="user-info-label">Created:</span>
-                                        {{toDateStringPretty(user.date_created)}}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="flex">
-                                <paper-fab mini
-                                    icon="icons:create"
-                                    on-tap="openEditUserDialog"
-                                    hidden$="[[!isUserAdmin(userRole)]]"
-                                    title="edit user"
-                                    class="add-user-button ml-lg pull-right mt-lg"
-                                    data-id$="{{user.id}}">
-                                </paper-fab>
-
-                                <paper-fab mini
-                                    icon="icons:delete"
-                                    on-tap="deleteUserClick"
-                                    hidden$="[[!isUserAdmin(userRole)]]"
-                                    title="delete user"
-                                    class="add-user-button ml-lg pull-right mt-lg"
-                                    data-id$="{{user.id}}">
-                                </paper-fab>
-                            </div>
-                        </div>
-                    </iron-collapse>
                 </div>
             </template>
-        </div>
 
         <!-- Dialogs -->
 
@@ -182,25 +157,15 @@
                     <div class="layout vertical">
                         <div>
                             <div class="layout horizontal">
-                                <paper-dropdown-menu id="accountTypeSelect"
-                                        label="Account Type"
-                                        disabled$="{{!newUser}}" class="mr">
-                                    <paper-menu id="accountTypeSelectMenu"
-                                            class="dropdown-content"
-                                            attr-for-selected="value"
-                                            selected="{{accountTypeSelected}}">
-                                        <paper-item value="local">Local</paper-item>
-                                        <paper-item value="google">Google</paper-item>
-                                    </paper-menu>
-                                </paper-dropdown-menu>
                                 <paper-dropdown-menu id="accountRoleSelect"
                                         label="Account Role" class="ml">
                                     <paper-menu id="accountRoleSelectMenu"
                                             class="dropdown-content"
                                             attr-for-selected="value"
                                             selected="{{accountRoleSelected}}">
-                                        <paper-item value="user">User</paper-item>
                                         <paper-item value="admin">Admin</paper-item>
+                                        <paper-item value="moderator">Moderator</paper-item>
+                                        <paper-item value="user">User</paper-item>
                                         <paper-item value="guest">Guest</paper-item>
                                     </paper-menu>
                                 </paper-dropdown-menu>
@@ -209,13 +174,7 @@
                         <div>
                             <paper-input
                                 id="userEmailAddress"
-                                label="Email" maxlength="40"
-                                hidden$="{{!isGoogleAccount(accountTypeSelected)}}">
-                            </paper-input>
-                            <paper-input
-                                id="userFirstAndLastName"
-                                label="Name" maxlength="30"
-                                hidden$="{{!isLocalAccount(accountTypeSelected)}}">
+                                label="Email" maxlength="40">
                             </paper-input>
                         </div>
                     </div>
@@ -233,19 +192,18 @@
         </paper-dialog>
 
 
-        <paper-toast
-                id="userSuccess"
-                class="success-toast"
-                text="{{successMessage}}"
-                duration="4000">
-        </paper-toast>
-        <paper-toast
-                id="userError"
-                class="error-toast"
-                text="{{errorMessage}}"
-                duration="4000">
-        </paper-toast>
-
+        <!--<paper-toast-->
+                <!--id="userSuccess"-->
+                <!--class="success-toast"-->
+                <!--text="{{successMessage}}"-->
+                <!--duration="4000">-->
+        <!--</paper-toast>-->
+        <!--<paper-toast-->
+                <!--id="userError"-->
+                <!--class="error-toast"-->
+                <!--text="{{errorMessage}}"-->
+                <!--duration="4000">-->
+        <!--</paper-toast>-->
 
     </template>
 
@@ -254,34 +212,33 @@
             'use strict';
             Polymer({
                 is: 'user-collection',
-                behaviors: [RecipeBehaviors.UserBehavior],
+                //behaviors: [RecipeBehaviors.UserBehavior],
                 properties: {
                     users: {
-                        type: Object,
-                        notify: true
+                        type: Object
+                    },
+                    usersFilter: {
+                        type: String,
+                        computed: "computeUsersFitler(userNameFilter)",
+                    },
+                    userNameFilter: {
+                        type: String,
+                        value: "",
                     }
                 },
                 ready: function () {
-                    this.set('accountTypeSelected', '');
-                    var that = this;
-
-                    this.set('progressActive', true);
-
-                    this.getUsers().then(function(users) {
-                        that.set('users', users);
-                        that.set('progressActive', false);
-                    }, function (error) {
-                        // notify error
-                        that.set('errorMessage', 'Error getting users');
-                        that.$.userError.open();
-                        that.set('progressActive', false);
-                    });
                 },
-
-                itemClick: function (event) {
-                    var item = event.currentTarget;
-                    var collapse = Polymer.dom(item).querySelector('iron-collapse');
-                    collapse.toggle();
+                computeUsersFilter: function(userNameFilter) {
+                    var o = {};
+                    if (userNameFilter) o.nameOrEmail = userNameFilter;
+                    return o;
+                },
+                toDateStringPretty: function (timestamp) {
+                    if(timestamp) {
+                        var date = new Date(timestamp)
+                        return date.toDateString() + ' ' + date.toLocaleTimeString();
+                    }
+                    else return '(no activity recorded)';
                 },
 
                 openEditUserDialog: function (e) {

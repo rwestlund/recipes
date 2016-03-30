@@ -8,6 +8,19 @@ import (
     "github.com/rwestlund/recipes/defs"
 )
 
+/* SQL to select recipes. */
+var query_rows string = `SELECT recipes.id, recipes.revision,
+            recipes.amount, recipes.author_id, recipes.directions,
+            recipes.ingredients, recipes.notes, recipes.oven,
+            recipes.source, recipes.summary, recipes.time, recipes.title,
+            json_agg(tags.tag), users.name
+        FROM recipes
+        JOIN users
+            ON recipes.author_id = users.id
+        LEFT JOIN tags
+            ON recipes.id = tags.recipe_id `
+
+/* Helper function to read Recipe out of a sql.Rows object. */
 func scan_recipe(row *sql.Rows) (*defs.Recipe, error) {
     /* JSON fields will need special handling. */
     var ingredients, directions, tags string
@@ -36,20 +49,8 @@ func scan_recipe(row *sql.Rows) (*defs.Recipe, error) {
     return &r, nil
 }
 
-/* SQL to select recipes. */
-var query_rows string = `SELECT recipes.id, recipes.revision,
-            recipes.amount, recipes.author_id, recipes.directions,
-            recipes.ingredients, recipes.notes, recipes.oven,
-            recipes.source, recipes.summary, recipes.time, recipes.title,
-            json_agg(tags.tag), users.name
-        FROM recipes
-        JOIN users
-            ON recipes.author_id = users.id
-        LEFT JOIN tags
-            ON recipes.id = tags.recipe_id `
-
 /* Fetch all recipes from the database. */
-func FetchRecipes(filter *defs.RecipeFilter) ([]defs.Recipe, error) {
+func FetchRecipes(filter *defs.RecipeFilter) (*[]defs.Recipe, error) {
     _ = log.Println//DEBUG
 
     /* Build where_text. */
@@ -90,9 +91,9 @@ func FetchRecipes(filter *defs.RecipeFilter) ([]defs.Recipe, error) {
      * double the capacity when it needs to reallocate, but we can save some
      * copying by starting at a decent number. */
     var recipes  = make([]defs.Recipe, 0, 200)
-    /* Iterate over rows, reading in each recipes as we go. */
+    var r *defs.Recipe
+    /* Iterate over rows, reading in each Recipe as we go. */
     for rows.Next() {
-        var r *defs.Recipe
         r, err = scan_recipe(rows)
         if err != nil {
             return nil, err
@@ -100,7 +101,7 @@ func FetchRecipes(filter *defs.RecipeFilter) ([]defs.Recipe, error) {
         /* Add it to our list. */
         recipes = append(recipes, *r)
     }
-    return recipes, nil
+    return &recipes, nil
 }
 
 

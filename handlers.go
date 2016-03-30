@@ -14,7 +14,7 @@ import (
  * Request a list of recipes
  * GET /recipes
  */
-func recipes(res http.ResponseWriter, req *http.Request) {
+func handle_recipes(res http.ResponseWriter, req *http.Request) {
     res.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
     /* We can ignore the error because count=0 means disabled. */
@@ -29,7 +29,7 @@ func recipes(res http.ResponseWriter, req *http.Request) {
         Skip: uint32(bigskip),
     }
 
-    var recipes []defs.Recipe
+    var recipes *[]defs.Recipe
     var err error
     recipes, err = db.FetchRecipes(&filter)
     if err != nil {
@@ -52,7 +52,7 @@ func recipes(res http.ResponseWriter, req *http.Request) {
  * Request a specific recipe.
  * GET /recipes/3
  */
-func recipe(res http.ResponseWriter, req *http.Request) {
+func handle_recipe(res http.ResponseWriter, req *http.Request) {
     /* Get id parameter. */
     params := mux.Vars(req)
     bigid, err := strconv.ParseUint(params["id"], 10, 32)
@@ -78,6 +78,31 @@ func recipe(res http.ResponseWriter, req *http.Request) {
         return
     }
 
+    /* If we made it here, send good response. */
+    res.Write(j)
+}
+
+/*
+ * Request a list of users.
+ * GET /users
+ */
+func handle_users(res http.ResponseWriter, req *http.Request) {
+    res.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+    var users *[]defs.User
+    var err error
+    users, err = db.FetchUsers()
+    if err != nil {
+        log.Println(err)
+        res.WriteHeader(500)
+        return
+    }
+    j, e := json.Marshal(users)
+    if e != nil {
+        log.Println(e)
+        res.WriteHeader(500)
+        return
+    }
     /* If we made it here, send good response. */
     res.Write(j)
 }
