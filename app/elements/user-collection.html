@@ -26,13 +26,19 @@
                 font-size: 2em;
                 color: #AAA;
             }
-            .local-account-icon iron-icon {
-                --iron-icon-height: 2.3em;
-                --iron-icon-width: 2.3em;
-                --iron-icon-fill-color: rgba(188, 188, 188, 0.8);
+            .user-title {
+                font-style: italic;
+                font-weight: normal;
+                margin-bottom: 0;
+                margin-top: 0;
             }
             paper-fab {
                 --paper-fab-keyboard-focus-background: #E9E9E9;
+            }
+            td.td-label {
+                font-weight: bold;
+                text-align: right;
+                padding-right: 0.8em;
             }
         </style>
         <!--<cookie-display -->
@@ -40,11 +46,6 @@
             <!--cookie-value="{{userRole}}">-->
         <!--</cookie-display>-->
 
-        <!--<spinner-observer-->
-            <!--id="manualCleaningSpinner"-->
-            <!--class="card-progress"-->
-            <!--active="{{progressActive}}">-->
-        <!--</spinner-observer>-->
         <!-- a filter box -->
         <div class="layout horizontal center end-justified mv-lg">
             <div class="flex self-start page-title-text">Users</div> 
@@ -74,124 +75,109 @@
         </iron-ajax>
 
             <template is="dom-repeat" items={{users}} as="user">
-                <div class="item">
-
-                    <div class="layout horizontal center start-justified pl-lg">
-                        <div class="avatar layout horizontal center center-justified">
-                            <iron-icon class="user-icon" icon="social:person">
-                            </iron-icon>
-                        </div>
-                        <div class="">
-                            <div class="flex layout vertical">
-                                <div>
-                                    <span class="user-info-label">Name:</span>
-                                    {{user.name}}
-                                </div>
-                                <div>
-                                    <span class="user-info-label">Email:</span>
-                                    {{user.email}}
-                                </div>
-                                <div>
-                                    <span class="user-info-label">Last Activity:</span>
-                                    {{toDateStringPretty(user.lastlog)}}
-                                </div>
-                                <div>
-                                    <span class="user-info-label">Created:</span>
-                                    {{toDateStringPretty(user.date_created)}}
-                                </div>
-                                <div>
-                                    <span class="user-info-label">Recipes Authored:</span>
-                                    {{user.recipes_authored}}
-                                </div>
+                <paper-material>
+                    <div class="item">
+                        <div class="layout horizontal center justified">
+                            <h3 class="user-title">{{user.name}}</h3>
+                            <div>
+                                <paper-icon-button
+                                        icon="icons:create"
+                                        on-tap="openEditUserDialog"
+                                        data-id$="{{user.id}}">
+                                </paper-icon-button>
+                                <paper-icon-button
+                                        icon="icons:delete"
+                                        on-tap="deleteUserClick"
+                                        data-id$="{{user.id}}">
+                                </paper-icon-button>
                             </div>
                         </div>
-                        <div class="flex">
-                            <paper-fab mini
-                                icon="icons:create"
-                                on-tap="openEditUserDialog"
-                                title="edit user"
-                                class="add-user-button ml-lg pull-right mt-lg"
-                                data-id$="{{user.id}}">
-                            </paper-fab>
-
-                            <paper-fab mini
-                                icon="icons:delete"
-                                on-tap="deleteUserClick"
-                                title="delete user"
-                                class="add-user-button ml-lg pull-right mt-lg"
-                                data-id$="{{user.id}}">
-                            </paper-fab>
+                        <div class="layout horizontal center-justified">
+                            <span class="flex-1"></span>
+                            <div class="flex-11 layout vertical">
+                                <table>
+                                    <tr>
+                                        <td class="td-label">Email</td>
+                                        <td>{{user.email}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="td-label">Role</td>
+                                        <td>{{user.role}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="td-label">Last Login</td>
+                                        <td>{{toDateStringPretty(user.lastlog)}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="td-label">Created</td>
+                                        <td>{{toDateStringPretty(user.date_created)}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="td-label">Recipes</td>
+                                        <td>{{user.recipes_authored}}</td>
+                                    </tr>
+                                </table>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </paper-material>
             </template>
 
         <!-- Dialogs -->
 
-        <paper-dialog id="deleteUserConfirmationDialog" class="layout vertical">
-            <div>
-                <h2>Delete User</h2>
-            </div>
-            <div class="flex flex-ratio-12">
-                <paper-dialog-scrollable>
-                    <div class="layout vertical">
-                        <div>Are you sure you want to delete user
-                            <span class="bold">{{userToDelete.name}}</span>?
-                        </div>
-                    </div>
+        <paper-dialog with-backdrop no-cancel-on-outside-click
+                id="deleteUserConfirmationDialog">
+            <h2>Delete User</h2>
+            <p>
+                Are you sure you want to delete {{userToDelete.role}}
+                <strong>{{userToDelete.name}}</strong>?
+            </p>
 
-                </paper-dialog-scrollable>
-            </div>
-
-            <div class="flex-none self-end buttons">
+            <div class="buttons">
                 <paper-button dialog-dismiss>Cancel</paper-button>
-                <paper-button on-tap="deleteUserConfirmClick" dialog-confirm>
+                <paper-button dialog-confirm on-tap="deleteUserConfirmClick">
                     Delete
                 </paper-button>
             </div>
         </paper-dialog>
 
-        <paper-dialog id="editUserDialog" class="layout vertical">
-            <div>
-                <h2 hidden$="{{!newUser}}">Add User</h2>
-                <h2 hidden$="{{newUser}}">Edit User</h2>
+        <!-- For editing user details. -->
+        <paper-dialog with-backdrop no-cancel-on-outside-click
+                id="editUserDialog">
+            <h2>
+                <template is="dom-if" if="{{newUser}}">Add</template>
+                <template is="dom-if" if="{{!newUser}}">Edit</template>
+                User
+            </h2>
+            <div class="layout horizontal justified">
+                <div class="flex-11">
+                    <paper-dropdown-menu label="Account Role">
+                        <paper-menu id="accountRoleSelectMenu"
+                                class="dropdown-content"
+                                attr-for-selected="value"
+                                selected="{{accountRoleSelected}}">
+                            <paper-item value="admin">Admin</paper-item>
+                            <paper-item value="moderator">Moderator</paper-item>
+                            <paper-item value="user">User</paper-item>
+                        </paper-menu>
+                    </paper-dropdown-menu>
+                    <paper-input id="userEmailAddress"
+                        label="Email" maxlength="40">
+                    </paper-input>
+                </div>
+                <!-- This span makes sure the dropdown has enough space. -->
+                <span class="flex-1"></span>
             </div>
-            <div class="flex flex-ratio-12">
-                <paper-dialog-scrollable>
-                    <div class="layout vertical">
-                        <div>
-                            <div class="layout horizontal">
-                                <paper-dropdown-menu id="accountRoleSelect"
-                                        label="Account Role" class="ml">
-                                    <paper-menu id="accountRoleSelectMenu"
-                                            class="dropdown-content"
-                                            attr-for-selected="value"
-                                            selected="{{accountRoleSelected}}">
-                                        <paper-item value="admin">Admin</paper-item>
-                                        <paper-item value="moderator">Moderator</paper-item>
-                                        <paper-item value="user">User</paper-item>
-                                        <paper-item value="guest">Guest</paper-item>
-                                    </paper-menu>
-                                </paper-dropdown-menu>
-                            </div>
-                        </div>
-                        <div>
-                            <paper-input
-                                id="userEmailAddress"
-                                label="Email" maxlength="40">
-                            </paper-input>
-                        </div>
-                    </div>
-                </paper-dialog-scrollable>
-            </div>
-
-
-            <div class="flex-none self-end buttons">
+            <div class="buttons">
                 <paper-button dialog-dismiss>Cancel</paper-button>
-                <paper-button on-tap="createUserClick" dialog-confirm
-                        hidden="[[!newUser]]">Add</paper-button>
-                <paper-button on-tap="saveUserClick" dialog-confirm
-                        hidden="[[newUser]]">Save</paper-button>
+                <paper-button dialog-confirm on-tap="createUserClick"
+                        hidden="[[!newUser]]">
+                    Add
+                </paper-button>
+                <paper-button dialog-confirm on-tap="saveUserClick"
+                        hidden="[[newUser]]">
+                    Save
+                </paper-button>
             </div>
         </paper-dialog>
 
@@ -261,9 +247,7 @@
                             if(id === user.id) userToEdit = user;
                         });
                         this.set('userToEdit', userToEdit);
-                        this.$.userFirstAndLastName.value = userToEdit.name;
                         this.$.userEmailAddress.value = userToEdit.email;
-                        this.$.accountTypeSelectMenu.selected = userToEdit.type;
                         this.$.accountRoleSelectMenu.selected = userToEdit.role;
                         this.set('newUser', false);
                     }

@@ -50,7 +50,7 @@ func FetchUsers(name_or_email string) (*[]defs.User, error) {
     var rows *sql.Rows
     var err error
     rows, err = DB.Query(users_query + where_text +
-            " GROUP BY users.id ORDER BY email",
+            " GROUP BY users.id ORDER BY lastlog DESC NULLS LAST",
             params...)
     if err != nil {
         return nil, err
