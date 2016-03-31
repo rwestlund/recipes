@@ -8,32 +8,50 @@ import (
 )
 
 /* SQL to select users. */
-var users_query string = `SELECT id, email, name, role, lastlog, date_created
-        FROM users `
+var users_query string = `SELECT users.id, users.email, users.name,
+            users.role, users.lastlog, users.date_created,
+            COUNT(recipes.id) AS recipes_authored
+        FROM users
+        LEFT JOIN recipes
+            ON users.id = recipes.author_id `
 
 func scan_user(rows *sql.Rows) (*defs.User, error) {
     var u defs.User
+    /* Because lastlog may be null, read into NullTime first. The User object
+     * holds a pointer to a time.Time rather than a time.Time directly because
+     * this is the only way to make json.Marshal() encode a null when the time
+     * is not valid. */
     var lastlog pq.NullTime
-    _ = pq.Open//DEBUG
     var err error = rows.Scan(&u.Id, &u.Email, &u.Name, &u.Role, &lastlog,
-            &u.DateCreated)
+            &u.DateCreated, &u.RecipesAuthored)
     if err != nil {
         return nil, err
     }
     if lastlog.Valid {
-        u.Lastlog = lastlog.Time
+        u.Lastlog = &lastlog.Time
     }
     return &u, nil
 }
 
 /* Fetch all users in the database. */
-func FetchUsers() (*[]defs.User, error) {
+func FetchUsers(name_or_email string) (*[]defs.User, error) {
     _ = log.Println//DEBUG
+
+    var where_text string
+    var params []interface{};
+
+    if name_or_email != "" {
+        params = append(params, name_or_email)
+        where_text = ` WHERE (users.name ILIKE '%' || $1 || '%'
+                        OR users.email ILIKE '%' || $1 || '%') `
+    }
 
     /* Run the query. */
     var rows *sql.Rows
     var err error
-    rows, err = DB.Query(users_query + " ORDER BY email")
+    rows, err = DB.Query(users_query + where_text +
+            " GROUP BY users.id ORDER BY email",
+            params...)
     if err != nil {
         return nil, err
     }

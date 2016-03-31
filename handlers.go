@@ -91,7 +91,7 @@ func handle_users(res http.ResponseWriter, req *http.Request) {
 
     var users *[]defs.User
     var err error
-    users, err = db.FetchUsers()
+    users, err = db.FetchUsers(req.URL.Query().Get("name_or_email"))
     if err != nil {
         log.Println(err)
         res.WriteHeader(500)

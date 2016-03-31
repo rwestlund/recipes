@@ -99,6 +99,10 @@
                                     <span class="user-info-label">Created:</span>
                                     {{toDateStringPretty(user.date_created)}}
                                 </div>
+                                <div>
+                                    <span class="user-info-label">Recipes Authored:</span>
+                                    {{user.recipes_authored}}
+                                </div>
                             </div>
                         </div>
                         <div class="flex">
@@ -219,7 +223,7 @@
                     },
                     usersFilter: {
                         type: String,
-                        computed: "computeUsersFitler(userNameFilter)",
+                        computed: "computeUsersFilter(userNameFilter)",
                     },
                     userNameFilter: {
                         type: String,
@@ -230,7 +234,7 @@
                 },
                 computeUsersFilter: function(userNameFilter) {
                     var o = {};
-                    if (userNameFilter) o.nameOrEmail = userNameFilter;
+                    if (userNameFilter) o.name_or_email = userNameFilter;
                     return o;
                 },
                 toDateStringPretty: function (timestamp) {
