@@ -49,7 +49,7 @@
         <!-- a filter box -->
         <div class="layout horizontal center end-justified mv-lg">
             <div class="flex self-start page-title-text">Users</div> 
-            <paper-spinner class="nav-button" active="{{loadingUsers}}"
+            <paper-spinner class="nav-button" active="{{loadingData}}"
                     alt="loading users...">
             </paper-spinner>
             <paper-input label="Filter" type="text" maxlength="60"
@@ -63,14 +63,14 @@
                 class="add-user-button pull-right ml-lg mt-lg">
             </paper-fab>
         </div>
-        <iron-ajax auto method="GET"
+        <iron-ajax auto id="getUsers"
+                method="GET"
                 url="/users"
                 params="{{usersFilter}}"
                 handle-as="json"
                 last-response="{{users}}"
                 debounce-duration="100"
                 on-error="onAjaxError"
-                on-response="newUsersReceived"
                 loading="{{loadingUsers}}">
         </iron-ajax>
 
@@ -181,19 +181,32 @@
             </div>
         </paper-dialog>
 
+        <iron-ajax id="postNewUser"
+                verbose
+                method="POST"
+                url="/users"
+                body="{{userToPost}}"
+                content-type="application/json"
+                handle-as="json"
+                debounce-duration="100"
+                last-response="{{lastUserCreated}}"
+                on-error="createUserFailed"
+                on-response="userCreated"
+                loading="{{creatingUser}}">
+        </iron-ajax>
 
-        <!--<paper-toast-->
-                <!--id="userSuccess"-->
-                <!--class="success-toast"-->
-                <!--text="{{successMessage}}"-->
-                <!--duration="4000">-->
-        <!--</paper-toast>-->
-        <!--<paper-toast-->
-                <!--id="userError"-->
-                <!--class="error-toast"-->
-                <!--text="{{errorMessage}}"-->
-                <!--duration="4000">-->
-        <!--</paper-toast>-->
+        <paper-toast
+                id="successToast"
+                class="success-toast"
+                text="{{toastSuccessMessage}}"
+                duration="4000">
+        </paper-toast>
+        <paper-toast
+                id="errorToast"
+                class="error-toast"
+                text="{{toastErrorMessage}}"
+                duration="4000">
+        </paper-toast>
 
     </template>
 
@@ -207,14 +220,45 @@
                     users: {
                         type: Object
                     },
+                    // Query params for GET /users.
                     usersFilter: {
                         type: String,
                         computed: "computeUsersFilter(userNameFilter)",
                     },
+                    // Filter box value.
                     userNameFilter: {
                         type: String,
                         value: "",
-                    }
+                    },
+                    // Body for POST /users.
+                    userToPost: {
+                        type: Object
+                    },
+                    lastUserCreated: {
+                        type: Object,
+                    },
+                    // True during GET /users.
+                    loadingUsers: {
+                        type: Boolean,
+                        value: false,
+                    },
+                    // True during POST /users.
+                    creatingUser: {
+                        type: Boolean,
+                        value: false,
+                    },
+                    // True whenever we're loading XHR data.
+                    loadingData: {
+                        type: Boolean,
+                        computed: "computeLoadingData(loadingUsers, creatingUser)"
+                    },
+                    // Set by iron-ajax handlers prior to flashing toast.
+                    toastSuccessMessage: {
+                        type: String
+                    },
+                    toastErrorMessage: {
+                        type: String
+                    },
                 },
                 ready: function () {
                 },
@@ -223,6 +267,35 @@
                     if (userNameFilter) o.name_or_email = userNameFilter;
                     return o;
                 },
+                computeLoadingData: function(loadingUsers, creatingUser) {
+                    return loadingUsers || creatingUser;
+                },
+                // Called upon submission of new user form.
+                createUserClick: function () {
+                    this.userToPost = {
+                        email: this.$.userEmailAddress.value,
+                        role: this.$.accountRoleSelectMenu.selected,
+                    };
+                    this.$.postNewUser.generateRequest()
+                },
+                // Called when a POST /users succeeds
+                userCreated: function() {
+                    this.toastSuccessMessage = "New " +
+                            this.lastUserCreated.role + " " +
+                            this.lastUserCreated.email + " created";
+                    // Rather than refetch users, just append the new one
+                    this.users.push(this.lastUserCreated);
+                    this.$.successToast.open();
+                },
+                // Called when a POST /users fails
+                createUserFailed: function(e, s) {
+                    // failure status is here:
+                    //console.log(e.detail.request.status);
+                    this.toastErrorMessage = "Failed to create user :(";
+                    this.$.errorToast.open();
+                },
+
+                // UTILITY FUNCTIONS
                 toDateStringPretty: function (timestamp) {
                     if(timestamp) {
                         var date = new Date(timestamp)
@@ -253,43 +326,15 @@
                     }
                     // otherwise initialize form with defaults
                     else {
-                        this.$.userFirstAndLastName.value = '';
                         this.$.userEmailAddress.value = '';
-                        this.$.accountTypeSelectMenu.selected =
-                            this.constants.accountTypeEnum.google;
-                        this.$.accountRoleSelectMenu.selected =
-                            this.constants.userRoleEnum.user;
+                        this.$.accountRoleSelectMenu.selected = 'user';
                         this.set('newUser', true);
                     }
                     this.$.editUserDialog.open();
                 },
 
-                createUserClick: function () {
-                    var user = {
-                        name: this.$.userFirstAndLastName.value,
-                        email: this.$.userEmailAddress.value,
-                        type: this.$.accountTypeSelectMenu.selected,
-                        role: this.$.accountRoleSelectMenu.selected
-                    };
 
-                    this.set('progressActive', true);
 
-                    var that = this;
-                    this.createUser(user)
-                        .then(function(newUser) {
-                            that.push('users', newUser);
-                            // notify success
-                            that.set('successMessage', 'User created');
-                            that.$.userSuccess.open();
-                            that.set('progressActive', false);
-                        }, function (err) {
-                            // notify error
-                            that.set('errorMessage', 'Error creating user');
-                            that.$.userError.open();
-                            that.set('progressActive', false);
-                        });
-
-                },
 
                 saveUserClick: function () {
                     this.set('userToEdit.name', this.$.userFirstAndLastName.value);

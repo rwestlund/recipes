@@ -106,3 +106,39 @@ func handle_users(res http.ResponseWriter, req *http.Request) {
     /* If we made it here, send good response. */
     res.Write(j)
 }
+
+
+/*
+ * Receive a new user to create.
+ * POST /users
+ * Example: { email: ..., role: ... }
+ */
+func handle_post_user(res http.ResponseWriter, req *http.Request) {
+    res.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+    /* Decode body. */
+    var user defs.User
+    var err error = json.NewDecoder(req.Body).Decode(&user)
+    if err != nil {
+        log.Println(err)
+        res.WriteHeader(400)
+        return
+    }
+    /* Create new user in DB. */
+    err = db.CreateUser(&user)
+    if err != nil {
+        log.Println(err)
+        res.WriteHeader(400)
+        return
+    }
+
+    /* Send it back. */
+    j, e := json.Marshal(user)
+    if e != nil {
+        log.Println(e)
+        res.WriteHeader(500)
+        return
+    }
+    /* If we made it here, send good response. */
+    res.Write(j)
+}

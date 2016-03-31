@@ -22,7 +22,9 @@ func scan_user(rows *sql.Rows) (*defs.User, error) {
      * this is the only way to make json.Marshal() encode a null when the time
      * is not valid. */
     var lastlog pq.NullTime
-    var err error = rows.Scan(&u.Id, &u.Email, &u.Name, &u.Role, &lastlog,
+    /* Name may be null, but we've fine converting that to an empty string. */
+    var name sql.NullString
+    var err error = rows.Scan(&u.Id, &u.Email, &name, &u.Role, &lastlog,
             &u.DateCreated, &u.RecipesAuthored)
     if err != nil {
         return nil, err
@@ -30,6 +32,7 @@ func scan_user(rows *sql.Rows) (*defs.User, error) {
     if lastlog.Valid {
         u.Lastlog = &lastlog.Time
     }
+    u.Name = name.String
     return &u, nil
 }
 
@@ -72,4 +75,31 @@ func FetchUsers(name_or_email string) (*[]defs.User, error) {
         users = append(users, *user)
     }
     return &users, nil
+}
+
+/* Take a reference to a User and create it in the database, returning fields
+ * in the passed object. Only User.Email and User.Role are read.
+ */
+func CreateUser(user *defs.User) error {
+    var rows *sql.Rows
+    var err error
+    //TODO some input validation on would be nice
+    rows, err = DB.Query(`INSERT INTO users (email, role) VALUES ($1, $2)
+                RETURNING id, email, name, role, lastlog, date_created,
+                    0 AS recipes_authored`,
+                user.Email, user.Role)
+    if err != nil {
+        return err
+    }
+    defer rows.Close()
+    /* Make sure we have a row returned. */
+    if !rows.Next() {
+        return sql.ErrNoRows
+    }
+    /* Scan it in. */
+    user, err = scan_user(rows)
+    if err != nil {
+        return err
+    }
+    return nil
 }
