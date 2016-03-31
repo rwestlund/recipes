@@ -48,7 +48,7 @@
 
         <!-- a filter box -->
         <div class="layout horizontal center end-justified mv-lg">
-            <div class="flex self-start page-title-text">Users</div> 
+            <div class="flex self-start page-title-text">Users</div>
             <paper-spinner class="nav-button" active="{{loadingData}}"
                     alt="loading users...">
             </paper-spinner>
@@ -155,13 +155,13 @@
                         <paper-menu id="accountRoleSelectMenu"
                                 class="dropdown-content"
                                 attr-for-selected="value"
-                                selected="{{accountRoleSelected}}">
+                                selected="{{userToPost.role}}">
                             <paper-item value="admin">Admin</paper-item>
                             <paper-item value="moderator">Moderator</paper-item>
                             <paper-item value="user">User</paper-item>
                         </paper-menu>
                     </paper-dropdown-menu>
-                    <paper-input id="userEmailAddress"
+                    <paper-input id="userEmailAddress" value="{{userToPost.email}}"
                         label="Email" maxlength="40">
                     </paper-input>
                 </div>
@@ -193,6 +193,19 @@
                 on-error="createUserFailed"
                 on-response="userCreated"
                 loading="{{creatingUser}}">
+        </iron-ajax>
+        <iron-ajax id="putNewUser"
+                verbose
+                method="PUT"
+                url="/users"
+                body="{{userToPost}}"
+                content-type="application/json"
+                handle-as="json"
+                debounce-duration="100"
+                last-response="{{lastUserCreated}}"
+                on-error="saveUserFailed"
+                on-response="userSaved"
+                loading="{{savingUser}}">
         </iron-ajax>
 
         <paper-toast
@@ -247,10 +260,15 @@
                         type: Boolean,
                         value: false,
                     },
+                    // True during PUT /users
+                    savingUser: {
+                        type: Boolean,
+                        value: false,
+                    },
                     // True whenever we're loading XHR data.
                     loadingData: {
                         type: Boolean,
-                        computed: "computeLoadingData(loadingUsers, creatingUser)"
+                        computed: "computeLoadingData(loadingUsers, creatingUser, savingUser)"
                     },
                     // Set by iron-ajax handlers prior to flashing toast.
                     toastSuccessMessage: {
@@ -267,33 +285,51 @@
                     if (userNameFilter) o.name_or_email = userNameFilter;
                     return o;
                 },
-                computeLoadingData: function(loadingUsers, creatingUser) {
-                    return loadingUsers || creatingUser;
+                computeLoadingData: function(loadingUsers, creatingUser, savingUser) {
+                    return loadingUsers || creatingUser || savingUser;
                 },
                 // Called upon submission of new user form.
                 createUserClick: function () {
-                    this.userToPost = {
-                        email: this.$.userEmailAddress.value,
-                        role: this.$.accountRoleSelectMenu.selected,
-                    };
                     this.$.postNewUser.generateRequest()
                 },
-                // Called when a POST /users succeeds
+                // Called when a POST /users succeeds.
                 userCreated: function() {
                     this.toastSuccessMessage = "New " +
                             this.lastUserCreated.role + " " +
                             this.lastUserCreated.email + " created";
-                    // Rather than refetch users, just append the new one
-                    this.users.push(this.lastUserCreated);
+                    // Rather than refetch users, just append the new one.
+                    this.push("users", this.lastUserCreated);
                     this.$.successToast.open();
                 },
-                // Called when a POST /users fails
+                // Called when a POST /users fails.
                 createUserFailed: function(e, s) {
                     // failure status is here:
                     //console.log(e.detail.request.status);
                     this.toastErrorMessage = "Failed to create user :(";
                     this.$.errorToast.open();
                 },
+
+                // Called when a PUT /users succeeds.
+                userSaved: function() {
+                    this.toastSuccessMessage =
+                            this.lastUserCreated.role + " " +
+                            this.lastUserCreated.email + " saved";
+
+                    /* Update user in our list. */
+                    var that = this;
+                    for(var i = 0; i < that.users.length; i++) {
+                        if(that.users[i].id === that.lastUserCreated.id) {
+                            that.splice('users', i, 1, that.lastUserCreated);
+                        }
+                    }
+                    this.$.successToast.open();
+                },
+                // Called when a PUT /users fails.
+                saveUserFailed: function() {
+                    this.toastErrorMessage = "Failed to save user :(";
+                    this.$.errorToast.open();
+                },
+
 
                 // UTILITY FUNCTIONS
                 toDateStringPretty: function (timestamp) {
@@ -304,65 +340,34 @@
                     else return '(no activity recorded)';
                 },
 
-                openEditUserDialog: function (e) {
-                    // prohibit containing div from firing its on-tap handler
-                    e.stopPropagation();
+                openEditUserDialog: function() {
 
                     var currentTarget = e.currentTarget;
                     var idAttr = currentTarget.attributes['data-id'];
                     var id;
                     if(idAttr) id = Number(idAttr.value);
 
+                // TODO just-added users come up blank on edit
                     // if we are editing an existing user
                     if(id) {
-                        var userToEdit;
+                        var that = this;
                         this.users.forEach(function(user) {
-                            if(id === user.id) userToEdit = user;
+                            if(id === user.id) that.userToPost = user;
                         });
-                        this.set('userToEdit', userToEdit);
-                        this.$.userEmailAddress.value = userToEdit.email;
-                        this.$.accountRoleSelectMenu.selected = userToEdit.role;
                         this.set('newUser', false);
                     }
                     // otherwise initialize form with defaults
                     else {
-                        this.$.userEmailAddress.value = '';
-                        this.$.accountRoleSelectMenu.selected = 'user';
+                        this.userToPost = { email: "", role: "user" };
                         this.set('newUser', true);
                     }
                     this.$.editUserDialog.open();
                 },
 
-
-
-
+                // Called upon submission of edit user form.
                 saveUserClick: function () {
-                    this.set('userToEdit.name', this.$.userFirstAndLastName.value);
-                    this.set('userToEdit.email', this.$.userEmailAddress.value);
-                    this.set('userToEdit.type', this.$.accountTypeSelectMenu.selected);
-                    this.set('userToEdit.role', this.$.accountRoleSelectMenu.selected);
-
-                    this.set('progressActive', true);
-
                     var that = this;
-                    this.saveUser(this.userToEdit)
-                        .then(function(newuser) {
-                            // update users list
-                            for(var i = 0; i < that.users.length; i++) {
-                                if(that.users[i].id === newuser.id) {
-                                    that.splice('users', i, 1, newuser);
-                                }
-                            }
-                            // notify success
-                            that.set('successMessage', 'User saved');
-                            that.$.userSuccess.open();
-                            that.set('progressActive', false);
-                        }, function (err) {
-                            // notify error
-                            that.set('errorMessage', 'Error saving user');
-                            that.$.userError.open();
-                            that.set('progressActive', false);
-                        });
+                    this.$.putNewUser.generateRequest()
                 },
 
                 deleteUserClick: function (e) {

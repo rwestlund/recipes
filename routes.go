@@ -35,8 +35,8 @@ var routes = Routes {
     },
     Route {
         "users",
-        []string{ "POST" },
+        []string{ "POST", "PUT" },
         "/users",
-        handle_post_user,
+        handle_post_or_put_user,
     },
 }

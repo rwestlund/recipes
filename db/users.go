@@ -80,7 +80,7 @@ func FetchUsers(name_or_email string) (*[]defs.User, error) {
 /* Take a reference to a User and create it in the database, returning fields
  * in the passed object. Only User.Email and User.Role are read.
  */
-func CreateUser(user *defs.User) error {
+func CreateUser(user *defs.User) (*defs.User, error) {
     var rows *sql.Rows
     var err error
     //TODO some input validation on would be nice
@@ -89,17 +89,46 @@ func CreateUser(user *defs.User) error {
                     0 AS recipes_authored`,
                 user.Email, user.Role)
     if err != nil {
-        return err
+        return nil, err
     }
     defer rows.Close()
     /* Make sure we have a row returned. */
     if !rows.Next() {
-        return sql.ErrNoRows
+        return nil, sql.ErrNoRows
     }
     /* Scan it in. */
     user, err = scan_user(rows)
     if err != nil {
-        return err
+        return nil, err
     }
-    return nil
+    return user, nil
+}
+
+
+/* Take a reference to a User and update it in the database, returning fields
+ * in the passed object. Only User.Id, User.Email, and User.Role are read.
+ */
+func UpdateUser(user *defs.User) (*defs.User, error) {
+    var rows *sql.Rows
+    var err error
+    //TODO some input validation on would be nice
+    rows, err = DB.Query(`UPDATE users SET (email, role) = ($1, $2)
+                WHERE id = $3
+                RETURNING id, email, name, role, lastlog, date_created,
+                    0 AS recipes_authored`,
+                user.Email, user.Role, user.Id)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+    /* Make sure we have a row returned. */
+    if !rows.Next() {
+        return nil, sql.ErrNoRows
+    }
+    /* Scan it in. */
+    user, err = scan_user(rows)
+    if err != nil {
+        return nil, err
+    }
+    return user, nil
 }

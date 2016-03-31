@@ -110,10 +110,10 @@ func handle_users(res http.ResponseWriter, req *http.Request) {
 
 /*
  * Receive a new user to create.
- * POST /users
+ * POST /users or PUT /users
  * Example: { email: ..., role: ... }
  */
-func handle_post_user(res http.ResponseWriter, req *http.Request) {
+func handle_post_or_put_user(res http.ResponseWriter, req *http.Request) {
     res.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
     /* Decode body. */
@@ -124,8 +124,16 @@ func handle_post_user(res http.ResponseWriter, req *http.Request) {
         res.WriteHeader(400)
         return
     }
+
+    var new_user *defs.User
+    /* Update a user in the database. */
+    if req.Method == "PUT" {
+        new_user, err = db.UpdateUser(&user)
     /* Create new user in DB. */
-    err = db.CreateUser(&user)
+    } else {
+        new_user, err = db.CreateUser(&user)
+    }
+
     if err != nil {
         log.Println(err)
         res.WriteHeader(400)
@@ -133,7 +141,7 @@ func handle_post_user(res http.ResponseWriter, req *http.Request) {
     }
 
     /* Send it back. */
-    j, e := json.Marshal(user)
+    j, e := json.Marshal(new_user)
     if e != nil {
         log.Println(e)
         res.WriteHeader(500)
