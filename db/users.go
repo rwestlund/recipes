@@ -132,3 +132,16 @@ func UpdateUser(user *defs.User) (*defs.User, error) {
     }
     return user, nil
 }
+
+/* Delete a User by id.  */
+func DeleteUser(id uint32) error {
+    var rows *sql.Rows
+    var err error
+    rows, err = DB.Query(`DELETE FROM USERS
+                WHERE id = $1`, id)
+    if err != nil {
+        return err
+    }
+    defer rows.Close()
+    return nil
+}

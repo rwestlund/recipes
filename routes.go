@@ -39,4 +39,10 @@ var routes = Routes {
         "/users",
         handle_post_or_put_user,
     },
+    Route {
+        "users",
+        []string{ "DELETE" },
+        "/users/{id:[0-9]+}",
+        handle_delete_user,
+    },
 }

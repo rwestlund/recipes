@@ -53,12 +53,17 @@ func handle_recipes(res http.ResponseWriter, req *http.Request) {
  * GET /recipes/3
  */
 func handle_recipe(res http.ResponseWriter, req *http.Request) {
+    res.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
     /* Get id parameter. */
     params := mux.Vars(req)
     bigid, err := strconv.ParseUint(params["id"], 10, 32)
+    if err != nil {
+        log.Println(err)
+        res.WriteHeader(400)
+        return
+    }
     var id uint32 = uint32(bigid)
-
-    res.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
     var recipe *defs.Recipe
     recipe, err = db.FetchRecipe(id)
@@ -150,3 +155,35 @@ func handle_post_or_put_user(res http.ResponseWriter, req *http.Request) {
     /* If we made it here, send good response. */
     res.Write(j)
 }
+
+
+/*
+ * Delete a user by id.
+ * DELETE /users/4
+ */
+func handle_delete_user(res http.ResponseWriter, req *http.Request) {
+    res.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+    /* Get id parameter. */
+    params := mux.Vars(req)
+    bigid, err := strconv.ParseUint(params["id"], 10, 32)
+    if err != nil {
+        log.Println(err)
+        res.WriteHeader(400)
+        return
+    }
+    var id uint32 = uint32(bigid)
+
+    err = db.DeleteUser(id)
+
+    if err != nil {
+        log.Println(err)
+        res.WriteHeader(400)
+        return
+    }
+
+    /* If we made it here, send good response. */
+    res.WriteHeader(200)
+}
+
+
