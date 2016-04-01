@@ -16,7 +16,6 @@
         <style>
             :host {
                 display: block;
-                /*margin: 5px;*/
             }
             #filterInputField {
                 width 200px;
@@ -46,7 +45,7 @@
         <iron-ajax auto
                 method="GET"
                 url="/users"
-                params="{{usersFilter}}"
+                params="[[usersFilter]]"
                 handle-as="json"
                 last-response="{{users}}"
                 debounce-duration="100"
@@ -56,7 +55,7 @@
         <iron-ajax id="postNewUser"
                 method="POST"
                 url="/users"
-                body="{{ajaxData}}"
+                body="[[ajaxData]]"
                 content-type="application/json"
                 handle-as="json"
                 last-response="{{lastUserCreated}}"
@@ -67,7 +66,7 @@
         <iron-ajax id="putNewUser"
                 method="PUT"
                 url="/users"
-                body="{{ajaxData}}"
+                body="[[ajaxData]]"
                 content-type="application/json"
                 handle-as="json"
                 last-response="{{lastUserCreated}}"
@@ -77,7 +76,7 @@
         </iron-ajax>
         <iron-ajax id="deleteUser"
                 method="DELETE"
-                url="/users/{{ajaxData.id}}"
+                url="/users/[[ajaxData.id]]"
                 on-error="DeleteUserFailed"
                 on-response="userDeleted"
                 loading="{{loading.deleteUser}}">
@@ -102,21 +101,21 @@
         </div>
 
         <!-- Each user card. -->
-        <template is="dom-repeat" items={{users}} as="user">
+        <template is="dom-repeat" items=[[users]] as="user">
             <paper-material>
                 <div class="item">
                     <div class="layout horizontal center justified">
-                        <h3 class="user-title">{{user.name}}</h3>
+                        <h3 class="user-title">[[user.name]]</h3>
                         <div>
                             <paper-icon-button
                                     icon="icons:create"
                                     on-tap="openEditUserDialog"
-                                    data-id$="{{user.id}}">
+                                    data-id$="[[user.id]]">
                             </paper-icon-button>
                             <paper-icon-button
                                     icon="icons:delete"
                                     on-tap="deleteUserClick"
-                                    data-id$="{{user.id}}">
+                                    data-id$="[[user.id]]">
                             </paper-icon-button>
                         </div>
                     </div>
@@ -126,23 +125,23 @@
                             <table>
                                 <tr>
                                     <td class="td-label">Email</td>
-                                    <td>{{user.email}}</td>
+                                    <td>[[user.email]]</td>
                                 </tr>
                                 <tr>
                                     <td class="td-label">Role</td>
-                                    <td>{{user.role}}</td>
+                                    <td>[[user.role]]</td>
                                 </tr>
                                 <tr>
                                     <td class="td-label">Last Login</td>
-                                    <td>{{toDateStringPretty(user.lastlog)}}</td>
+                                    <td>[[toDateStringPretty(user.lastlog)]]</td>
                                 </tr>
                                 <tr>
                                     <td class="td-label">Created</td>
-                                    <td>{{toDateStringPretty(user.date_created)}}</td>
+                                    <td>[[toDateStringPretty(user.date_created)]]</td>
                                 </tr>
                                 <tr>
                                     <td class="td-label">Recipes</td>
-                                    <td>{{user.recipes_authored}}</td>
+                                    <td>[[user.recipes_authored]]</td>
                                 </tr>
                             </table>
                         </div>
@@ -157,8 +156,8 @@
                 id="deleteUserConfirmationDialog">
             <h2>Delete User</h2>
             <p>
-                Are you sure you want to delete {{ajaxData.role}}
-                <strong>{{ajaxData.name}}</strong>?
+                Are you sure you want to delete [[ajaxData.role]]
+                <strong>[[ajaxData.name]]</strong>?
             </p>
 
             <div class="buttons">
@@ -173,8 +172,8 @@
         <paper-dialog with-backdrop no-cancel-on-outside-click
                 id="editUserDialog">
             <h2>
-                <template is="dom-if" if="{{newUser}}">Add</template>
-                <template is="dom-if" if="{{!newUser}}">Edit</template>
+                <template is="dom-if" if="[[newUser]]">Add</template>
+                <template is="dom-if" if="[[!newUser]]">Edit</template>
                 User
             </h2>
             <div class="layout horizontal justified">
@@ -213,13 +212,13 @@
         <paper-toast
                 id="successToast"
                 class="success-toast"
-                text="{{toastMessage}}"
+                text="[[toastMessage]]"
                 duration="4000">
         </paper-toast>
         <paper-toast
                 id="errorToast"
                 class="error-toast"
-                text="{{toastMessage}}"
+                text="[[toastMessage]]"
                 duration="4000">
         </paper-toast>
 
@@ -342,7 +341,7 @@
                     this.$.errorToast.open();
                 },
 
-                openEditUserDialog: function() {
+                openEditUserDialog: function(e) {
                     var idAttr = e.currentTarget.attributes['data-id'];
                     var id;
                     if(idAttr) id = Number(idAttr.value);
