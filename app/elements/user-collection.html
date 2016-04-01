@@ -1,6 +1,6 @@
 <!--
-    Randy Westlund and Jon Doltar
-    2016-02
+    Randy Westlund
+    2016-04
 -->
 <!-- this module shows a list of users -->
 
@@ -41,10 +41,40 @@
                 padding-right: 0.8em;
             }
         </style>
-        <!--<cookie-display -->
-            <!--cookie-name="role"-->
-            <!--cookie-value="{{userRole}}">-->
-        <!--</cookie-display>-->
+
+        <!-- AJAX elements -->
+        <iron-ajax auto
+                method="GET"
+                url="/users"
+                params="{{usersFilter}}"
+                handle-as="json"
+                last-response="{{users}}"
+                debounce-duration="100"
+                on-error="onAjaxError"
+                loading="{{loading.getUsers}}">
+        </iron-ajax>
+        <iron-ajax id="postNewUser"
+                method="POST"
+                url="/users"
+                body="{{ajaxData}}"
+                content-type="application/json"
+                handle-as="json"
+                last-response="{{lastUserCreated}}"
+                on-error="createUserFailed"
+                on-response="userCreated"
+                loading="{{loading.postUser}}">
+        </iron-ajax>
+        <iron-ajax id="putNewUser"
+                method="PUT"
+                url="/users"
+                body="{{ajaxData}}"
+                content-type="application/json"
+                handle-as="json"
+                last-response="{{lastUserCreated}}"
+                on-error="saveUserFailed"
+                on-response="userSaved"
+                loading="{{loading.putUser}}">
+        </iron-ajax>
 
         <!-- a filter box -->
         <div class="layout horizontal center end-justified mv-lg">
@@ -63,65 +93,56 @@
                 class="add-user-button pull-right ml-lg mt-lg">
             </paper-fab>
         </div>
-        <iron-ajax auto id="getUsers"
-                method="GET"
-                url="/users"
-                params="{{usersFilter}}"
-                handle-as="json"
-                last-response="{{users}}"
-                debounce-duration="100"
-                on-error="onAjaxError"
-                loading="{{loadingUsers}}">
-        </iron-ajax>
 
-            <template is="dom-repeat" items={{users}} as="user">
-                <paper-material>
-                    <div class="item">
-                        <div class="layout horizontal center justified">
-                            <h3 class="user-title">{{user.name}}</h3>
-                            <div>
-                                <paper-icon-button
-                                        icon="icons:create"
-                                        on-tap="openEditUserDialog"
-                                        data-id$="{{user.id}}">
-                                </paper-icon-button>
-                                <paper-icon-button
-                                        icon="icons:delete"
-                                        on-tap="deleteUserClick"
-                                        data-id$="{{user.id}}">
-                                </paper-icon-button>
-                            </div>
-                        </div>
-                        <div class="layout horizontal center-justified">
-                            <span class="flex-1"></span>
-                            <div class="flex-11 layout vertical">
-                                <table>
-                                    <tr>
-                                        <td class="td-label">Email</td>
-                                        <td>{{user.email}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="td-label">Role</td>
-                                        <td>{{user.role}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="td-label">Last Login</td>
-                                        <td>{{toDateStringPretty(user.lastlog)}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="td-label">Created</td>
-                                        <td>{{toDateStringPretty(user.date_created)}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="td-label">Recipes</td>
-                                        <td>{{user.recipes_authored}}</td>
-                                    </tr>
-                                </table>
-                            </div>
+        <!-- Each user card. -->
+        <template is="dom-repeat" items={{users}} as="user">
+            <paper-material>
+                <div class="item">
+                    <div class="layout horizontal center justified">
+                        <h3 class="user-title">{{user.name}}</h3>
+                        <div>
+                            <paper-icon-button
+                                    icon="icons:create"
+                                    on-tap="openEditUserDialog"
+                                    data-id$="{{user.id}}">
+                            </paper-icon-button>
+                            <paper-icon-button
+                                    icon="icons:delete"
+                                    on-tap="deleteUserClick"
+                                    data-id$="{{user.id}}">
+                            </paper-icon-button>
                         </div>
                     </div>
-                </paper-material>
-            </template>
+                    <div class="layout horizontal center-justified">
+                        <span class="flex-1"></span>
+                        <div class="flex-11 layout vertical">
+                            <table>
+                                <tr>
+                                    <td class="td-label">Email</td>
+                                    <td>{{user.email}}</td>
+                                </tr>
+                                <tr>
+                                    <td class="td-label">Role</td>
+                                    <td>{{user.role}}</td>
+                                </tr>
+                                <tr>
+                                    <td class="td-label">Last Login</td>
+                                    <td>{{toDateStringPretty(user.lastlog)}}</td>
+                                </tr>
+                                <tr>
+                                    <td class="td-label">Created</td>
+                                    <td>{{toDateStringPretty(user.date_created)}}</td>
+                                </tr>
+                                <tr>
+                                    <td class="td-label">Recipes</td>
+                                    <td>{{user.recipes_authored}}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </paper-material>
+        </template>
 
         <!-- Dialogs -->
 
@@ -155,13 +176,13 @@
                         <paper-menu id="accountRoleSelectMenu"
                                 class="dropdown-content"
                                 attr-for-selected="value"
-                                selected="{{userToPost.role}}">
+                                selected="{{ajaxData.role}}">
                             <paper-item value="admin">Admin</paper-item>
                             <paper-item value="moderator">Moderator</paper-item>
                             <paper-item value="user">User</paper-item>
                         </paper-menu>
                     </paper-dropdown-menu>
-                    <paper-input id="userEmailAddress" value="{{userToPost.email}}"
+                    <paper-input id="userEmailAddress" value="{{ajaxData.email}}"
                         label="Email" maxlength="40">
                     </paper-input>
                 </div>
@@ -181,43 +202,17 @@
             </div>
         </paper-dialog>
 
-        <iron-ajax id="postNewUser"
-                verbose
-                method="POST"
-                url="/users"
-                body="{{userToPost}}"
-                content-type="application/json"
-                handle-as="json"
-                debounce-duration="100"
-                last-response="{{lastUserCreated}}"
-                on-error="createUserFailed"
-                on-response="userCreated"
-                loading="{{creatingUser}}">
-        </iron-ajax>
-        <iron-ajax id="putNewUser"
-                verbose
-                method="PUT"
-                url="/users"
-                body="{{userToPost}}"
-                content-type="application/json"
-                handle-as="json"
-                debounce-duration="100"
-                last-response="{{lastUserCreated}}"
-                on-error="saveUserFailed"
-                on-response="userSaved"
-                loading="{{savingUser}}">
-        </iron-ajax>
-
+        <!-- Notifications used by iron-ajax handlers. -->
         <paper-toast
                 id="successToast"
                 class="success-toast"
-                text="{{toastSuccessMessage}}"
+                text="{{toastMessage}}"
                 duration="4000">
         </paper-toast>
         <paper-toast
                 id="errorToast"
                 class="error-toast"
-                text="{{toastErrorMessage}}"
+                text="{{toastMessage}}"
                 duration="4000">
         </paper-toast>
 
@@ -228,10 +223,9 @@
             'use strict';
             Polymer({
                 is: 'user-collection',
-                //behaviors: [RecipeBehaviors.UserBehavior],
                 properties: {
                     users: {
-                        type: Object
+                        type: Object,
                     },
                     // Query params for GET /users.
                     usersFilter: {
@@ -243,39 +237,30 @@
                         type: String,
                         value: "",
                     },
-                    // Body for POST /users.
-                    userToPost: {
-                        type: Object
+                    // Body for POST and PUT /users.
+                    ajaxData: {
+                        type: Object,
                     },
                     lastUserCreated: {
                         type: Object,
                     },
-                    // True during GET /users.
-                    loadingUsers: {
-                        type: Boolean,
-                        value: false,
-                    },
-                    // True during POST /users.
-                    creatingUser: {
-                        type: Boolean,
-                        value: false,
-                    },
-                    // True during PUT /users
-                    savingUser: {
-                        type: Boolean,
-                        value: false,
+                    /* One flag for each iron-ajax. */
+                    loading: {
+                        type: Object,
+                        value: {
+                            getUsers: false,
+                            putUser: false,
+                            postUser: false,
+                        },
                     },
                     // True whenever we're loading XHR data.
                     loadingData: {
                         type: Boolean,
-                        computed: "computeLoadingData(loadingUsers, creatingUser, savingUser)"
+                        computed: "computeLoadingData(loading.*)",
                     },
                     // Set by iron-ajax handlers prior to flashing toast.
-                    toastSuccessMessage: {
-                        type: String
-                    },
-                    toastErrorMessage: {
-                        type: String
+                    toastMessage: {
+                        type: String,
                     },
                 },
                 ready: function () {
@@ -285,8 +270,12 @@
                     if (userNameFilter) o.name_or_email = userNameFilter;
                     return o;
                 },
-                computeLoadingData: function(loadingUsers, creatingUser, savingUser) {
-                    return loadingUsers || creatingUser || savingUser;
+                /* Loading is true if any flags in it are true. */
+                computeLoadingData: function(loading) {
+                    var ret = false;
+                    Object.keys(this.loading)
+                        .forEach( v => ret = ret || this.loading[v] );
+                    return ret;
                 },
                 // Called upon submission of new user form.
                 createUserClick: function () {
@@ -294,7 +283,7 @@
                 },
                 // Called when a POST /users succeeds.
                 userCreated: function() {
-                    this.toastSuccessMessage = "New " +
+                    this.toastMessage = "New " +
                             this.lastUserCreated.role + " " +
                             this.lastUserCreated.email + " created";
                     // Rather than refetch users, just append the new one.
@@ -305,13 +294,13 @@
                 createUserFailed: function(e, s) {
                     // failure status is here:
                     //console.log(e.detail.request.status);
-                    this.toastErrorMessage = "Failed to create user :(";
+                    this.toastMessage = "Failed to create user :(";
                     this.$.errorToast.open();
                 },
 
                 // Called when a PUT /users succeeds.
                 userSaved: function() {
-                    this.toastSuccessMessage =
+                    this.toastMessage =
                             this.lastUserCreated.role + " " +
                             this.lastUserCreated.email + " saved";
 
@@ -326,7 +315,7 @@
                 },
                 // Called when a PUT /users fails.
                 saveUserFailed: function() {
-                    this.toastErrorMessage = "Failed to save user :(";
+                    this.toastMessage = "Failed to save user :(";
                     this.$.errorToast.open();
                 },
 
@@ -347,18 +336,17 @@
                     var id;
                     if(idAttr) id = Number(idAttr.value);
 
-                // TODO just-added users come up blank on edit
                     // if we are editing an existing user
                     if(id) {
                         var that = this;
                         this.users.forEach(function(user) {
-                            if(id === user.id) that.userToPost = user;
+                            if(id === user.id) that.ajaxData = user;
                         });
                         this.set('newUser', false);
                     }
                     // otherwise initialize form with defaults
                     else {
-                        this.userToPost = { email: "", role: "user" };
+                        this.ajaxData = { email: "", role: "user" };
                         this.set('newUser', true);
                     }
                     this.$.editUserDialog.open();
