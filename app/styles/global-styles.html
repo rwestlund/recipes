@@ -15,6 +15,41 @@
                 /*font-family: 'Montserrat', sans-serif;*/
             }
 
+            div.recipe-item {
+                margin-bottom: 1em;
+            }
+            .recipe-title {
+                margin-bottom: 0;
+                /* TODO can this be removed? there's padding on the container. */
+                margin-top: 0;
+            }
+            .recipe-col {
+                 min-width: 300px;
+                 padding:1em;
+            }
+            ul.ingredients-list > li {
+                margin-bottom: 0.3em;
+            }
+            ol.directions-list > li {
+                margin-bottom: 1em;
+            }
+            .nav-button {
+                margin-left: 0.8em;
+                margin-right: 0.8em;
+            }
+            span.recipe-tags {
+                color: gray;
+            }
+
+            .card-item {
+                padding-left: 0.5em;
+                padding-right: 0.5em;
+                padding-top: 0.3em;
+                padding-bottom: 0.3em;
+             }
+
+
+
             paper-dialog {
                 background-color: var(--google-grey-100);
             }
@@ -167,13 +202,6 @@
                 --paper-toast-color: white;
             }
 
-            .card-progress {
-                position: absolute;
-                top: 0px;
-                left: 0px;
-                width: 100%;
-            }
-            
             paper-toast {
                 right: 10px;
                 left: auto;

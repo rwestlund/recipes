@@ -7,23 +7,20 @@
     // More info: https://visionmedia.github.io/page.js/
     page('/', function () {
       app.route = 'recipes';
-      app.scrollPageToTop();
+      //app.scrollPageToTop();
     });
 
     page('/users', function () {
       app.route = 'users';
-      app.scrollPageToTop();
+      //app.scrollPageToTop();
     });
 
-    page('/recipes', function () {
-      app.route = 'recipes';
-      app.scrollPageToTop();
-    });
-
-    page('/recipe/:id', function (data) {
+    console.log('asdasdasd');
+    page('/recipes/:id', function (data) {
+        console.log('loading recipe-details');
       app.route = 'recipe-details';
       app.params = data.params;
-      app.scrollPageToTop();
+      //app.scrollPageToTop();
     });
 
     // add #! before urls

@@ -1,0 +1,136 @@
+<!--
+    Randy Westlund
+    2016-04
+-->
+<!-- This module allows editing of a recipe. -->
+
+<link rel="import" href="../bc/polymer/polymer.html">
+
+<dom-module id="recipe-details">
+    <template>
+        <style is="custom-style" include="global-styles"></style>
+        <style>
+            :host {
+                display: block;
+            }
+        </style>
+
+        <!-- AJAX requests. -->
+        <iron-ajax auto
+                method="GET"
+                url="/recipes/[[recipeId]]"
+                handle-as="json"
+                last-response="{{recipe}}"
+                on-error="loadingRecipeFailed"
+                on-response="recipeReceived"
+                loading="{{loading.getRecipe}}">
+        </iron-ajax>
+
+        <paper-icon-button icon="icons:arrow-left" on-tap="loadRecipesPage">
+        </paper-icon-button>
+
+        <!-- The recipe card itself. --> 
+        <paper-material>
+            <div class="layout horizontal end end-justified wrap">
+                <h3 class="recipe-title">[[recipe.title]]</h3>
+                <!--<div class="layout horizontal end-justified">-->
+                    <span class="flex"></span>
+                    <span class="recipe-tags">
+                        [[formatRecipeTags(recipe.tags)]]
+                    </span>
+                <!--</div>-->
+            </div>
+            <div>[[recipe.summary]]</div>
+
+            <div class="layout horizontal wrap">
+                <div class="flex-4 recipe-col">
+                    <strong>Ingredients</strong>
+                    <ul class="ingredients-list">
+                        <template is="dom-repeat"
+                                items="[[recipe.ingredients]]"
+                                as="i">
+                            <li>[[i]]</li>
+                        </template>
+                    </ul>
+                </div>
+                <div class="flex-4 recipe-col">
+                    <strong>Directions</strong>
+                    <ol class="directions-list">
+                        <template is="dom-repeat"
+                                items="[[recipe.directions]]"
+                                as="d">
+                            <li>[[d]]</li>
+                        </template>
+                    </ol>
+                </div>
+                <!-- Info column. -->
+                <div class="flex-4 recipe-col">
+                    <div class="layout horizontal justified">
+                        <div>
+                            <template is="dom-if" if="[[recipe.amount]]">
+                                <strong>Amount</strong>
+                                <div>[[recipe.amount]]</div>
+                                <br />
+                            </template>
+                            <template is="dom-if" if="[[recipe.time]]">
+                                <strong>Time</strong>
+                                <div>[[recipe.time]]</div>
+                                <br />
+                            </template>
+                            <template is="dom-if" if="[[recipe.oven]]">
+                                <Strong>Oven</Strong>
+                                <div>[[recipe.oven]]</div>
+                                <br />
+                            </template>
+                            <strong>Author</strong>
+                            <div>[[recipe.author_name]]</div>
+                            <br />
+                            <template is="dom-if" if="[[recipe.source]]">
+                                <strong>Source</strong>
+                                <div>[[recipe.source]]</div>
+                                <br />
+                            </template>
+                            <strong>Revision</strong>
+                            <div>[[recipe.revision]]</div>
+                            <br />
+                            <template is="dom-if" if="[[recipe.notes]]">
+                                <strong>Notes</strong>
+                                <div>[[recipe.notes]]</div>
+                                <br />
+                            </template>
+                        </div>
+                        <paper-icon-button icon="icons:create"
+                                data-id$="[[recipe.id]]"
+                                on-tap="loadRecipePage">
+                        </paper-icon-button>
+                    </div>
+                </div>
+            </div>
+        </paper-material>
+
+    </template>
+
+    <script>
+        (function() {
+            'use strict';
+            Polymer({
+                is: 'recipe-details',
+                properties: {
+                    recipeId: {
+                        type: String,
+                    },
+                    loading: {
+                        type: Object,
+                        value: {
+                            getRecipe: false,
+                        },
+                    },
+                },
+                ready: function() {
+                },
+                loadRecipesPage: function() {
+                    page.show('/');
+                },
+            })();
+    </script>
+</dom-module>

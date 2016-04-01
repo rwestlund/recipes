@@ -86,13 +86,14 @@
                     <recipe-collection></recipe-collection>
                 </section>
 
-                <section data-route="about">
+                <section data-route="recipe-details">
+                    <recipe-details recipe-id="[[params.id]]"></recipe-details>
                 </section>
+
                 <!--<template is="dom-if" if="[[isUserAdmin(userRole)]]">-->
                     <section data-route="users">
                         <user-collection><user-collection>
                     </section>
-
                 <!--</template>-->
 
             </iron-pages>
