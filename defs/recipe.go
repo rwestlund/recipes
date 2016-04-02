@@ -20,7 +20,7 @@ type Recipe struct {
 
 type RecipeFilter struct {
     /* Use SQL ILIKE to filter title by this, with % on both ends. */
-    Title       string
+    TitleOrTag  string
     /* Limit to this many results. */
     Count       uint32
     /* Skip this many pages of results. */

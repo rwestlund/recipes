@@ -24,7 +24,7 @@ func handle_recipes(res http.ResponseWriter, req *http.Request) {
     bigskip, _ = strconv.ParseUint(req.URL.Query().Get("skip"), 10, 32)
     /* Build RecipeFilter from query params. */
     var filter defs.RecipeFilter = defs.RecipeFilter{
-        Title: req.URL.Query().Get("title"),
+        TitleOrTag: req.URL.Query().Get("title_or_tag"),
         Count: uint32(bigcount),
         Skip: uint32(bigskip),
     }

@@ -3,6 +3,7 @@ package db
 import (
     "log"
     "strconv"
+    "strings"
     "database/sql"
     "encoding/json"
     "github.com/rwestlund/recipes/defs"
@@ -53,35 +54,46 @@ func scan_recipe(row *sql.Rows) (*defs.Recipe, error) {
 func FetchRecipes(filter *defs.RecipeFilter) (*[]defs.Recipe, error) {
     _ = log.Println//DEBUG
 
-    /* Build where_text. */
-    var where_text string
+    /* Hold the dynamically generated portion of our SQL. */
+    var query_text string
+    /* Hold all the parameters for our query. */
     var params []interface{};
 
-    if filter.Title != "" {
-        params = append(params, filter.Title)
-        where_text += " title ILIKE '%' || $" +
-                strconv.Itoa(len(params)) + " || '%'"
+    /* Tokenize search string on spaces. Each term must be matched in the title
+     * or tags for a recipe to be returned. */
+    var terms []string = strings.Split(filter.TitleOrTag, " ")
+    /* Build and apply having_text. */
+    for i, term := range terms {
+        /* Ignore blank terms (comes from leading/trailing spaces). */
+        if term == "" { continue }
+
+        if i == 0 {
+            query_text += "\n\t HAVING (title ILIKE $"
+        } else {
+            query_text += " AND (title ILIKE $"
+        }
+        params = append(params, "%" + term + "%")
+        query_text += strconv.Itoa(len(params)) +
+            "\n\t\t OR string_agg(tags.tag, ' ') ILIKE $" +
+            strconv.Itoa(len(params)) + ") "
     }
 
-    var query_text string
-    /* Apply where_text. */
-    if where_text != "" {
-        query_text += " WHERE " + where_text
-    }
-    query_text += " GROUP BY recipes.id, users.name ORDER BY title "
+    query_text += "\n\t ORDER BY title "
 
     /* Apply count. */
     if filter.Count != 0 {
         params = append(params, filter.Count)
-        query_text += " LIMIT $" + strconv.Itoa(len(params))
+        query_text += "\n\t LIMIT $" + strconv.Itoa(len(params))
     }
     /* Apply skip. */
     if filter.Skip != 0 {
         params = append(params, filter.Count * filter.Skip)
-        query_text += " OFFSET $" + strconv.Itoa(len(params))
+        query_text += "\n\t OFFSET $" + strconv.Itoa(len(params))
     }
     /* Run the actual query. */
-    rows, err := DB.Query(query_rows + query_text, params...)
+    rows, err := DB.Query(query_rows +
+            "\n\t GROUP BY recipes.id, users.name " +
+            query_text , params...)
     if err != nil {
         return nil, err
     }
