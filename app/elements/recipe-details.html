@@ -49,7 +49,7 @@
 
                 <div class="layout horizontal wrap">
                     <div class="flex-4 recipe-col">
-                        <strong>Ingredients</strong>
+                        <strong class="recipe-item-label">Ingredients</strong>
                         <ul class="ingredients-list">
                             <template is="dom-repeat"
                                     items="[[recipe.ingredients]]"
@@ -59,7 +59,7 @@
                         </ul>
                     </div>
                     <div class="flex-4 recipe-col">
-                        <strong>Directions</strong>
+                        <strong class="recipe-item-label">Directions</strong>
                         <ol class="directions-list">
                             <template is="dom-repeat"
                                     items="[[recipe.directions]]"
@@ -71,35 +71,28 @@
                     <!-- Info column. -->
                     <div class="flex-4 recipe-col">
                         <template is="dom-if" if="[[recipe.amount]]">
-                            <strong>Amount</strong>
+                            <strong class="recipe-item-label">Amount</strong>
                             <div>[[recipe.amount]]</div>
-                            <br />
                         </template>
                         <template is="dom-if" if="[[recipe.time]]">
-                            <strong>Time</strong>
+                            <strong class="recipe-item-label">Time</strong>
                             <div>[[recipe.time]]</div>
-                            <br />
                         </template>
                         <template is="dom-if" if="[[recipe.oven]]">
-                            <Strong>Oven</Strong>
+                            <Strong class="recipe-item-label">Oven</Strong>
                             <div>[[recipe.oven]]</div>
-                            <br />
                         </template>
-                        <strong>Author</strong>
+                        <strong class="recipe-item-label">Author</strong>
                         <div>[[recipe.author_name]]</div>
-                        <br />
                         <template is="dom-if" if="[[recipe.source]]">
-                            <strong>Source</strong>
+                            <strong class="recipe-item-label">Source</strong>
                             <div>[[recipe.source]]</div>
-                            <br />
                         </template>
-                        <strong>Revision</strong>
+                        <strong class="recipe-item-label">Revision</strong>
                         <div>[[recipe.revision]]</div>
-                        <br />
                         <template is="dom-if" if="[[recipe.notes]]">
-                            <strong>Notes</strong>
+                            <strong class="recipe-item-label">Notes</strong>
                             <div>[[recipe.notes]]</div>
-                            <br />
                         </template>
                     </div>
                 </div>
