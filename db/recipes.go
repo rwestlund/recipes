@@ -106,12 +106,12 @@ func FetchRecipes(filter *defs.RecipeFilter) (*[]defs.Recipe, error) {
 
 
 /* Fetch one recipe by id. */
-func FetchRecipe (id uint32) (*defs.Recipe, error) {
+func FetchRecipe(id uint32) (*defs.Recipe, error) {
     /* Read recipe from database. */
     var rows *sql.Rows
     var err error
     rows, err = DB.Query(query_rows +
-            " WHERE id = $1 GROUP BY recipes.id, users.name", id)
+            " WHERE recipes.id = $1 GROUP BY recipes.id, users.name", id)
     if err != nil {
         return nil, err
     }
