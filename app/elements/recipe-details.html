@@ -31,74 +31,191 @@
                 <iron-icon icon="icons:arrow-back"></iron-icon>
                 All Recipes
             </paper-button>
+            <paper-button raised on-tap="toggleEditMode">
+                <iron-icon icon="icons:create"></iron-icon>
+                <template is="dom-if" if="[[editMode]]">
+                    Leave
+                </template>
+                <template is="dom-if" if="[[!editMode]]">
+                    Enter
+                </template>
+                Edit Mode
+            </paper-button>
+            <paper-spinner class="nav-button" active="[[loadingData]]"
+                    alt="loading recipes...">
+            </paper-spinner>
         </div>
 
         <!-- The recipe card itself. --> 
         <paper-material>
             <div class="card-item">
-                <div class="layout horizontal end end-justified wrap">
-                    <h3 class="recipe-title">[[recipe.title]]</h3>
-                    <!--<div class="layout horizontal end-justified">-->
-                        <span class="flex"></span>
-                        <span class="recipe-tags">
-                            [[formatRecipeTags(recipe.tags)]]
-                        </span>
-                    <!--</div>-->
-                </div>
-                <div>[[recipe.summary]]</div>
+                <!-- Form version. -->
+                <template is="dom-if" if="[[editMode]]">
+                    <div class="layout horizontal wrap">
+                        <div class="flex-4 recipe-col">
+                            <paper-input type="text"
+                                    label="Title"
+                                    value="{{recipe.title}}">
+                            </paper-input>
+                            <paper-textarea type="text"
+                                    label="Summary"
+                                    value="{{recipe.summary}}">
+                            </paper-textarea>
 
-                <div class="layout horizontal wrap">
-                    <div class="flex-4 recipe-col">
-                        <strong class="recipe-item-label">Ingredients</strong>
-                        <ul class="ingredients-list">
+                            <!-- Ingredients inputs. -->
+                            <strong class="recipe-item-label">
+                                Ingredients
+                            </strong>
                             <template is="dom-repeat"
-                                    items="[[recipe.ingredients]]"
-                                    as="i">
-                                <li>[[i]]</li>
+                                    items="{{recipe.ingredients}}" as="i">
+                                <paper-input type="text"
+                                        label="Item [[addOne(index)]]"
+                                        value="{{i}}">
+                                    <paper-icon-button suffix
+                                            icon="icons:cancel"
+                                            data-index$="[[index]]"
+                                            on-tap="deleteIngredient">
+                                    </paper-icon-button>
+                                    <paper-icon-button suffix
+                                            icon="icons:arrow-upward"
+                                            data-index$="[[index]]"
+                                            disabled$="[[!index]]"
+                                            on-tap="moveIngredientUp">
+                                    </paper-icon-button>
+                                </paper-input>
                             </template>
-                        </ul>
-                    </div>
-                    <div class="flex-4 recipe-col">
-                        <strong class="recipe-item-label">Directions</strong>
-                        <ol class="directions-list">
+
+                            <div class="layout horizontal center-justified">
+                                <paper-button on-tap="addIngredient">
+                                    <iron-icon icon="icons:add-circle"></iron-icon>
+                                    Add item
+                                </paper-button>
+                            </div>
+                        </div>
+
+                        <div class="flex-4 recipe-col">
+                            <!-- Directions inputs. -->
+                            <strong class="recipe-item-label">
+                                Directions
+                            </strong>
                             <template is="dom-repeat"
-                                    items="[[recipe.directions]]"
-                                    as="d">
-                                <li>[[d]]</li>
+                                    items="{{recipe.directions}}" as="d">
+                                <paper-textarea type="text"
+                                        label="Step [[addOne(index)]]"
+                                        value="{{d}}">
+                                </paper-textarea>
+                                <div class="layout horizontal end-justified">
+                                    <paper-button
+                                            data-index$="[[index]]"
+                                            on-tap="deleteDirection">
+                                        <iron-icon icon="icons:cancel"></iron-icon>
+                                        Remove Step [[addOne(index)]]
+                                    </paper-button>
+                                    <paper-icon-button
+                                            icon="icons:arrow-upward"
+                                            data-index$="[[index]]"
+                                            disabled$="[[!index]]"
+                                            on-tap="moveDirectionUp">
+                                    </paper-icon-button>
+                                </div>
                             </template>
-                        </ol>
+                            <div class="layout horizontal center-justified">
+                                <paper-button on-tap="addDirection">
+                                    <iron-icon icon="icons:add-circle"></iron-icon>
+                                    Add item
+                                </paper-button>
+                            </div>
+                        </div>
+                        <div class="flex-4 recipe-col">
+                            <paper-input type="text"
+                                    label="Amount"
+                                    value="{{recipe.amount}}">
+                            </paper-input>
+                            <paper-input type="text"
+                                    label="Time"
+                                    value="{{recipe.time}}">
+                            </paper-input>
+                            <paper-input type="text"
+                                    label="Oven"
+                                    value="{{recipe.oven}}">
+                            </paper-input>
+                            <paper-input type="text"
+                                    label="Source"
+                                    value="{{recipe.source}}">
+                            </paper-input>
+                            <paper-textarea type="text"
+                                    label="Notes"
+                                    value="{{recipe.notes}}">
+                            </paper-textarea>
+                        </div>
                     </div>
-                    <!-- Info column. -->
-                    <div class="flex-4 recipe-col">
-                        <template is="dom-if" if="[[recipe.amount]]">
-                            <strong class="recipe-item-label">Amount</strong>
-                            <div>[[recipe.amount]]</div>
-                        </template>
-                        <template is="dom-if" if="[[recipe.time]]">
-                            <strong class="recipe-item-label">Time</strong>
-                            <div>[[recipe.time]]</div>
-                        </template>
-                        <template is="dom-if" if="[[recipe.oven]]">
-                            <Strong class="recipe-item-label">Oven</Strong>
-                            <div>[[recipe.oven]]</div>
-                        </template>
-                        <strong class="recipe-item-label">Author</strong>
-                        <div>[[recipe.author_name]]</div>
-                        <template is="dom-if" if="[[recipe.source]]">
-                            <strong class="recipe-item-label">Source</strong>
-                            <div>[[recipe.source]]</div>
-                        </template>
-                        <strong class="recipe-item-label">Revision</strong>
-                        <div>[[recipe.revision]]</div>
-                        <template is="dom-if" if="[[recipe.notes]]">
-                            <strong class="recipe-item-label">Notes</strong>
-                            <div>[[recipe.notes]]</div>
-                        </template>
+                </template>
+
+                <!-- Display version. -->
+                <template is="dom-if" if="[[!editMode]]">
+                    <div class="layout horizontal end end-justified wrap">
+                        <h3 class="recipe-title">[[recipe.title]]</h3>
+                        <!--<div class="layout horizontal end-justified">-->
+                            <span class="flex"></span>
+                            <span class="recipe-tags">
+                                [[formatRecipeTags(recipe.tags)]]
+                            </span>
+                        <!--</div>-->
                     </div>
-                </div>
+                    <div>[[recipe.summary]]</div>
+
+                    <div class="layout horizontal wrap">
+                        <div class="flex-4 recipe-col">
+                            <strong class="recipe-item-label">Ingredients</strong>
+                            <ul class="ingredients-list">
+                                <template is="dom-repeat"
+                                        items="[[recipe.ingredients]]"
+                                        as="i">
+                                    <li>[[i]]</li>
+                                </template>
+                            </ul>
+                        </div>
+                        <div class="flex-4 recipe-col">
+                            <strong class="recipe-item-label">Directions</strong>
+                            <ol class="directions-list">
+                                <template is="dom-repeat"
+                                        items="[[recipe.directions]]"
+                                        as="d">
+                                    <li>[[d]]</li>
+                                </template>
+                            </ol>
+                        </div>
+                        <!-- Info column. -->
+                        <div class="flex-4 recipe-col">
+                            <template is="dom-if" if="[[recipe.amount]]">
+                                <strong class="recipe-item-label">Amount</strong>
+                                <div>[[recipe.amount]]</div>
+                            </template>
+                            <template is="dom-if" if="[[recipe.time]]">
+                                <strong class="recipe-item-label">Time</strong>
+                                <div>[[recipe.time]]</div>
+                            </template>
+                            <template is="dom-if" if="[[recipe.oven]]">
+                                <Strong class="recipe-item-label">Oven</Strong>
+                                <div>[[recipe.oven]]</div>
+                            </template>
+                            <strong class="recipe-item-label">Author</strong>
+                            <div>[[recipe.author_name]]</div>
+                            <template is="dom-if" if="[[recipe.source]]">
+                                <strong class="recipe-item-label">Source</strong>
+                                <div>[[recipe.source]]</div>
+                            </template>
+                            <strong class="recipe-item-label">Revision</strong>
+                            <div>[[recipe.revision]]</div>
+                            <template is="dom-if" if="[[recipe.notes]]">
+                                <strong class="recipe-item-label">Notes</strong>
+                                <div>[[recipe.notes]]</div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
             </div>
         </paper-material>
-
     </template>
 
     <script>
@@ -110,21 +227,78 @@
                     recipeId: {
                         type: String,
                     },
+                    // Holds the recipe we load in.
+                    recipe: {
+                        type: Object,
+                    },
                     loading: {
                         type: Object,
                         value: {
                             getRecipe: false,
                         },
                     },
+                    // True whenever we're loading XHR data.
+                    loadingData: {
+                        type: Boolean,
+                        computed: "computeLoadingData(loading.*)",
+                    },
+                    // Whether to show inputs or just display.
+                    editMode: {
+                        type: Boolean,
+                        value: false,
+                    },
                 },
                 ready: function() {
+                },
+                /* Loading is true if any flags in it are true. */
+                computeLoadingData: function(loading) {
+                    var ret = false;
+                    Object.keys(this.loading)
+                        .forEach( v => ret = ret || this.loading[v] );
+                    return ret;
                 },
                 loadRecipesPage: function() {
                     page.show('/');
                 },
+                toggleEditMode: function() {
+                    this.editMode = !this.editMode;
+                },
+                addIngredient: function() {
+                    this.push("recipe.ingredients", new String());
+                },
+                addDirection: function() {
+                    this.push("recipe.directions", new String());
+                },
+                deleteIngredient: function(e) {
+                    var index = Number(
+                            e.currentTarget.attributes['data-index'].value);
+                    this.splice('recipe.ingredients', index, 1);
+                },
+                deleteDirection: function(e) {
+                    var index = Number(
+                            e.currentTarget.attributes['data-index'].value);
+                    this.splice('recipe.directions', index, 1);
+                },
+                moveIngredientUp: function(e) {
+                    var index = Number(
+                            e.currentTarget.attributes['data-index'].value);
+                    if (!index) return;
+                    var temp = this.splice('recipe.ingredients', index, 1)[0];
+                    this.splice('recipe.ingredients', index - 1, 0, temp);
+                },
+                moveDirectionUp: function(e) {
+                    var index = Number(
+                            e.currentTarget.attributes['data-index'].value);
+                    if (!index) return;
+                    var temp = this.splice('recipe.directions', index, 1)[0];
+                    this.splice('recipe.directions', index - 1, 0, temp);
+                },
                 formatRecipeTags: function(tags) {
                     if (!tags) return "";
                     return tags.join(", ");
+                },
+                addOne: function(val) {
+                    return val + 1;
                 },
             });
         })();
