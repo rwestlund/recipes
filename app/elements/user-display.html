@@ -1,0 +1,233 @@
+<!--
+    Randy Westlund
+    2016-06
+-->
+<!-- This module shows a user card. -->
+
+<link rel="import" href="../bc/polymer/polymer.html">
+
+<!-- External styles for this element -->
+<link rel="import" href="../styles/global-styles.html">
+
+<dom-module id="user-display">
+    <template>
+        <style is="custom-style" include="global-styles"></style>
+        <style>
+            :host {
+                display: block;
+            }
+            td.td-label {
+                width: 7em;
+            }
+        </style>
+
+        <iron-ajax method="PUT"
+                id="put_ajax"
+                url="/users/[[user.id]]"
+                body="[[item_to_edit]]"
+                content-type="application/json"
+                handle-as="json"
+                last-response="{{item_to_edit}}"
+                on-response="put_item_successful"
+                on-error="put_item_failed"
+                loading="{{loading.put_item}}">
+        </iron-ajax>
+        <iron-ajax id="delete_item_ajax"
+                method="DELETE"
+                url="/users/[[user.id]]"
+                handle-as="json"
+                on-error="delete_item_failed"
+                on-response="delete_item_successful"
+                loading="{{loading.delete_item}}">
+        </iron-ajax>
+
+        <paper-material class="card-item">
+            <!-- Summary header. -->
+            <div class="layout horizontal end-justified wrap">
+                <h3 class="card-title">[[user.name]]</h3>
+                <span class="flex"></span>
+                <!--TODO should I put role here? -->
+                <!--<span class="card-subtitle">[[salesRep.initials]]</span>-->
+            </div>
+
+            <div class="layout horizontal center justified">
+                <!-- First column holds the icon. -->
+                <iron-icon icon="social:person" class="large-icon">
+                </iron-icon>
+                <!-- Second column holds the table with fields. -->
+                <table class="fixed-80">
+                    <tr>
+                        <td class="td-label">Email</td>
+                        <td class="td-field">
+                            <a href$="mailto:[[user.email]]">[[user.email]]</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="td-label">Role</td>
+                        <td class="td-field">[[user.role]]</td>
+                    </tr>
+                    <tr>
+                        <td class="td-label">Recipes</td>
+                        <td class="td-field">[[user.recipes_authored]]</td>
+                    </tr>
+                    <tr>
+                        <td class="td-label">Last Activity</td>
+                        <td class="td-field">[[long_date(user.lastlog)]]</td>
+                    </tr>
+                    <tr>
+                        <td class="td-label">Created</td>
+                        <td class="td-field">
+                            [[long_date(user.creation_date)]]
+                        </td>
+                    </tr>
+                </table>
+
+                <span class="flex"></span>
+                <!-- Fourth column is just the loading spinner. -->
+                <paper-spinner active="[[loading_data]]" alt="loading data...">
+                </paper-spinner>
+
+                <!-- Fifth and final column holds edit buttons. -->
+                <div class="layout vertical">
+                    <!-- If we're editing, show edit and delete buttons. -->
+                    <template is="dom-if" if="[[allowEdit]]">
+                        <paper-icon-button icon="icons:create"
+                                on-tap="edit_item">
+                        </paper-icon-button>
+                        <paper-icon-button icon="icons:delete"
+                                on-tap="open_delete_item_confirmation">
+                        </paper-icon-button>
+                    </template>
+                </div>
+            </div>
+        </paper-material>
+
+        <!--TODO does this need a delay render option? -->
+        <!-- Form for editing items withing this element. -->
+        <template is="dom-if" if="[[allowEdit]]">
+            <user-form
+                    id="edit_item_dialog"
+                    user="{{item_to_edit}}"
+                    on-closed="resolve_edit_item_dialog">
+            </user-form>
+        </template>
+
+        <paper-dialog id="delete_item_confirmation"
+                on-iron-overlay-closed="delete_item">
+            <div>
+                Delete [[user.role]] [[first_defined(user.name, user.email)]]?
+            </div>
+            <div class="buttons">
+                <paper-button raised dialog-dismiss>Cancel</paper-button>
+                <paper-button raised dialog-confirm>Delete</paper-button>
+            </div>
+        </paper-dialog>
+
+    </template>
+
+    <script>
+        (function () {
+            'use strict';
+            Polymer({
+                is: 'user-display',
+                behaviors: [ recipe_behaviors.global_behavior, ],
+                properties: {
+                    // Must be provided by parent object.
+                    user: {
+                        type: Object,
+                    },
+                    allowEdit: {
+                        type: Boolean,
+                        value: false,
+                    },
+                    loading: {
+                        type: Object,
+                        value: {
+                            put_item: false,
+                            delete_item: false,
+                        },
+                    },
+                    // True whenever we're loading XHR data.
+                    loading_data: {
+                        type: Boolean,
+                        computed: "compute_loading_data(loading.*)",
+                    },
+                },
+                // Loading is true if any flags in it are true.
+                compute_loading_data: function(loading) {
+                    var ret = false;
+                    Object.keys(this.loading)
+                        .forEach( v => ret = ret || this.loading[v] );
+                    return ret;
+                },
+                // Opens the edit modal.
+                edit_item: function() {
+                    // Deep copy the object so we don't change the card's
+                    // display until the save is successful.
+                    var item_to_edit = {};
+                    Object.keys(this.user)
+                        .forEach(k => item_to_edit[k] = this.user[k]);
+                    this.set('item_to_edit', item_to_edit);
+                    this.$$("#edit_item_dialog").open();
+                },
+                // Handle response from dialog. Reason is either confirmed or
+                // canceled.
+                resolve_edit_item_dialog: function(e, reason) {
+                    if (reason.confirmed)
+                        this.$.put_ajax.generateRequest();
+                },
+                open_delete_item_confirmation: function() {
+                    this.$.delete_item_confirmation.open();
+                },
+                // Handle result of delete modal.
+                delete_item: function(e, reason) {
+                    if (reason.confirmed)
+                        this.$.delete_item_ajax.generateRequest();
+                },
+                //TODO this isn't capitalized...
+                delete_item_successful: function() {
+                    this.fire("iron-signal", {
+                        name: "success-toast",
+                        data: this.user.role + " " + this.first_defined(
+                                this.user.name, this.user.email) + " deleted",
+                    });
+                    // Ask the parent element to delete this item. It can't be
+                    // done here because this whole element needs to be
+                    // removed.
+                    this.fire('delete-item', this.user);
+                },
+                //TODO should these have more details?
+                delete_item_failed: function() {
+                    this.fire("iron-signal", {
+                        name: "error-toast",
+                        data: "Failed to delete user :(",
+                    });
+                },
+                loading_data_failed: function() {
+                    this.fire("iron-signal", {
+                        name: "error-toast",
+                        data: "Failed to communicate with server :(",
+                    });
+                },
+                // Copy response from PUT to update the display. The rationale
+                // for not loading the PUT response directly into user is
+                // to prevent a failed return status from clearing the display.
+                //TODO this isn't capitalized...
+                put_item_successful: function() {
+                    this.set('user', this.item_to_edit);
+                    this.fire("iron-signal", {
+                        name: "success-toast",
+                        data: this.user.role + " " + this.first_defined(
+                                this.user.name, this.user.email) + " saved",
+                    });
+                },
+                put_item_failed: function() {
+                    this.fire("iron-signal", {
+                        name: "error-toast",
+                        data: "Failed to save user :(",
+                    });
+                },
+            });
+        })();
+    </script>
+</dom-module>

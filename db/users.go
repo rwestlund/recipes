@@ -9,7 +9,7 @@ import (
 
 /* SQL to select users. */
 var users_query string = `SELECT users.id, users.email, users.name,
-            users.role, users.lastlog, users.date_created,
+            users.role, users.lastlog, users.creation_date,
             COUNT(recipes.id) AS recipes_authored
         FROM users
         LEFT JOIN recipes
@@ -25,7 +25,7 @@ func scan_user(rows *sql.Rows) (*defs.User, error) {
     /* Name may be null, but we've fine converting that to an empty string. */
     var name sql.NullString
     var err error = rows.Scan(&u.Id, &u.Email, &name, &u.Role, &lastlog,
-            &u.DateCreated, &u.RecipesAuthored)
+            &u.CreationDate, &u.RecipesAuthored)
     if err != nil {
         return nil, err
     }
@@ -85,7 +85,7 @@ func CreateUser(user *defs.User) (*defs.User, error) {
     var err error
     //TODO some input validation on would be nice
     rows, err = DB.Query(`INSERT INTO users (email, role) VALUES ($1, $2)
-                RETURNING id, email, name, role, lastlog, date_created,
+                RETURNING id, email, name, role, lastlog, creation_date,
                     0 AS recipes_authored`,
                 user.Email, user.Role)
     if err != nil {
@@ -114,7 +114,7 @@ func UpdateUser(user *defs.User) (*defs.User, error) {
     //TODO some input validation on would be nice
     rows, err = DB.Query(`UPDATE users SET (email, role) = ($1, $2)
                 WHERE id = $3
-                RETURNING id, email, name, role, lastlog, date_created,
+                RETURNING id, email, name, role, lastlog, creation_date,
                     0 AS recipes_authored`,
                 user.Email, user.Role, user.Id)
     if err != nil {

@@ -1,0 +1,294 @@
+<!--
+    Randy Westlund
+    2016-07
+-->
+<!-- This module shows a list of items, with server-side pagination and
+     search. -->
+
+<link rel="import" href="../bc/polymer/polymer.html">
+
+<dom-module id="item-collection">
+    <template>
+        <style is="custom-style" include="global-styles"></style>
+        <style>
+            :host {
+                display: block;
+            }
+            paper-input {
+                min-width: 10em;
+            }
+            paper-button {
+                margin-top: 1em;
+            }
+        </style>
+
+        <!-- AJAX requests. -->
+        <iron-ajax auto method="GET"
+                id="get_items_ajax"
+                url="/[[itemName]]"
+                params="[[search_filter]]"
+                handle-as="json"
+                last-response="{{items}}"
+                debounce-duration="100"
+                on-error="loading_data_failed"
+                on-response="new_items_received"
+                loading="{{loading.get_items}}">
+        </iron-ajax>
+        <iron-ajax id="create_item_ajax"
+                method="POST"
+                url="/[[itemName]]"
+                body="[[new_item]]"
+                content-type="application/json"
+                handle-as="json"
+                last-response="{{new_item}}"
+                on-error="creating_item_failed"
+                on-response="creating_item_succeeded"
+                loading="{{loading.post_item}}">
+        </iron-ajax>
+
+        <div class="layout horizontal center around-justified wrap">
+            <!-- Navigation icons. -->
+            <paper-button raised on-tap="previous" disabled$="[[!skip]]">
+                <iron-icon icon="icons:arrow-back"></iron-icon>
+            </paper-button>
+            <paper-button raised on-tap="refresh">
+                <iron-icon icon="icons:refresh"></iron-icon>
+            </paper-button>
+            <paper-button raised on-tap="next" disabled$="[[disable_next]]">
+                <iron-icon icon="icons:arrow-forward"></iron-icon>
+            </paper-button>
+            <div>
+                <span class="nav-button">Page {{page_number}}</span>
+                <paper-spinner class="nav-button" active="[[loading_data]]"
+                        alt="loading data...">
+                </paper-spinner>
+            </div>
+            <!-- Search box. -->
+            <paper-input class="flex" label="Filter"
+                type="text" value="{{search_text}}">
+                <paper-icon-button suffix icon="icons:clear"
+                        on-tap="clear_filter">
+                </paper-icon-button>
+            </paper-input>
+        </div>
+
+        <!-- Display a list of whichever item we're showing. Each type of
+             item-collection may include a form for the FAB. -->
+        <template is="dom-if" if="[[equal(itemName, 'users')]]">
+            <template is="dom-repeat" items="[[items]]">
+                <user-display allow-edit user="{{item}}"
+                        on-delete-item="remove_item">
+                </user-display>
+            </template>
+            <user-form id="create_user_form"
+                    title="Create user"
+                    user="{{new_item}}"
+                    on-closed="resolve_create_item">
+            </user-form>
+        </template>
+
+        <template is="dom-if" if="[[equal(itemName, 'recipes')]]">
+            <template is="dom-repeat" items="[[items]]">
+                <recipe-display
+                        recipe="[[item]]"
+                        on-delete-item="remove_item">
+                </recipe-display>
+            </template>
+            <recipe-form id="create_recipe_form"
+                    title="Create Recipe"
+                    lead-source="{{new_item}}"
+                    on-closed="resolve_create_item">
+            </recipe-form>
+        </template>
+
+        <!-- FAB and creation forms. -->
+        <paper-fab icon="icons:add" on-tap="create_item">
+        </paper-fab>
+
+
+        <!-- Show bottom buttons if there are several items listed. -->
+        <template is="dom-if" if="[[show_bottom_buttons(items)]]">
+            <div class="layout horizontal center around-justified wrap">
+                <!-- Navigation icons. -->
+                <paper-button raised on-tap="previous" disabled$="[[!skip]]">
+                    <iron-icon icon="icons:arrow-back"></iron-icon>
+                </paper-button>
+                <paper-button raised on-tap="refresh">
+                    <iron-icon icon="icons:refresh"></iron-icon>
+                </paper-button>
+                <paper-button raised on-tap="next" disabled$="[[disable_next]]">
+                    <iron-icon icon="icons:arrow-forward"></iron-icon>
+                </paper-button>
+                <div>
+                    <span class="nav-button">Page {{page_number}}</span>
+                    <paper-spinner class="nav-button" active="[[loading_data]]"
+                            alt="loading data...">
+                    </paper-spinner>
+                </div>
+            </div>
+        </template>
+    </template>
+
+    <script>
+        (function () {
+            'use strict';
+            Polymer({
+                is: 'item-collection',
+                behaviors: [ recipe_behaviors.global_behavior, ],
+                properties: {
+                    // The parent provides 'recipes' or 'users' here.
+                    itemName: {
+                        type: String,
+                    },
+                    items: {
+                        type: Array,
+                        value: [],
+                    },
+                    count: {
+                        type: Number,
+                        value: 20
+                    },
+                    skip: {
+                        type: Number,
+                        value: 0
+                    },
+                    page_number: {
+                        type: Number,
+                        computed: "compute_page_number(skip)"
+                    },
+                    search_text: {
+                        type: String,
+                        value: ''
+                    },
+                    search_filter: {
+                        type: Object,
+                        computed: "compute_search_filter(count, skip, search_text)"
+                    },
+                    disable_next: {
+                        type: Boolean,
+                        computed: "compute_disable_next(items, count)"
+                    },
+                    loading: {
+                        type: Object,
+                        value: {
+                            post_item: false,
+                            get_items: false,
+                        },
+                    },
+                    // True whenever we're loading XHR data.
+                    loading_data: {
+                        type: Boolean,
+                        computed: "compute_loading_data(loading.*)",
+                    },
+                },
+                // Loading is true if any flags in it are true.
+                compute_loading_data: function(loading) {
+                    var ret = false;
+                    Object.keys(this.loading)
+                        .forEach( v => ret = ret || this.loading[v] );
+                    return ret;
+                },
+                compute_search_filter: function(count, skip, search_text) {
+                    var o = { count: count };
+                    if (skip) o.skip = skip;
+                    if (search_text) o.query = search_text;
+                    return o;
+                },
+                compute_disable_next: function(items, count) {
+                    var val = true;
+                    if (this.items)
+                        val = this.items.length < this.count;
+                    return val;
+                },
+                compute_page_number: function(skip) {
+                    return skip + 1;
+                },
+                // Reload the collection of items.
+                refresh: function() {
+                    this.$.get_items_ajax.generateRequest();
+                },
+
+
+                // Open the appropriate form after a click on the FAB.
+                create_item: function() {
+                    this.set('new_item', {});
+                    if (this.itemName === "users") {
+                        this.$$("#create_user_form").open();
+                    }
+                    else if (this.itemName === "recipes") {
+                        this.$$("#create_recipe_form").open();
+                    }
+                },
+                // Handle response from dialog. Reason is either confirmed or
+                // canceled.
+                resolve_create_item: function(e, reason) {
+                    if (reason.confirmed)
+                        this.$.create_item_ajax.generateRequest();
+                },
+                creating_item_succeeded: function() {
+                    // This isn't in shorter form like the one below because
+                    // some pages need to change the route.
+                    if(this.itemName === "users") {
+                        this.fire("iron-signal", {
+                            name: "success-toast",
+                            data: this.new_item.role +
+                                    (this.new_item.name || this.new_item.email)
+                                    + " created",
+                        });
+                        this.push("items", this.new_item);
+                    }
+                    else if (this.itemName === "recipes") {
+                        this.fire("iron-signal", {
+                            name: "success-toast",
+                            data: "Recipe " + this.new_item.title + " created",
+                        });
+                        page.show("/recipes/" + this.new_item.id);
+                    }
+                },
+                creating_item_failed: function() {
+                    var data;
+                    if (this.itemName === "users")
+                        data = "Failed to create user :(";
+                    else if(this.itemName === "recipes")
+                        data = "Failed to create recipe :("
+                    
+                    this.fire("iron-signal", {
+                        name: "error-toast",
+                        data: data,
+                    });
+                },
+                // Simply remove the element from the DOM.
+                remove_item: function(e, item) {
+                    this.splice('items', this.items.indexOf(item), 1);
+                },
+
+                previous: function() {
+                    if (this.skip) this.skip--;
+                },
+                next: function() {
+                    this.skip++;
+                },
+                clear_filter: function() {
+                    this.search_text = "";
+                },
+                // Only show bottom nav buttons if there are several items.
+                show_bottom_buttons: function(items) {
+                    if (!items) return false;
+                    return items.length > 5;
+                },
+                // When new items are received, back up a page if the
+                // current one is blank.
+                new_items_received: function() {
+                    if (this.items && !this.items.length && this.skip)
+                        this.skip--;
+                },
+                loading_data_failed: function() {
+                    this.fire("iron-signal", {
+                        name: "error-toast",
+                        data: "Failed to communicate with server :(",
+                    });
+                },
+            });
+        })();
+    </script>
+</dom-module>

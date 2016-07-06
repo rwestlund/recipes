@@ -11,7 +11,7 @@ type User struct {
     Role        string      `json:"role"`
     /* See the comment in db/users.go:scan_user() for why this is a pointer. */
     Lastlog    *time.Time   `json:"lastlog"`
-    DateCreated time.Time   `json:"date_created"`
+    CreationDate    time.Time   `json:"creation_date"`
     /* Fields from other tables. */
     RecipesAuthored uint32  `json:"recipes_authored"`
 }

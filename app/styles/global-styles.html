@@ -1,6 +1,6 @@
 <!--
-    Jon Doltar
-    2016-02
+    Randy Westlund
+    2016-07
 -->
 
 <dom-module id="global-styles">
@@ -14,19 +14,29 @@
                 font-family: 'Open Sans', sans-serif;
                 /*font-family: 'Montserrat', sans-serif;*/
             }
+            iron-icon.large-icon {
+                --iron-icon-width:      4em;
+                --iron-icon-height:     4em;
+                --iron-icon-fill-color: gray;
+            }
 
-            div.recipe-item {
-                margin-bottom: 1em;
+            paper-fab {
+                position:   fixed;
+                bottom:     1em;
+                right:      2em;
+                z-index:    100;
             }
-            .recipe-title {
-                margin-bottom: 0;
-                /* TODO can this be removed? there's padding on the container. */
-                margin-top: 0;
+            paper-material.card-item {
+                 padding-left:      0.5em;
+                 padding-right:     0.5em;
+                 padding-top:       0.5em;
+                 padding-bottom:    0.5em;
+                 margin-top:        0.5em;
             }
-            .recipe-col {
-                 min-width: 370px;
-                 padding-left: 1em;
-                 padding-right: 1em;
+            .item-col {
+                 padding-left: 0.2em;
+                 padding-right: 0.2em;
+                 padding-bottom: 0.2em;
             }
             ul.ingredients-list > li {
                 margin-bottom: 0.3em;
@@ -62,11 +72,6 @@
                 padding-top: 0.5em;
                 padding-bottom: 0.5em;
              }
-
-
-            paper-dialog {
-                background-color: var(--google-grey-100);
-            }
 
             .page-title {
                 @apply(--paper-font-display2);

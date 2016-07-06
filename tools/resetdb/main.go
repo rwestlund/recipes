@@ -37,7 +37,7 @@ func main() {
         name            text,
         role            text NOT NULL,
         token           text,
-        date_created    timestamp WITH TIME ZONE NOT NULL
+        creation_date   timestamp WITH TIME ZONE NOT NULL
                             DEFAULT CURRENT_TIMESTAMP,
         lastlog         timestamp WITH TIME ZONE
     )`)
