@@ -6,9 +6,6 @@
 
 <link rel="import" href="../bc/polymer/polymer.html">
 
-<!-- External styles for this element -->
-<link rel="import" href="../styles/global-styles.html">
-
 <dom-module id="recipe-display">
     <template>
         <style is="custom-style" include="global-styles"></style>
@@ -18,88 +15,81 @@
             }
         </style>
 
-        <paper-material class="card-item">
-            <div class="card-item" on-tap="expand_recipe">
-                <div class="layout horizontal end end-justified wrap">
-                    <h3 class="card-title">[[recipe.title]]</h3>
-                    <span class="flex"></span>
-                    <span class="recipe-tags">
-                        [[formatRecipeTags(recipe.tags)]]
-                    </span>
-                </div>
-                <div>[[recipe.summary]]</div>
+        <paper-material class="card-item" on-tap="expand_recipe">
+            <div class="layout horizontal end end-justified wrap">
+                <h3 class="card-title">[[recipe.title]]</h3>
+                <span class="flex"></span>
+                <span class="card-subtitle">[[fmt_tags(recipe.tags)]]</span>
+            </div>
+            <div>[[recipe.summary]]</div>
 
-                <iron-collapse id="collapse" opened="{{recipe._expanded}}">
-                    <div class="layout horizontal wrap">
-                        <div class="flex-4 recipe-col">
+            <iron-collapse id="collapse" opened="{{recipe._expanded}}">
+                <div class="layout horizontal wrap">
+                    <div class="flex-4 item-col">
+                        <strong class="recipe-item-label">
+                            Ingredients
+                        </strong>
+                        <ul class="ingredients-list">
+                            <template is="dom-repeat"
+                                      items="[[recipe.ingredients]]">
+                                <li>[[item]]</li>
+                            </template>
+                        </ul>
+                    </div>
+                    <div class="flex-4 item-col">
+                        <strong class="recipe-item-label">
+                            Directions
+                        </strong>
+                        <ol class="directions-list">
+                            <template is="dom-repeat"
+                                    items="[[recipe.directions]]"
+                                    as="d">
+                                <li>[[d]]</li>
+                            </template>
+                        </ol>
+                    </div>
+                    <!-- Info column. -->
+                    <div class="flex-4 item-col">
+                        <template is="dom-if" if="[[recipe.amount]]">
                             <strong class="recipe-item-label">
-                                Ingredients
+                                Amount
                             </strong>
-                            <ul class="ingredients-list">
-                                <template is="dom-repeat"
-                                          items="[[recipe.ingredients]]">
-                                    <li>[[item]]</li>
-                                </template>
-                            </ul>
-                        </div>
-                        <div class="flex-4 recipe-col">
+                            <div>[[recipe.amount]]</div>
+                        </template>
+                        <template is="dom-if" if="[[recipe.time]]">
+                            <strong class="recipe-item-label">Time</strong>
+                            <div>[[recipe.time]]</div>
+                        </template>
+                        <template is="dom-if" if="[[recipe.oven]]">
+                            <Strong class="recipe-item-label">Oven</Strong>
+                            <div>[[recipe.oven]]</div>
+                        </template>
+                        <strong class="recipe-item-label">Author</strong>
+                        <div>[[recipe.author_name]]</div>
+                        <template is="dom-if" if="[[recipe.source]]">
                             <strong class="recipe-item-label">
-                                Directions
+                                Source
                             </strong>
-                            <ol class="directions-list">
-                                <template is="dom-repeat"
-                                        items="[[recipe.directions]]"
-                                        as="d">
-                                    <li>[[d]]</li>
-                                </template>
-                            </ol>
-                        </div>
-                        <!-- Info column. -->
-                        <div class="flex-4 recipe-col">
-                            <template is="dom-if" if="[[recipe.amount]]">
-                                <strong class="recipe-item-label">
-                                    Amount
-                                </strong>
-                                <div>[[recipe.amount]]</div>
-                            </template>
-                            <template is="dom-if" if="[[recipe.time]]">
-                                <strong class="recipe-item-label">Time</strong>
-                                <div>[[recipe.time]]</div>
-                            </template>
-                            <template is="dom-if" if="[[recipe.oven]]">
-                                <Strong class="recipe-item-label">Oven</Strong>
-                                <div>[[recipe.oven]]</div>
-                            </template>
-                            <strong class="recipe-item-label">Author</strong>
-                            <div>[[recipe.author_name]]</div>
-                            <template is="dom-if" if="[[recipe.source]]">
-                                <strong class="recipe-item-label">
-                                    Source
-                                </strong>
-                                <div>[[recipe.source]]</div>
-                            </template>
-                            <strong class="recipe-item-label">Revision</strong>
-                            <div>[[recipe.revision]]</div>
-                            <template is="dom-if" if="[[recipe.notes]]">
-                                <strong class="recipe-item-label">
-                                    Notes
-                                </strong>
-                                <div>[[recipe.notes]]</div>
-                            </template>
-                            <!-- Edit recipe button. -->
-                            <div class="layout horizontal end-justified">
-                                <paper-button raised
-                                         on-tap="loadRecipePage"
-                                         data-id$="[[recipe.id]]">
-                                    <iron-icon icon="icons:link">
-                                    </iron-icon>
-                                    Permalink
-                                </paper-button>
-                            </div>
+                            <div>[[recipe.source]]</div>
+                        </template>
+                        <strong class="recipe-item-label">Revision</strong>
+                        <div>[[recipe.revision]]</div>
+                        <template is="dom-if" if="[[recipe.notes]]">
+                            <strong class="recipe-item-label">
+                                Notes
+                            </strong>
+                            <div>[[recipe.notes]]</div>
+                        </template>
+                        <!-- Edit recipe button. -->
+                        <div class="layout horizontal end-justified">
+                            <paper-button raised on-tap="load_recipe_page">
+                                <iron-icon icon="icons:link"></iron-icon>
+                                Permalink
+                            </paper-button>
                         </div>
                     </div>
-                </iron-collapse>
-            </div>
+                </div>
+            </iron-collapse>
         </paper-material>
     </template>
 
@@ -118,8 +108,12 @@
                 expand_recipe: function(event) {
                     this.set('recipe._expanded', !this.recipe._expanded);
                 },
-                formatRecipeTags: function(tags) {
+                fmt_tags: function(tags) {
                     return tags.join(", ");
+                },
+                load_recipe_page: function(e) {
+                    e.stopPropagation();
+                    page.show('/recipes/' + this.recipe.id);
                 },
             });
         })();

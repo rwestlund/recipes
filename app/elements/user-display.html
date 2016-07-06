@@ -16,9 +16,6 @@
             :host {
                 display: block;
             }
-            td.td-label {
-                width: 7em;
-            }
         </style>
 
         <iron-ajax method="PUT"
@@ -46,8 +43,7 @@
             <div class="layout horizontal end-justified wrap">
                 <h3 class="card-title">[[user.name]]</h3>
                 <span class="flex"></span>
-                <!--TODO should I put role here? -->
-                <!--<span class="card-subtitle">[[salesRep.initials]]</span>-->
+                <span class="card-subtitle">[[user.role]]</span>
             </div>
 
             <div class="layout horizontal center justified">
