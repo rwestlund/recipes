@@ -1,3 +1,5 @@
+/* The database interface for recipes. */
+
 package db
 
 import (
@@ -50,7 +52,10 @@ func scan_recipe(row *sql.Rows) (*defs.Recipe, error) {
     return &r, nil
 }
 
-/* Fetch all recipes from the database. */
+/*
+ * Fetch all recipes from the database that match the given filter. The query
+ * in the filter can match either the title or the tag.
+ */
 func FetchRecipes(filter *defs.ItemFilter) (*[]defs.Recipe, error) {
     _ = log.Println//DEBUG
 
@@ -60,7 +65,8 @@ func FetchRecipes(filter *defs.ItemFilter) (*[]defs.Recipe, error) {
     var params []interface{};
 
     /* Tokenize search string on spaces. Each term must be matched in the title
-     * or tags for a recipe to be returned. */
+     * or tags for a recipe to be returned.
+     */
     var terms []string = strings.Split(filter.Query, " ")
     /* Build and apply having_text. */
     for i, term := range terms {
@@ -91,7 +97,9 @@ func FetchRecipes(filter *defs.ItemFilter) (*[]defs.Recipe, error) {
         query_text += "\n\t OFFSET $" + strconv.Itoa(len(params))
     }
     /* Run the actual query. */
-    rows, err := DB.Query(query_rows +
+    var rows *sql.Rows
+    var err error
+    rows, err = DB.Query(query_rows +
             "\n\t GROUP BY recipes.id, users.name " +
             query_text , params...)
     if err != nil {
@@ -101,7 +109,8 @@ func FetchRecipes(filter *defs.ItemFilter) (*[]defs.Recipe, error) {
 
     /* The array we're going to fill. The append() builtin will approximately
      * double the capacity when it needs to reallocate, but we can save some
-     * copying by starting at a decent number. */
+     * copying by starting at a decent number.
+     */
     var recipes  = make([]defs.Recipe, 0, 200)
     var r *defs.Recipe
     /* Iterate over rows, reading in each Recipe as we go. */

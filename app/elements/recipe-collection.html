@@ -174,7 +174,7 @@
                 computeRecipeFilter: function(count, skip, titleFilter) {
                     var o = { count: count };
                     if (skip) o.skip = skip;
-                    if (titleFilter) o.title_or_tag = titleFilter;
+                    if (titleFilter) o.query = titleFilter;
                     return o;
                 },
                 computeDisableNext: function(recipes, count) {

@@ -1,5 +1,6 @@
 package defs
-/* This defines the ItemFilter struct, which represents a search query for any
+/*
+ * This defines the ItemFilter struct, which represents a search query for any
  * records in a collection that match the query string. It expects server-side
  * pagination.
  */

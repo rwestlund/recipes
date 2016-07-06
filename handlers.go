@@ -3,6 +3,7 @@ package main
 import (
     "strconv"
     "log"
+    "net/url"
     "net/http"
     "encoding/json"
     "github.com/rwestlund/recipes/defs"
@@ -11,28 +12,35 @@ import (
 )
 
 /*
+ * Take a url.URL object (from req.URL) and fill an ItemFilter.
+ */
+func build_item_filter(url *url.URL) *defs.ItemFilter {
+    /* We can ignore the error because count=0 means disabled. */
+    var bigcount uint64
+    bigcount, _ = strconv.ParseUint(url.Query().Get("count"), 10, 32)
+    var bigskip uint64
+    bigskip, _ = strconv.ParseUint(url.Query().Get("skip"), 10, 32)
+    /* Build ItemFilter from query params. */
+    var filter defs.ItemFilter = defs.ItemFilter{
+        Query: url.Query().Get("query"),
+        Count: uint32(bigcount),
+        Skip: uint32(bigskip),
+    }
+    return &filter
+}
+
+/*
  * Request a list of recipes.
  * GET /recipes
  */
 func handle_recipes(res http.ResponseWriter, req *http.Request) {
     res.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-    /* We can ignore the error because count=0 means disabled. */
-    var bigcount uint64
-    bigcount, _ = strconv.ParseUint(req.URL.Query().Get("count"), 10, 32)
-    var bigskip uint64
-    bigskip, _ = strconv.ParseUint(req.URL.Query().Get("skip"), 10, 32)
-    /* Build ItemFilter from query params. */
-    var filter defs.ItemFilter = defs.ItemFilter{
-        /* TODO change this when I swap in item-collection for recipes. */
-        Query: req.URL.Query().Get("title_or_tag"),
-        Count: uint32(bigcount),
-        Skip: uint32(bigskip),
-    }
+    var filter = build_item_filter(req.URL);
 
     var recipes *[]defs.Recipe
     var err error
-    recipes, err = db.FetchRecipes(&filter)
+    recipes, err = db.FetchRecipes(filter)
     if err != nil {
         log.Println(err)
         res.WriteHeader(500)
@@ -95,9 +103,11 @@ func handle_recipe(res http.ResponseWriter, req *http.Request) {
 func handle_users(res http.ResponseWriter, req *http.Request) {
     res.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
+    var filter = build_item_filter(req.URL);
+
     var users *[]defs.User
     var err error
-    users, err = db.FetchUsers(req.URL.Query().Get("name_or_email"))
+    users, err = db.FetchUsers(filter)
     if err != nil {
         log.Println(err)
         res.WriteHeader(500)

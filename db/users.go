@@ -1,7 +1,11 @@
+/* The database interface for users. */
+
 package db
 
 import (
     "log"
+    "strconv"
+    "strings"
     "database/sql"
     "github.com/lib/pq"
     "github.com/rwestlund/recipes/defs"
@@ -17,10 +21,12 @@ var users_query string = `SELECT users.id, users.email, users.name,
 
 func scan_user(rows *sql.Rows) (*defs.User, error) {
     var u defs.User
-    /* Because lastlog may be null, read into NullTime first. The User object
+    /*
+     * Because lastlog may be null, read into NullTime first. The User object
      * holds a pointer to a time.Time rather than a time.Time directly because
      * this is the only way to make json.Marshal() encode a null when the time
-     * is not valid. */
+     * is not valid.
+     */
     var lastlog pq.NullTime
     /* Name may be null, but we've fine converting that to an empty string. */
     var name sql.NullString
@@ -36,25 +42,57 @@ func scan_user(rows *sql.Rows) (*defs.User, error) {
     return &u, nil
 }
 
-/* Fetch all users in the database. */
-func FetchUsers(name_or_email string) (*[]defs.User, error) {
+/*
+ * Fetch all users in the database that match the given filter. The query in
+ * the filter can match either the name, email, or role.
+ */
+func FetchUsers(filter *defs.ItemFilter) (*[]defs.User, error) {
     _ = log.Println//DEBUG
 
-    var where_text string
+    /* Hold the dynamically generated portion of our SQL. */
+    var query_text string
+    /* Hold all the parameters for our query. */
     var params []interface{};
 
-    if name_or_email != "" {
-        params = append(params, name_or_email)
-        where_text = ` WHERE (users.name ILIKE '%' || $1 || '%'
-                        OR users.email ILIKE '%' || $1 || '%') `
+    /* Tokenize search string on spaces. Each term must be matched in the
+     * name or email for a user to be returned.
+     */
+    var terms []string = strings.Split(filter.Query, " ")
+    /* Build and apply having_text. */
+    for i, term := range terms {
+        /* Ignore blank terms (comes from leading/trailing spaces). */
+        if term == "" { continue }
+
+        if i == 0 {
+            query_text += "\n\t WHERE (name ILIKE $"
+        } else {
+            query_text += " AND (name ILIKE $"
+        }
+        params = append(params, "%" + term + "%")
+        query_text += strconv.Itoa(len(params)) +
+            "\n\t\t OR email ILIKE $" +
+            strconv.Itoa(len(params)) +
+            "\n\t\t OR role ILIKE $" +
+            strconv.Itoa(len(params)) + ") "
+    }
+    query_text += "\n\t GROUP BY users.id "
+    query_text += "\n\t ORDER BY lastlog DESC NULLS LAST "
+
+    /* Apply count. */
+    if filter.Count != 0 {
+        params = append(params, filter.Count)
+        query_text += "\n\t LIMIT $" + strconv.Itoa(len(params))
+    }
+    /* Apply skip. */
+    if filter.Skip != 0 {
+        params = append(params, filter.Count * filter.Skip)
+        query_text += "\n\t OFFSET $" + strconv.Itoa(len(params))
     }
 
-    /* Run the query. */
+    /* Run the actual query. */
     var rows *sql.Rows
     var err error
-    rows, err = DB.Query(users_query + where_text +
-            " GROUP BY users.id ORDER BY lastlog DESC NULLS LAST",
-            params...)
+    rows, err = DB.Query(users_query + query_text, params...)
     if err != nil {
         return nil, err
     }
