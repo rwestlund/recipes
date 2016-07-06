@@ -51,7 +51,7 @@ func scan_recipe(row *sql.Rows) (*defs.Recipe, error) {
 }
 
 /* Fetch all recipes from the database. */
-func FetchRecipes(filter *defs.RecipeFilter) (*[]defs.Recipe, error) {
+func FetchRecipes(filter *defs.ItemFilter) (*[]defs.Recipe, error) {
     _ = log.Println//DEBUG
 
     /* Hold the dynamically generated portion of our SQL. */
@@ -61,7 +61,7 @@ func FetchRecipes(filter *defs.RecipeFilter) (*[]defs.Recipe, error) {
 
     /* Tokenize search string on spaces. Each term must be matched in the title
      * or tags for a recipe to be returned. */
-    var terms []string = strings.Split(filter.TitleOrTag, " ")
+    var terms []string = strings.Split(filter.Query, " ")
     /* Build and apply having_text. */
     for i, term := range terms {
         /* Ignore blank terms (comes from leading/trailing spaces). */

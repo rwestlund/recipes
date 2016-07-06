@@ -11,7 +11,7 @@ import (
 )
 
 /*
- * Request a list of recipes
+ * Request a list of recipes.
  * GET /recipes
  */
 func handle_recipes(res http.ResponseWriter, req *http.Request) {
@@ -22,9 +22,10 @@ func handle_recipes(res http.ResponseWriter, req *http.Request) {
     bigcount, _ = strconv.ParseUint(req.URL.Query().Get("count"), 10, 32)
     var bigskip uint64
     bigskip, _ = strconv.ParseUint(req.URL.Query().Get("skip"), 10, 32)
-    /* Build RecipeFilter from query params. */
-    var filter defs.RecipeFilter = defs.RecipeFilter{
-        TitleOrTag: req.URL.Query().Get("title_or_tag"),
+    /* Build ItemFilter from query params. */
+    var filter defs.ItemFilter = defs.ItemFilter{
+        /* TODO change this when I swap in item-collection for recipes. */
+        Query: req.URL.Query().Get("title_or_tag"),
         Count: uint32(bigcount),
         Skip: uint32(bigskip),
     }

@@ -1,4 +1,5 @@
 package defs
+/* This defines the User struct, which represents a user from the DB */
 
 import (
     "time"
