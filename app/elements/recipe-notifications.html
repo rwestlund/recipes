@@ -1,0 +1,53 @@
+<!--
+    Randy Westlund
+    2016-07
+-->
+<!-- This module listens to toast signals and displays them so that not every
+     element needs a paper-toast. -->
+
+<link rel="import" href="../bc/polymer/polymer.html">
+
+<dom-module id="recipe-notifications">
+    <template>
+        <style is="custom-style" include="global-styles"></style>
+        <style>
+            :host {
+                display: block;
+            }
+        </style>
+
+        <paper-toast id="success_toast"
+                class="success-toast"
+                horizontal-align="right"
+                horizontal-offset="20"
+                no-cancel-on-esc-key
+                duration="4000">
+        </paper-toast>
+        <paper-toast id="error_toast"
+                class="error-toast"
+                horizontal-align="right"
+                horizontal-offset="20"
+                no-cancel-on-esc-key
+                duration="4000">
+        </paper-toast>
+        <iron-signals on-iron-signal-success-toast="show_success_toast"
+                      on-iron-signal-error-toast="show_error_toast">
+    </template>
+
+    <script>
+        (function () {
+            'use strict';
+            Polymer({
+                is: 'recipe-notifications',
+                show_success_toast: function(e, data) {
+                    this.$.success_toast.text = data;
+                    this.$.success_toast.show();
+                },
+                show_error_toast: function(e, data) {
+                    this.$.error_toast.text = data;
+                    this.$.error_toast.show();
+                },
+            });
+        })();
+    </script>
+</dom-module>

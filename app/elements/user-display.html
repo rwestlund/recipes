@@ -41,7 +41,9 @@
         <paper-material class="card-item">
             <!-- Summary header. -->
             <div class="layout horizontal end-justified wrap">
-                <h3 class="card-title">[[user.name]]</h3>
+                <h3 class="card-title">
+                    [[first_defined(user.name, user.email)]]
+                </h3>
                 <span class="flex"></span>
                 <span class="card-subtitle">[[user.role]]</span>
             </div>

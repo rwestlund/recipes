@@ -231,7 +231,7 @@
                     if(this.itemName === "users") {
                         this.fire("iron-signal", {
                             name: "success-toast",
-                            data: this.new_item.role +
+                            data: this.new_item.role + " " +
                                     (this.new_item.name || this.new_item.email)
                                     + " created",
                         });
