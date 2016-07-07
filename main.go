@@ -5,14 +5,14 @@ import (
     "net/http"
     "db"
     "router"
+    "config"
 )
 
 func main() {
-
     db.Init()
 
     /* Create router from routes.go. */
     my_router := router.NewRouter()
     log.Println("server running")
-    http.ListenAndServe(":3000", my_router)
+    http.ListenAndServe(config.Config.ListenAddress, my_router)
 }

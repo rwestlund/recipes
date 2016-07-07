@@ -1,0 +1,35 @@
+/*
+ * This is the config file for the site. It must be copied to
+ * src/config/config.go and modified.
+ */
+package config
+
+type config struct {
+    /* Format: [address]:port, passed to http.ListenAndServe(). */
+    ListenAddress       string
+    /* Paramaters for connecting to a local PostgreSQL database. */
+    DatabaseUserName    string
+    DatabaseName        string
+
+    /*
+     * The following variables are used in OAuth, and must be set to your
+     * deployment-specific values.
+     */
+
+    /* Google OAuth client id. */
+    OAuthClientID       string
+    /* Google OAuth client secret. */
+    OAuthClientSecret   string
+    /* The hostname in the URL where this server can be found. */
+    LocalHostName       string
+}
+
+var Config config = config{
+    ListenAddress:      ":3000",
+    DatabaseUserName:   "recipes",
+    DatabaseName:       "recipes",
+    OAuthClientID       your value here!,
+    OAuthClientSecret:  your value here!,
+    LocalHostName:      "recipes.textplain.net",
+}
+
