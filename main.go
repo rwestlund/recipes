@@ -3,7 +3,8 @@ package main
 import (
     "log"
     "net/http"
-    "github.com/rwestlund/recipes/db"
+    "db"
+    "router"
 )
 
 func main() {
@@ -11,7 +12,7 @@ func main() {
     db.Init()
 
     /* Create router from routes.go. */
-    router := NewRouter()
+    my_router := router.NewRouter()
     log.Println("server running")
-    http.ListenAndServe(":3000", router)
+    http.ListenAndServe(":3000", my_router)
 }

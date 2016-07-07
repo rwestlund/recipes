@@ -1,4 +1,4 @@
-package main
+package router
 
 import (
     "strconv"
@@ -6,8 +6,8 @@ import (
     "net/url"
     "net/http"
     "encoding/json"
-    "github.com/rwestlund/recipes/defs"
-    "github.com/rwestlund/recipes/db"
+    "defs"
+    "db"
     "github.com/gorilla/mux"
 )
 

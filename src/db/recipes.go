@@ -8,7 +8,7 @@ import (
     "strings"
     "database/sql"
     "encoding/json"
-    "github.com/rwestlund/recipes/defs"
+    "defs"
 )
 
 /* SQL to select recipes. */

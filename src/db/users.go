@@ -8,7 +8,7 @@ import (
     "strings"
     "database/sql"
     "github.com/lib/pq"
-    "github.com/rwestlund/recipes/defs"
+    "defs"
 )
 
 /* SQL to select users. */
