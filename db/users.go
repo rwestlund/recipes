@@ -115,7 +115,8 @@ func FetchUsers(filter *defs.ItemFilter) (*[]defs.User, error) {
     return &users, nil
 }
 
-/* Take a reference to a User and create it in the database, returning fields
+/*
+ * Take a reference to a User and create it in the database, returning fields
  * in the passed object. Only User.Email and User.Role are read.
  */
 func CreateUser(user *defs.User) (*defs.User, error) {

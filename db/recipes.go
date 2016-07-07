@@ -149,3 +149,36 @@ func FetchRecipe(id uint32) (*defs.Recipe, error) {
     }
     return r, nil
 }
+
+/*
+ * Take a reference to a Recipe and create it in the database, returning fields
+ * in the passed object.  Only Recipe.Title, Recipe.Summary, and
+ * Recipe.AuthorId are read.
+ */
+func CreateRecipe(recipe *defs.Recipe) (*defs.Recipe, error) {
+    var rows *sql.Rows
+    var err error
+    //TODO some input validation on would be nice
+    rows, err = DB.Query(`INSERT INTO recipes (title, summary, author_id)
+            VALUES ($1, $2, $3)
+                RETURNING id`,
+                recipe.Title, recipe.Summary, recipe.AuthorId)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+    /* Make sure we have a row returned. */
+    if !rows.Next() {
+        return nil, sql.ErrNoRows
+    }
+    /* Scan it in. */
+    var id uint32;
+    err = rows.Scan(&id)
+    if err != nil {
+        return nil, err
+    }
+    /* At this point, we just need to read back the new recipe. */
+    recipe, err = FetchRecipe(id)
+
+    return recipe, err
+}

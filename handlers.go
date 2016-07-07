@@ -56,6 +56,42 @@ func handle_recipes(res http.ResponseWriter, req *http.Request) {
     res.Write(j)
 }
 
+/*
+ * Create a new recipe.
+ * POST /recipes
+ */
+func handle_post_recipe(res http.ResponseWriter, req *http.Request) {
+    res.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+    // TODO need to know the current user before this will work.
+    /* Decode body. */
+    var recipe defs.Recipe
+    var err error = json.NewDecoder(req.Body).Decode(&recipe)
+    if err != nil {
+        log.Println(err)
+        res.WriteHeader(400)
+        return
+    }
+
+    var new_recipe *defs.Recipe
+    new_recipe, err = db.CreateRecipe(&recipe)
+
+    if err != nil {
+        log.Println(err)
+        res.WriteHeader(400)
+        return
+    }
+
+    /* Send it back. */
+    j, e := json.Marshal(new_recipe)
+    if e != nil {
+        log.Println(e)
+        res.WriteHeader(500)
+        return
+    }
+    /* If we made it here, send good response. */
+    res.Write(j)
+}
 
 /*
  * Request a specific recipe.

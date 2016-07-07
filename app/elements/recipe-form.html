@@ -1,0 +1,63 @@
+<!--
+    Randy Westlund
+    2016-06
+-->
+<!-- This module displays a recipe creation form. -->
+
+<link rel="import" href="../bc/polymer/polymer.html">
+
+<dom-module id="recipe-form">
+    <style is="custom-style" include="global-styles"></style>
+    <template>
+        <responsive-dialog id="dialog"
+                   title="[[title]]"
+                   dismiss-text="Cancel"
+                   confirm-text="Save"
+                   on-iron-overlay-closed="resolve_dialog">
+
+            <paper-input
+                    type="text"
+                    label="Title"
+                    value="{{recipe.title}}"
+                    char-counter maxlength="30">
+                <paper-icon-button suffix
+                        icon="icons:clear"
+                        on-tap="clear_field">
+                </paper-icon-button>
+            </paper-input>
+
+            <paper-input
+                    type="text"
+                    label="Summary"
+                    value="{{recipe.summary}}"
+                    char-counter maxlength="50">
+                <paper-icon-button suffix
+                        icon="icons:clear"
+                        on-tap="clear_field">
+                </paper-icon-button>
+            </paper-input>
+
+        </responsive-dialog>
+    </template>
+
+    <script>
+        (function () {
+            'use strict';
+            Polymer({
+                is: 'recipe-form',
+                behaviors: [ recipe_behaviors.global_behavior,
+                            recipe_behaviors.form_behavior ],
+                properties: {
+                    // Must be provided by parent object.
+                    recipe: {
+                        type: Object,
+                    },
+                    title: {
+                        type: String,
+                        value: "Edit Recipe",
+                    },
+                },
+            });
+        })();
+    </script>
+</dom-module>

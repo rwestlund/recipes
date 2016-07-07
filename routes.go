@@ -34,6 +34,12 @@ var routes = Routes {
         handle_users,
     },
     Route {
+        "recipes",
+        []string{ "POST" },
+        "/recipes",
+        handle_post_recipe,
+    },
+    Route {
         "users",
         []string{ "POST" },
         "/users",
