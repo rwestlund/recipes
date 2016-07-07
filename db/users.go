@@ -146,15 +146,21 @@ func CreateUser(user *defs.User) (*defs.User, error) {
 /* Take a reference to a User and update it in the database, returning fields
  * in the passed object. Only User.Id, User.Email, and User.Role are read.
  */
-func UpdateUser(user *defs.User) (*defs.User, error) {
+func UpdateUser(id uint32, user *defs.User) (*defs.User, error) {
     var rows *sql.Rows
     var err error
     //TODO some input validation on would be nice
+    /* Run one wuery to update the value. */
     rows, err = DB.Query(`UPDATE users SET (email, role) = ($1, $2)
-                WHERE id = $3
-                RETURNING id, email, name, role, lastlog, creation_date,
-                    0 AS recipes_authored`,
+                WHERE id = $3`,
                 user.Email, user.Role, user.Id)
+    if err != nil {
+        return nil, err
+    }
+    rows.Close();
+    /* Run a second query to read it back with the join. */
+    rows, err = DB.Query(users_query +
+            `WHERE users.id = $1 GROUP BY users.id`, user.Id)
     if err != nil {
         return nil, err
     }
@@ -175,8 +181,7 @@ func UpdateUser(user *defs.User) (*defs.User, error) {
 func DeleteUser(id uint32) error {
     var rows *sql.Rows
     var err error
-    rows, err = DB.Query(`DELETE FROM USERS
-                WHERE id = $1`, id)
+    rows, err = DB.Query(`DELETE FROM USERS WHERE id = $1`, id)
     if err != nil {
         return err
     }

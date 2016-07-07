@@ -36,7 +36,7 @@ var routes = Routes {
     Route {
         "users",
         []string{ "POST", "PUT" },
-        "/users",
+        "/users/{id:[0-9]+?}",
         handle_post_or_put_user,
     },
     Route {

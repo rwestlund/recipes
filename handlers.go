@@ -126,7 +126,7 @@ func handle_users(res http.ResponseWriter, req *http.Request) {
 
 /*
  * Receive a new user to create.
- * POST /users or PUT /users
+ * POST /users or PUT /users/4
  * Example: { email: ..., role: ... }
  */
 func handle_post_or_put_user(res http.ResponseWriter, req *http.Request) {
@@ -144,7 +144,17 @@ func handle_post_or_put_user(res http.ResponseWriter, req *http.Request) {
     var new_user *defs.User
     /* Update a user in the database. */
     if req.Method == "PUT" {
-        new_user, err = db.UpdateUser(&user)
+        /* Get id parameter. */
+        params := mux.Vars(req)
+        bigid, err := strconv.ParseUint(params["id"], 10, 32)
+        if err != nil {
+            log.Println(err)
+            res.WriteHeader(400)
+            return
+        }
+        var id uint32 = uint32(bigid)
+
+        new_user, err = db.UpdateUser(id, &user)
     /* Create new user in DB. */
     } else {
         new_user, err = db.CreateUser(&user)
