@@ -2,8 +2,8 @@
     "name": "recipes",
     "private": true,
     "dependencies": {
-        "polymer": "1.4.0",
-        "iron-elements": "1.0.9",
+        "polymer": "1.6.0",
+        "iron-elements": "1.0.10",
         "paper-elements": "1.0.7",
         "page": "1.7.1"
     }
