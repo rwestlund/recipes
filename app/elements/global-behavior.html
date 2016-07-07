@@ -4,20 +4,32 @@
 -->
 
 <script>
+var constants = {};
+
+constants.user_role_enum = {
+    admin:      'admin',
+    moderator:  'moderator',
+    user:       'user',
+    guest:      'guest',
+};
+
+// Take an dictionary, return an array of values. This is defined outside the
+// behavior so I can use it on constants.
+var to_array = function(obj) {
+    if (!obj) return [];
+    return Object.keys(obj).map(k => obj[k]).sort();
+};
+
+// Provdide presorted lists.
+constants.user_roles =      to_array(constants.user_role_enum);
+
 var recipe_behaviors = recipe_behaviors || {};
 recipe_behaviors.global_behavior = {
-
-    created: function() {
-
-        var constants = {};
-
-        constants.userRoleEnum = {
-            admin:      'admin',
-            moderator:  'moderator',
-            user:       'user',
-            guest:      'guest',
-        };
-        this.set('constants', constants);
+    properties: {
+        constants: {
+            type: Object,
+            value: constants,
+        },
     },
     isUserAdmin: function(role) {
         return (role === this.constants.userRoleEnum.admin);
@@ -29,6 +41,7 @@ recipe_behaviors.global_behavior = {
         var date = new Date(d);
         return date.toDateString() + ' ' + date.toLocaleTimeString();
     },
+    to_array: to_array,
     equal: function(a, b) {
         return a === b;
     },

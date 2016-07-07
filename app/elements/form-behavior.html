@@ -1,0 +1,38 @@
+<!--
+    Randy Westlund
+    2016-04
+-->
+<script>
+'use strict';
+var recipe_behaviors = recipe_behaviors || {};
+recipe_behaviors.form_behavior = {
+    open: function() {
+        this.$.dialog.open();
+    },
+    close: function() {
+        this.$.dialog.close();
+    },
+    resolve_dialog: function(e, reason) {
+        this.fire('closed', reason);
+    },
+    // Handle click on the X suffix for a paper-input. This crawls up the DOM
+    // until it finds a paper-input and clears it.
+    clear_field: function(e, p) {
+        // Chrome desktop defines e.path, but Firefox doesn't. Fortunately,
+        // they both define e._path. It's not quite the same, but it works.
+        for (var i = 0; i < e._path.length; i++) {
+            if (e._path[i].localName === "paper-input") {
+                return e._path[i].value = null;
+            }
+        }
+    },
+    // Same, but for a number field.
+    clear_number_field: function(e, p) {
+        for (var i = 0; i < e._path.length; i++) {
+            if (e._path[i].localName === "paper-input") {
+                return e._path[i].value = 0;
+            }
+        }
+    },
+};
+</script>

@@ -1,0 +1,66 @@
+<!--
+    Randy Westlund
+    2016-06
+-->
+<!-- This module displays a user editing form. -->
+
+<link rel="import" href="../bc/polymer/polymer.html">
+
+<dom-module id="user-form">
+    <style is="custom-style" include="global-styles"></style>
+    <template>
+        <responsive-dialog id="dialog"
+                   title="[[title]]"
+                   dismiss-text="Cancel"
+                   confirm-text="Save"
+                   on-iron-overlay-closed="resolve_dialog">
+
+            <div class="layout vertical">
+                <paper-dropdown-menu label="Account Role"
+                            vertical-align="top" horizontal-align="right">
+                    <paper-menu class="dropdown-content"
+                            attr-for-selected="value"
+                            selected="{{user.role}}">
+                        <template is="dom-repeat"
+                                items="[[constants.user_roles]]">
+                            <paper-item value="[[item]]">[[item]]</paper-item>
+                        </template>
+                    </paper-menu>
+                </paper-dropdown-menu>
+            </div>
+
+            <paper-input
+                    type="email"
+                    label="Email"
+                    value="{{user.email}}"
+                    char-counter maxlength="50">
+                <paper-icon-button suffix
+                        icon="icons:clear"
+                        on-tap="clear_field">
+                </paper-icon-button>
+            </paper-input>
+
+        </responsive-dialog>
+    </template>
+
+    <script>
+        (function () {
+            'use strict';
+            Polymer({
+                is: 'user-form',
+                behaviors: [ recipe_behaviors.global_behavior,
+                            recipe_behaviors.form_behavior ],
+                properties: {
+                    // Must be provided by parent object.
+                    user: {
+                        type: Object,
+                    },
+                    title: {
+                        type: String,
+                        value: "Edit User",
+                    },
+                },
+            });
+        })();
+    </script>
+</dom-module>
