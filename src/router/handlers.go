@@ -73,7 +73,7 @@ func handle_post_recipe(res http.ResponseWriter, req *http.Request) {
         res.WriteHeader(401)
         return
     }
-    if usr.Role != "admin" && usr.Role != "moderator" && usr.Role != "user" {
+    if usr.Role != "Admin" && usr.Role != "Moderator" && usr.Role != "User" {
         res.WriteHeader(403)
         return
     }
@@ -168,7 +168,7 @@ func handle_users(res http.ResponseWriter, req *http.Request) {
         res.WriteHeader(401)
         return
     }
-    if usr.Role != "admin" {
+    if usr.Role != "Admin" {
         res.WriteHeader(403)
         return
     }
@@ -213,7 +213,7 @@ func handle_post_or_put_user(res http.ResponseWriter, req *http.Request) {
         res.WriteHeader(401)
         return
     }
-    if usr.Role != "admin" {
+    if usr.Role != "Admin" {
         res.WriteHeader(403)
         return
     }
@@ -283,7 +283,7 @@ func handle_delete_user(res http.ResponseWriter, req *http.Request) {
         res.WriteHeader(401)
         return
     }
-    if usr.Role != "admin" {
+    if usr.Role != "Admin" {
         res.WriteHeader(403)
         return
     }
