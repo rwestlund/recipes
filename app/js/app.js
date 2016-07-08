@@ -55,4 +55,8 @@
      document.getElementById('mainContainer').scrollTop = 0;
   };
 
+  app.closeDrawer = function() {
+      app.$.paperDrawerPanel.closeDrawer();
+  };
+
 })(document);

@@ -30,6 +30,8 @@
         content="images/touch/ms-touch-icon-144x144-precomposed.png">
 
     <script src="bc/webcomponentsjs/webcomponents-lite.js"></script>
+    <!-- build:js bc/webcomponentsjs/webcomponents-lite.min.js -->
+    <!--<script src="../bc/webcomponentsjs/webcomponents.js"></script> -->
 
     <!-- Google Font: Montserrat -->
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700'
@@ -45,69 +47,113 @@
     </script>
 
     <link rel="import" href="elements/elements.html">
-    <!-- TODO this isn't affecting the main file here. -->
-    <link rel="import" href="styles/global-styles.html">
 </head>
 
 <body unresolved class="fullbleed layout vertical">
-
     <template is="dom-bind" id="app">
-        <!-- main toolbar -->
-        <paper-toolbar id="mainToolbar" >
-            <div class="middle">
-                <span>Recipes</span>
-                <a href="/#!/users">Users</a>
-            </div>
-            <span class="flex"></span>
-            <div class="top-right-bar">
-                <span class="user-name">
-                    <!-- If the user is logged in. -->
-                    <template is="dom-if" if="[[user_name]]">
-                        <iron-icon icon="icons:account-circle"></iron-icon>
-                        <span>[[user_name]]</span>
-                        <a class="inherit-color" href="/logout">
-                            <paper-button raised>Logout</paper-button>
-                        </a>
-                    </template>
-                    <!-- If the user is not logged in. -->
+        <style is="custom-style" include="global-styles"></style>
+        <!-- The drawer panel holds the nav drawer and the main toolbar. -->
+        <paper-drawer-panel
+                id="paperDrawerPanel"
+                drawer-width="260px"
+                class="mainContentBackground"
+                responsive-width="1035px">
+            <!-- The first header panel is for the drawer. -->
+            <paper-header-panel drawer>
+                <paper-toolbar>
+                    <div class="middle middle-container center horizontal layout">
+                        <div class="menu-header-text">Menu</div>
+                    </div>
+                </paper-toolbar>
+                 <!-- Main navbar with page links. -->
+                <paper-menu class="list" attr-for-selected="data-route"
+                    selected="[[route]]">
+
+                    <a data-route="recipes" href="/">
+                        <iron-icon icon="icons:list"></iron-icon>
+                        <span>Recipes</span>
+                    </a>
+                    <a data-route="users" href="/users"
+                            hidden$="[[!user_is_admin(user_role)]]">
+                        <iron-icon icon="social:people"></iron-icon>
+                        <span>Users</span>
+                    </a>
                     <template is="dom-if" if="[[!user_name]]">
-                        <a class="inherit-color" href="/auth/google/login">
-                            <paper-button raised>
-                                Sign in with Google
-                            </paper-button>
+                        <a href="/auth/google/login">
+                            <iron-icon icon="icons:exit-to-app"></iron-icon>
+                            <span>Sign in with Google</span>
                         </a>
                     </template>
-                </span>
-            </div>
+                    <template is="dom-if" if="[[user_name]]">
+                        <a href="/logout">
+                            <iron-icon icon="maps:directions-run"></iron-icon>
+                            <span>Logout</span>
+                        </a>
+                    </template>
+                </paper-menu>
+            </paper-header-panel>
 
-            <cookie-display cookie-name="name" cookie-value="{{user_name}}">
-            </cookie-display>
-            <cookie-display cookie-name="role" cookie-value="{{user_role}}">
-            </cookie-display>
-            <!-- Application name -->
-        </paper-toolbar>
+            <!-- The second header panel is the main page, including
+                 the main toolbar. -->
+            <paper-header-panel main>
+                <!-- Main toolbar. -->
+                <paper-toolbar id="mainToolbar" >
+                    <paper-icon-button id="paperToggle" icon="menu"
+                            paper-drawer-toggle>
+                    </paper-icon-button>
+                    <span class="flex"></span>
 
-        <!-- main page content -->
-        <div>
-            <iron-pages attr-for-selected="data-route" selected="{{route}}">
+                    <div class="top-right-bar">
+                        <span class="user-name">
+                            <iron-icon icon="icons:account-circle"></iron-icon>
+                            <template is="dom-if" if="[[!user_name]]">
+                                <span>Not signed in</span>
+                            </template>
+                            <template is="dom-if" if="[[user_name]]">
+                                <span>[[user_name]]</span>
+                            </template>
+                        </span>
+                    </div>
 
-                <section data-route="recipes">
-                    <item-collection item-name="recipes"></item-collection>
-                </section>
+                    <cookie-display
+                            cookie-name="name"
+                            cookie-value="{{user_name}}">
+                    </cookie-display>
+                    <cookie-display
+                            cookie-name="role"
+                            cookie-value="{{user_role}}">
+                    </cookie-display>
+                    <!-- Application name -->
+                    <div class="middle middle-container center horizontal layout">
+                        <div class="app-name">
+                            <span>Recipes</span>
+                        </div>
+                    </div>
+                </paper-toolbar>
 
-                <section data-route="recipe-details">
-                    <recipe-details recipe-id="[[params.id]]"></recipe-details>
-                </section>
+                <!-- Main page content. -->
+                <iron-pages attr-for-selected="data-route" selected="{{route}}">
 
-                <template is="dom-if" if="[[user_is_admin(user_role)]]">
-                    <section data-route="users">
-                        <item-collection item-name="users"></item-collection>
+                    <section data-route="recipes">
+                        <item-collection item-name="recipes"></item-collection>
                     </section>
-                </template>
 
-            </iron-pages>
-        </div>
-        <br />
+                    <section data-route="recipe-details">
+                        <recipe-details recipe-id="[[params.id]]"></recipe-details>
+                    </section>
+
+                    <template is="dom-if" if="[[user_is_admin(user_role)]]">
+                        <section data-route="users">
+                            <item-collection item-name="users"></item-collection>
+                        </section>
+                    </template>
+                </iron-pages>
+                <br />
+                <br />
+            </paper-header-panel>
+        </paper-drawer-panel>
+
+        <!-- This displays toast events. -->
         <recipe-notifications></recipe-notifications>
     </template>
 
@@ -122,5 +168,4 @@
 
   </script>
 </body>
-
 </html>

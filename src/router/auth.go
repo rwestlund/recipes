@@ -118,11 +118,12 @@ func handle_oauth_callback(res http.ResponseWriter, req *http.Request) {
         res.WriteHeader(500)
         return
     }
-    /* The client will send this with every request. */
+    /* The client will send this with every request. It's HttpOnly. */
     var auth_cookie = http.Cookie {
         Name:      "authentication",
         Value:     token.AccessToken,
         Secure:    true,
+        HttpOnly:  true,
     }
     /* The client uses this for visibility control. */
     var role_cookie = http.Cookie {
@@ -149,6 +150,7 @@ func clear_cookies(res http.ResponseWriter) {
         Name:       "authentication",
         Value:      "",
         Secure:     true,
+        HttpOnly:  true,
         MaxAge:     -1,
     }
     var role_cookie = http.Cookie {
