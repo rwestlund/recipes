@@ -16,6 +16,18 @@ type Routes []Route
 /* Define the actual routes here. */
 var routes = Routes {
     Route {
+        "auth",
+        []string{ "GET" },
+        "/auth/google/login",
+        oauth_redirect,
+    },
+    Route {
+        "auth",
+        []string{ "GET" },
+        "/oauth2callback",
+        handle_oauth_callback,
+    },
+    Route {
         "recipe",
         []string{ "GET", "HEAD" },
         "/recipes/{id:[0-9]+}",

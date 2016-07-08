@@ -7,3 +7,12 @@
 [submodule "src/github.com/lib/pq"]
 	path = src/github.com/lib/pq
 	url = https://github.com/lib/pq
+[submodule "src/golang.org/x/oauth2"]
+	path = src/golang.org/x/oauth2
+	url = https://github.com/golang/oauth2
+[submodule "src/golang.org/x/net"]
+	path = src/golang.org/x/net
+	url = https://github.com/golang/net
+[submodule "src/google.golang.org/cloud"]
+	path = src/google.golang.org/cloud
+	url = https://github.com/GoogleCloudPlatform/gcloud-golang

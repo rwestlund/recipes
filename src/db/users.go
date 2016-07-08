@@ -151,7 +151,7 @@ func UpdateUser(id uint32, user *defs.User) (*defs.User, error) {
     var rows *sql.Rows
     var err error
     //TODO some input validation on would be nice
-    /* Run one wuery to update the value. */
+    /* Run one query to update the value. */
     rows, err = DB.Query(`UPDATE users SET (email, role) = ($1, $2)
                 WHERE id = $3`,
                 user.Email, user.Role, user.Id)
@@ -189,3 +189,30 @@ func DeleteUser(id uint32) error {
     defer rows.Close()
     return nil
 }
+
+func GoogleLogin(email string, name string, token string) (*defs.User, error) {
+    var rows *sql.Rows
+    var err error
+    rows, err = DB.Query(`UPDATE users SET (token, name, lastlog) =
+                ($1, $2, CURRENT_TIMESTAMP)
+            WHERE email = $3
+            RETURNING id, email, name, role, lastlog, creation_date,
+            0 AS recipes_authored`,
+            token, name, email)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+    /* Make sure we have a row returned. */
+    if !rows.Next() {
+        return nil, sql.ErrNoRows
+    }
+    /* Scan it in. */
+    var user *defs.User;
+    user, err = scan_user(rows)
+    if err != nil {
+        return nil, err
+    }
+    return user, nil
+}
+
