@@ -14,5 +14,5 @@ func main() {
     /* Create router from routes.go. */
     my_router := router.NewRouter()
     log.Println("server running")
-    http.ListenAndServe(config.Config.ListenAddress, my_router)
+    http.ListenAndServe(config.ListenAddress, my_router)
 }

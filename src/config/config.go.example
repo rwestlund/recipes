@@ -4,32 +4,20 @@
  */
 package config
 
-type config struct {
-    /* Format: [address]:port, passed to http.ListenAndServe(). */
-    ListenAddress       string
-    /* Paramaters for connecting to a local PostgreSQL database. */
-    DatabaseUserName    string
-    DatabaseName        string
+/* Format: [address]:port, passed to http.ListenAndServe(). */
+var ListenAddress       string = ":3000"
+/* Paramaters for connecting to a local PostgreSQL database. */
+var DatabaseUserName    string = "recipes"
+var DatabaseName        string = "recipes"
 
-    /*
-     * The following variables are used in OAuth, and must be set to your
-     * deployment-specific values.
-     */
+/*
+ * The following variables are used in OAuth, and must be set to your
+ * deployment-specific values.
+ */
 
-    /* Google OAuth client id. */
-    OAuthClientID       string
-    /* Google OAuth client secret. */
-    OAuthClientSecret   string
-    /* The hostname in the URL where this server can be found. */
-    LocalHostName       string
-}
-
-var Config config = config{
-    ListenAddress:      ":3000",
-    DatabaseUserName:   "recipes",
-    DatabaseName:       "recipes",
-    OAuthClientID       your value here!,
-    OAuthClientSecret:  your value here!,
-    LocalHostName:      "recipes.textplain.net",
-}
-
+/* Google OAuth client id. */
+var OAuthClientID       string = your value here!
+/* Google OAuth client secret. */
+var OAuthClientSecret   string = your value here!
+/* The hostname in the URL where this server can be found. */
+var LocalHostName       string = "recipes.textplain.net"
