@@ -29,8 +29,6 @@
     <meta name="msapplication-TileImage"
         content="images/touch/ms-touch-icon-144x144-precomposed.png">
 
-    <link rel="stylesheet" href="styles/main.css">
-
     <script src="bc/webcomponentsjs/webcomponents-lite.js"></script>
 
     <!-- Google Font: Montserrat -->
@@ -47,6 +45,8 @@
     </script>
 
     <link rel="import" href="elements/elements.html">
+    <!-- TODO this isn't affecting the main file here. -->
+    <link rel="import" href="styles/global-styles.html">
 </head>
 
 <body unresolved class="fullbleed layout vertical">
@@ -61,21 +61,29 @@
             <span class="flex"></span>
             <div class="top-right-bar">
                 <span class="user-name">
-                    <iron-icon icon="icons:account-circle"></iron-icon>
-                    <span class="user-label">Signed in as </span>
-                    <span>{{userFirstAndLastName}}</span>
+                    <!-- If the user is logged in. -->
+                    <template is="dom-if" if="[[user_name]]">
+                        <iron-icon icon="icons:account-circle"></iron-icon>
+                        <span>[[user_name]]</span>
+                        <a class="inherit-color" href="/logout">
+                            <paper-button raised>Logout</paper-button>
+                        </a>
+                    </template>
+                    <!-- If the user is not logged in. -->
+                    <template is="dom-if" if="[[!user_name]]">
+                        <a class="inherit-color" href="/auth/google/login">
+                            <paper-button raised>
+                                Sign in with Google
+                            </paper-button>
+                        </a>
+                    </template>
                 </span>
             </div>
 
-            <!--<cookie-display-->
-                <!--cookie-name="username"-->
-                <!--cookie-value="{{userFirstAndLastName}}"-->
-                <!--style="display: none;">-->
-            <!--</cookie-display>-->
-            <!--<cookie-display-->
-                <!--cookie-name="role"-->
-                <!--cookie-value="{{userRole}}">-->
-            <!--</cookie-display>-->
+            <cookie-display cookie-name="name" cookie-value="{{user_name}}">
+            </cookie-display>
+            <cookie-display cookie-name="role" cookie-value="{{user_role}}">
+            </cookie-display>
             <!-- Application name -->
         </paper-toolbar>
 
@@ -91,11 +99,11 @@
                     <recipe-details recipe-id="[[params.id]]"></recipe-details>
                 </section>
 
-                <!--<template is="dom-if" if="[[isUserAdmin(userRole)]]">-->
+                <template is="dom-if" if="[[user_is_admin(user_role)]]">
                     <section data-route="users">
                         <item-collection item-name="users"></item-collection>
                     </section>
-                <!--</template>-->
+                </template>
 
             </iron-pages>
         </div>
@@ -108,8 +116,8 @@
   <script>
     var app = document.querySelector('#app');
 
-    app.isUserAdmin = function (role) {
-        return (role === 'admin');
+    app.user_is_admin = function(role) {
+        return role === 'admin';
     };
 
   </script>
