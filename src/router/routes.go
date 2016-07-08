@@ -28,6 +28,12 @@ var routes = Routes {
         handle_oauth_callback,
     },
     Route {
+        "logout",
+        []string{ "GET" },
+        "/logout",
+        handle_logout,
+    },
+    Route {
         "recipe",
         []string{ "GET", "HEAD" },
         "/recipes/{id:[0-9]+}",

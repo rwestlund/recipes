@@ -141,5 +141,73 @@ func handle_oauth_callback(res http.ResponseWriter, req *http.Request) {
     http.SetCookie(res, &role_cookie)
     http.SetCookie(res, &name_cookie)
     http.Redirect(res, req, "/", 302)
-    /* TODO check auth in router */
+}
+
+/* A utility function to clear cookies. */
+func clear_cookies(res http.ResponseWriter) {
+    var auth_cookie = http.Cookie {
+        Name:       "authentication",
+        Value:      "",
+        Secure:     true,
+        MaxAge:     -1,
+    }
+    var role_cookie = http.Cookie {
+        Name:       "role",
+        Value:      "",
+        Secure:     true,
+        MaxAge:     -1,
+    }
+    var name_cookie = http.Cookie {
+        Name:       "name",
+        Value:      "",
+        Secure:     true,
+        MaxAge:     -1,
+    }
+    /* Set the cookies and send them home. */
+    http.SetCookie(res, &auth_cookie)
+    http.SetCookie(res, &role_cookie)
+    http.SetCookie(res, &name_cookie)
+}
+
+/*
+ * Handle a logout request.
+ * GET /logout
+ */
+func handle_logout(res http.ResponseWriter, req *http.Request) {
+    var err error
+    err = db.UserLogout("TODO NEED TOKEN")
+    if err != nil {
+        log.Println(err)
+        res.WriteHeader(500)
+        return
+    }
+    clear_cookies(res)
+    http.Redirect(res, req, "/", 302)
+    return
+}
+
+/* Use the authentication header to find the currently logged-in user. */
+func check_auth(res http.ResponseWriter, req *http.Request) (*defs.User, error) {
+    var auth_cookie *http.Cookie
+    var err error
+    auth_cookie, err = req.Cookie("authentication")
+    /* If there is no auth cookie, just return a nil User. */
+    if err != nil {
+        return nil, nil
+    }
+    var user *defs.User
+    user, err = db.FetchUserByToken(auth_cookie.Value)
+    /*
+     * If there is an auth token, but it isn't valid. Better clear it so the
+     * client knows, then continue as normal.
+     */
+    if err == sql.ErrNoRows {
+        clear_cookies(res)
+        return nil, nil
+    }
+    if err != nil {
+        return nil, err
+    }
+    /* Finally, return the valid logged-in user. */
+    return user, nil
 }

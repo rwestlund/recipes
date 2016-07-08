@@ -190,6 +190,22 @@ func DeleteUser(id uint32) error {
     return nil
 }
 
+/* Destroy a login token. */
+func UserLogout(token string) error {
+    var rows *sql.Rows
+    var err error
+    rows, err = DB.Query(`UPDATE users SET (token, lastlog) =
+                (NULL, CURRENT_TIMESTAMP)
+            WHERE token = $1`,
+            token)
+    if err != nil {
+        return err
+    }
+    defer rows.Close()
+    return nil
+}
+
+/* Record Google login by updating name, token, and lastlog. */
 func GoogleLogin(email string, name string, token string) (*defs.User, error) {
     var rows *sql.Rows
     var err error
@@ -216,3 +232,24 @@ func GoogleLogin(email string, name string, token string) (*defs.User, error) {
     return user, nil
 }
 
+func FetchUserByToken(token string) (*defs.User, error) {
+    var rows *sql.Rows
+    var err error
+    rows, err = DB.Query(users_query +
+            `WHERE users.token = $1 GROUP BY users.id`, token)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+    /* Make sure we have a row returned. */
+    if !rows.Next() {
+        return nil, sql.ErrNoRows
+    }
+    /* Scan it in. */
+    var user *defs.User
+    user, err = scan_user(rows)
+    if err != nil {
+        return nil, err
+    }
+    return user, nil
+}

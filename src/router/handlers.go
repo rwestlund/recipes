@@ -61,18 +61,37 @@ func handle_recipes(res http.ResponseWriter, req *http.Request) {
  * POST /recipes
  */
 func handle_post_recipe(res http.ResponseWriter, req *http.Request) {
+    /* Access control. */
+    var usr *defs.User
+    var err error
+    usr, err = check_auth(res, req)
+    if err != nil {
+        res.WriteHeader(500)
+        return
+    }
+    if usr == nil {
+        res.WriteHeader(401)
+        return
+    }
+    if usr.Role != "admin" && usr.Role != "moderator" && usr.Role != "user" {
+        res.WriteHeader(403)
+        return
+    }
+
     res.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-    // TODO need to know the current user before this will work.
     /* Decode body. */
     var recipe defs.Recipe
-    var err error = json.NewDecoder(req.Body).Decode(&recipe)
+    err = json.NewDecoder(req.Body).Decode(&recipe)
     if err != nil {
         log.Println(err)
         res.WriteHeader(400)
         return
     }
+    /* Fill in the currently logged-in user as the author. */
+    recipe.AuthorId = usr.Id
 
+    /* Create it. */
     var new_recipe *defs.Recipe
     new_recipe, err = db.CreateRecipe(&recipe)
 
@@ -137,12 +156,28 @@ func handle_recipe(res http.ResponseWriter, req *http.Request) {
  * GET /users
  */
 func handle_users(res http.ResponseWriter, req *http.Request) {
+    /* Access control. */
+    var usr *defs.User
+    var err error
+    usr, err = check_auth(res, req)
+    if err != nil {
+        res.WriteHeader(500)
+        return
+    }
+    if usr == nil {
+        res.WriteHeader(401)
+        return
+    }
+    if usr.Role != "admin" {
+        res.WriteHeader(403)
+        return
+    }
+
     res.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
     var filter = build_item_filter(req.URL);
 
     var users *[]defs.User
-    var err error
     users, err = db.FetchUsers(filter)
     if err != nil {
         log.Println(err)
@@ -166,11 +201,28 @@ func handle_users(res http.ResponseWriter, req *http.Request) {
  * Example: { email: ..., role: ... }
  */
 func handle_post_or_put_user(res http.ResponseWriter, req *http.Request) {
+    /* Access control. */
+    var usr *defs.User
+    var err error
+    usr, err = check_auth(res, req)
+    if err != nil {
+        res.WriteHeader(500)
+        return
+    }
+    if usr == nil {
+        res.WriteHeader(401)
+        return
+    }
+    if usr.Role != "admin" {
+        res.WriteHeader(403)
+        return
+    }
+
     res.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
     /* Decode body. */
     var user defs.User
-    var err error = json.NewDecoder(req.Body).Decode(&user)
+    err = json.NewDecoder(req.Body).Decode(&user)
     if err != nil {
         log.Println(err)
         res.WriteHeader(400)
@@ -219,6 +271,23 @@ func handle_post_or_put_user(res http.ResponseWriter, req *http.Request) {
  * DELETE /users/4
  */
 func handle_delete_user(res http.ResponseWriter, req *http.Request) {
+    /* Access control. */
+    var usr *defs.User
+    var err error
+    usr, err = check_auth(res, req)
+    if err != nil {
+        res.WriteHeader(500)
+        return
+    }
+    if usr == nil {
+        res.WriteHeader(401)
+        return
+    }
+    if usr.Role != "admin" {
+        res.WriteHeader(403)
+        return
+    }
+
     res.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
     /* Get id parameter. */
