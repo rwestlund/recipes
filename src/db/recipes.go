@@ -182,3 +182,71 @@ func CreateRecipe(recipe *defs.Recipe) (*defs.Recipe, error) {
 
     return recipe, err
 }
+
+/*
+ * Take a Recipe to save and the user_id of the current user trying the
+ * operation. If the user does not match the author_id of the recipe in the
+ * database, this will return sql.ErrNoRows. If the force flag is set, this
+ * check is disabled (such as for an admin.
+ *
+ * We must do the validation here to prevent a malicious user from setting the
+ * author_id of the Recipe they're trying to save to their own.
+ */
+func SaveRecipe(recipe *defs.Recipe, user_id uint32, force bool) (*defs.Recipe, error) {
+    var rows *sql.Rows
+    var err error
+    //TODO some input validation on would be nice
+    //TODO tags
+    //TODO linked recipes
+    /* Build JSON from complex fields. */
+    var directions []byte
+    var ingredients []byte
+    directions, err = json.Marshal(recipe.Directions)
+    if err != nil {
+        return nil, err
+    }
+    ingredients, err = json.Marshal(recipe.Ingredients)
+    if err != nil {
+        return nil, err
+    }
+    /* Hold the dynamically generated portion of our SQL. */
+    var query_text string
+    /* Hold all the parameters for our query. */
+    var params []interface{}
+
+    query_text = `UPDATE recipes SET (revision, amount, directions,
+                ingredients, notes, oven, source, summary, time, title) =
+                (revision + 1, $1, $2, $3, $4, $5, $6, $7, $8, $9)
+            WHERE id = $10 `
+    params = []interface{}{ recipe.Amount, directions, ingredients,
+            recipe.Notes, recipe.Oven, recipe.Source, recipe.Summary,
+            recipe.Time, recipe.Title, recipe.Id }
+    /*
+     * If force is not set, we need to make sure the author is the one making
+     * this change.
+     */
+    if force == false {
+        query_text = "AND author_id = $11"
+        params = append(params, user_id)
+    }
+    /* Run the actual query. */
+    rows, err = DB.Query(query_text + "RETURNING id", params...)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+    /* Make sure we have a row returned. */
+    if !rows.Next() {
+        return nil, sql.ErrNoRows
+    }
+    /* Scan it in. */
+    var id uint32;
+    err = rows.Scan(&id)
+    if err != nil {
+        return nil, err
+    }
+    /* At this point, we just need to read back the new recipe. */
+    recipe, err = FetchRecipe(id)
+
+    return recipe, err
+}

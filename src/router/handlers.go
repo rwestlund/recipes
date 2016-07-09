@@ -6,6 +6,7 @@ import (
     "net/url"
     "net/http"
     "encoding/json"
+    "database/sql"
     "defs"
     "db"
     "github.com/gorilla/mux"
@@ -60,7 +61,7 @@ func handle_recipes(res http.ResponseWriter, req *http.Request) {
  * Create a new recipe.
  * POST /recipes
  */
-func handle_post_recipe(res http.ResponseWriter, req *http.Request) {
+func handle_put_or_post_recipe(res http.ResponseWriter, req *http.Request) {
     /* Access control. */
     var usr *defs.User
     var err error
@@ -88,12 +89,25 @@ func handle_post_recipe(res http.ResponseWriter, req *http.Request) {
         res.WriteHeader(400)
         return
     }
-    /* Fill in the currently logged-in user as the author. */
-    recipe.AuthorId = usr.Id
 
-    /* Create it. */
     var new_recipe *defs.Recipe
-    new_recipe, err = db.CreateRecipe(&recipe)
+
+    /* Update it. */
+    if req.Method == "PUT" {
+        /* Bypass the author check if the user has sufficient privileges. */
+        var force bool
+        force = usr.Role == "Admin" || usr.Role == "Moderator"
+        new_recipe, err = db.SaveRecipe(&recipe, usr.Id, force)
+        if err == sql.ErrNoRows {
+            res.WriteHeader(403)
+            return
+        }
+    /* Create it. */
+    } else {
+        /* Fill in the currently logged-in user as the author. */
+        recipe.AuthorId = usr.Id
+        new_recipe, err = db.CreateRecipe(&recipe)
+    }
 
     if err != nil {
         log.Println(err)
