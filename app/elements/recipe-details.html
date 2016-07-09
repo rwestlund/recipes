@@ -301,18 +301,25 @@
                         name: "error-toast",
                         data: "Failed to save recipe :(",
                     });
+                    // This is something of a hack. The error toast will
+                    // dismiss the save button toast, so after 4 seconds,
+                    // show it again.
+                    var that = this;
+                    setTimeout(_ => that.check_change(), 4000);
+
                 },
                 put_item_successful: function() {
-                    // load the response into new_recipe and copy it here to
+                    // Load the response into new_recipe and copy it here to
                     // prevent blanking the screen on a failed request.
+                    // First make the backup.
+                    this.backup_recipe(this.new_recipe);
+                    // Then update our screen and let check_change fire.
+                    this.set('recipe', this.new_recipe);
+                    // Finally, show the success toast.
                     this.fire("iron-signal", {
                         name: "success-toast",
-                        data: this.new_recipe.title + " saved",
+                        data: (this.new_recipe.title || "Recipe") + " saved",
                     });
-                    this.set('recipe', this.new_recipe);
-                    // Make it back up the new copy.
-                    this.recipe_received();
-                    // Checking for change should automatically fire.
                 },
                 loading_recipe_failed: function() {
                     this.fire("iron-signal", {
@@ -320,14 +327,17 @@
                         data: "Failed to communicate with server :(",
                     });
                 },
-                /* Make a copy of the recipe so we can tell whether it changed. */
+                /* Backup on GET. */
                 recipe_received: function() {
-                    var o = JSON.parse(JSON.stringify(this.recipe));
-                    this.set('backup_recipe', o);
+                    this.backup_recipe(this.recipe);
+                },
+                /* Make a copy of the recipe so we can tell whether it changed. */
+                backup_recipe: function(r) {
+                    this.set('orig_recipe', JSON.parse(JSON.stringify(r)));
                 },
                 check_change: function() {
-                    if (!this.backup_recipe) return;
-                    var change = this.rdiff(this.backup_recipe, this.recipe);
+                    if (!this.orig_recipe) return;
+                    var change = this.rdiff(this.orig_recipe, this.recipe);
                     if (change) this.$.save_toast.open();
                     else this.$.save_toast.close();
                 },
