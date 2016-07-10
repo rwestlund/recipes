@@ -75,4 +75,10 @@ var routes = Routes {
         "/users/{id:[0-9]+}",
         handle_delete_user,
     },
+    Route {
+        "tags",
+        []string{ "GET", "HEAD" },
+        "/tags",
+        handle_get_tags,
+    },
 }

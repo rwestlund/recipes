@@ -326,4 +326,14 @@ func handle_delete_user(res http.ResponseWriter, req *http.Request) {
     res.WriteHeader(200)
 }
 
-
+func handle_get_tags(res http.ResponseWriter, req *http.Request) {
+    var tags []byte
+    var err error
+    tags, err = db.FetchTags()
+    if err != nil {
+        log.Println(err)
+        res.WriteHeader(500)
+        return
+    }
+    res.Write(tags)
+}

@@ -107,7 +107,8 @@ func FetchRecipes(filter *defs.ItemFilter) (*[]defs.Recipe, error) {
     }
     defer rows.Close()
 
-    /* The array we're going to fill. The append() builtin will approximately
+    /*
+     * The array we're going to fill. The append() builtin will approximately
      * double the capacity when it needs to reallocate, but we can save some
      * copying by starting at a decent number.
      */
@@ -229,12 +230,41 @@ func SaveRecipe(recipe *defs.Recipe, user_id uint32, force bool) (*defs.Recipe, 
         query_text = "AND author_id = $11"
         params = append(params, user_id)
     }
-    /* Run the actual query. */
-    rows, err = DB.Query(query_text + "RETURNING id", params...)
+
+    /* Start a transaction. */
+    var tx *sql.Tx
+    tx, err = DB.Begin()
+    /* Implicitly rollback if we exit with an error. */
+    defer tx.Rollback()
+
+    /*
+     * First we update tags. If the auther check fails, this will be rolled
+     * back at the end of the function. This deleting and then inserting is
+     * somewhat wasteful, but it's simple to implement.
+     */
+    /* Remove the old tags. */
+    rows, err = tx.Query("DELETE FROM tags WHERE recipe_id = $1", recipe.Id)
     if err != nil {
         return nil, err
     }
-    defer rows.Close()
+    rows.Close()
+    /* Insert the new tags. */
+    var tag string
+    for _, tag = range recipe.Tags {
+        rows, err = tx.Query(`INSERT INTO tags (recipe_id, tag)
+                VALUES ($1, $2)`, recipe.Id, tag)
+        if err != nil {
+            return nil, err
+        }
+        rows.Close()
+    }
+
+    /* Run the actual query to update the recipe fields. */
+    rows, err = tx.Query(query_text + "RETURNING id", params...)
+    if err != nil {
+        return nil, err
+    }
+    rows.Close()
     /* Make sure we have a row returned. */
     if !rows.Next() {
         return nil, sql.ErrNoRows
@@ -242,6 +272,11 @@ func SaveRecipe(recipe *defs.Recipe, user_id uint32, force bool) (*defs.Recipe, 
     /* Scan it in. */
     var id uint32;
     err = rows.Scan(&id)
+    if err != nil {
+        return nil, err
+    }
+    /* Everything worked, time to commit the transaction. */
+    err = tx.Commit()
     if err != nil {
         return nil, err
     }
