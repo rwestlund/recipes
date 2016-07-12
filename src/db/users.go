@@ -112,6 +112,10 @@ func FetchUsers(filter *defs.ItemFilter) (*[]defs.User, error) {
         /* Add it to our list. */
         users = append(users, *user)
     }
+    err = rows.Err()
+    if err != nil {
+        return nil, err
+    }
     return &users, nil
 }
 

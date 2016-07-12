@@ -136,6 +136,10 @@ func FetchRecipes(filter *defs.ItemFilter) (*[]defs.Recipe, error) {
         /* Add it to our list. */
         recipes = append(recipes, *r)
     }
+    err = rows.Err()
+    if err != nil {
+        return nil, err
+    }
     return &recipes, nil
 }
 
@@ -235,8 +239,6 @@ func SaveRecipe(recipe *defs.Recipe, user_id uint32, force bool) (*defs.Recipe, 
     var rows *sql.Rows
     var err error
     //TODO some input validation on would be nice
-    //TODO tags
-    //TODO linked recipes
     /* Build JSON from complex fields. */
     var directions []byte
     var ingredients []byte
@@ -265,7 +267,7 @@ func SaveRecipe(recipe *defs.Recipe, user_id uint32, force bool) (*defs.Recipe, 
      * this change.
      */
     if force == false {
-        query_text = "AND author_id = $11"
+        query_text = "AND author_id = $11 "
         params = append(params, user_id)
     }
 
@@ -280,29 +282,45 @@ func SaveRecipe(recipe *defs.Recipe, user_id uint32, force bool) (*defs.Recipe, 
      * back at the end of the function. This deleting and then inserting is
      * somewhat wasteful, but it's simple to implement.
      */
-    /* Remove the old tags. */
-    rows, err = tx.Query("DELETE FROM tags WHERE recipe_id = $1", recipe.Id)
+     /* Use _ and use Exec as in http://go-database-sql.org/modifying.html. */
+    _, err = tx.Exec("DELETE FROM tags WHERE recipe_id = $1", recipe.Id)
     if err != nil {
         return nil, err
     }
-    rows.Close()
     /* Insert the new tags. */
     var tag string
     for _, tag = range recipe.Tags {
-        rows, err = tx.Query(`INSERT INTO tags (recipe_id, tag)
+        _, err = tx.Exec(`INSERT INTO tags (recipe_id, tag)
                 VALUES ($1, $2)`, recipe.Id, tag)
         if err != nil {
             return nil, err
         }
-        rows.Close()
     }
 
-    /* Run the actual query to update the recipe fields. */
+    /*
+     * Second, we update linked_recipes. If the auther check fails, this will
+     * be rolled back at the end of the function. This deleting and then
+     * inserting is somewhat wasteful, but it's simple to implement.
+     */
+    _, err = tx.Exec("DELETE FROM linked_recipes WHERE src = $1", recipe.Id)
+    if err != nil {
+        return nil, err
+    }
+    /* Insert the new linked_recipes. */
+    var lr defs.LinkedRecipe
+    for _, lr = range recipe.LinkedRecipes {
+        _, err = tx.Exec(`INSERT INTO linked_recipes (src, dest)
+                VALUES ($1, $2)`, recipe.Id, lr.Id)
+        if err != nil {
+            return nil, err
+        }
+    }
+
+    /* Finally, run the actual query to update the Recipe fields. */
     rows, err = tx.Query(query_text + "RETURNING id", params...)
     if err != nil {
         return nil, err
     }
-    rows.Close()
     /* Make sure we have a row returned. */
     if !rows.Next() {
         return nil, sql.ErrNoRows
@@ -313,6 +331,8 @@ func SaveRecipe(recipe *defs.Recipe, user_id uint32, force bool) (*defs.Recipe, 
     if err != nil {
         return nil, err
     }
+    /* This must be closed before commit; defer doesn't work. */
+    rows.Close()
     /* Everything worked, time to commit the transaction. */
     err = tx.Commit()
     if err != nil {

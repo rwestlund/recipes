@@ -58,8 +58,8 @@ func handle_recipes(res http.ResponseWriter, req *http.Request) {
 }
 
 /*
- * Create a new recipe.
- * POST /recipes
+ * Create a new recipe or update an existing one.
+ * POST /recipes, PUT /recipes/4
  */
 func handle_put_or_post_recipe(res http.ResponseWriter, req *http.Request) {
     /* Access control. */
