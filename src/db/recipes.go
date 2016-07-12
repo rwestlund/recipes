@@ -16,7 +16,15 @@ var query_rows string = `SELECT recipes.id, recipes.revision,
             recipes.amount, recipes.author_id, recipes.directions,
             recipes.ingredients, recipes.notes, recipes.oven,
             recipes.source, recipes.summary, recipes.time, recipes.title,
-            json_agg(tags.tag), users.name
+            COALESCE(json_agg(tags.tag), '[]'::json) AS tags, users.name,
+            COALESCE((SELECT json_agg(json_build_object(
+                        'id', linked_recipes.dest,
+                        'title', lr.title))
+                    FROM linked_recipes, recipes lr
+                    WHERE recipes.id = linked_recipes.src
+                        AND linked_recipes.dest = lr.id),
+                '[]'::json)
+                AS linked_recipes
         FROM recipes
         JOIN users
             ON recipes.author_id = users.id
@@ -27,12 +35,13 @@ var query_rows string = `SELECT recipes.id, recipes.revision,
 func scan_recipe(row *sql.Rows) (*defs.Recipe, error) {
     /* JSON fields will need special handling. */
     var ingredients, directions, tags string
+    var linked_recipes []byte
     /* The recipe we're going to read in. */
     var r defs.Recipe
 
     err := row.Scan(&r.Id, &r.Revision, &r.Amount, &r.AuthorId, &directions,
             &ingredients, &r.Notes, &r.Oven, &r.Source, &r.Summary,
-            &r.Time, &r.Title, &tags, &r.AuthorName)
+            &r.Time, &r.Title, &tags, &r.AuthorName, &linked_recipes)
     if err != nil {
         return nil, err
     }
@@ -46,6 +55,10 @@ func scan_recipe(row *sql.Rows) (*defs.Recipe, error) {
         return nil, e
     }
     e = json.Unmarshal([]byte(tags), &r.Tags)
+    if e != nil {
+        return nil, e
+    }
+    e = json.Unmarshal(linked_recipes, &r.LinkedRecipes)
     if e != nil {
         return nil, e
     }
