@@ -1,6 +1,6 @@
 <!--
     Randy Westlund
-    2016-04
+    2016-07
 -->
 <!-- This module allows editing of a recipe. -->
 
@@ -46,10 +46,14 @@
         </iron-ajax>
 
         <div class="headerbar layout horizontal center">
-            <paper-button raised on-tap="load_recipes_page">
-                <iron-icon icon="icons:arrow-back"></iron-icon>
-                All Recipes
-            </paper-button>
+            <!-- This path doesn't use the hashbang, so it doesn't need the
+                 load_recipe hack. -->
+            <a class="inherit-color" href="/">
+                <paper-button raised>
+                    <iron-icon icon="icons:arrow-back"></iron-icon>
+                    All Recipes
+                </paper-button>
+            </a>
             <paper-button raised on-tap="toggle_edit_mode">
                 <iron-icon icon="icons:create"></iron-icon>
                 <template is="dom-if" if="[[edit_mode]]">
@@ -217,6 +221,7 @@
                     </div>
                 </template>
 
+
                 <!-- Display version. -->
                 <template is="dom-if" if="[[!edit_mode]]">
                     <div class="layout horizontal end end-justified wrap">
@@ -287,6 +292,25 @@
                                 </strong>
                                 <div>[[recipe.notes]]</div>
                             </template>
+                            <template is="dom-if"
+                                        if="[[recipe.linked_recipes.length]]">
+                                <strong class="recipe-item-label">
+                                    Linked Recipes
+                                </strong>
+                                <template is="dom-repeat"
+                                        items="[[recipe.linked_recipes]]">
+                                    <a class="inherit-color"
+                                            href$="#!/recipes/[[item.id]]"
+                                            data-id$="[[item.id]]"
+                                            on-tap="load_recipe">
+                                        <paper-button raised>
+                                            <iron-icon icon="icons:link">
+                                            </iron-icon>
+                                            [[item.title]]
+                                        </paper-button>
+                                    </a>
+                                </template>
+                            </template>
                         </div>
                     </div>
                 </template>
@@ -309,6 +333,7 @@
             'use strict';
             Polymer({
                 is: 'recipe-details',
+                behaviors: [ recipe_behaviors.global_behavior, ],
                 properties: {
                     recipeId: {
                         type: String,
@@ -383,6 +408,12 @@
                 /* Backup on GET. */
                 recipe_received: function() {
                     this.backup_recipe(this.recipe);
+                    // This fires automatically before the backup happens, so
+                    // call it manually here to fix state. This means that on
+                    // a page load, it will think there's a change for a short
+                    // duration, but it doesn't seem to be long enough to
+                    // display anything.
+                    this.check_change();
                 },
                 /* Make a copy of the recipe so we can tell whether it changed. */
                 backup_recipe: function(r) {
@@ -414,9 +445,6 @@
                     }
                     // Base case; a simple comparison between simple types.
                     else return a !== b;
-                },
-                load_recipes_page: function() {
-                    page.show('/');
                 },
                 toggle_edit_mode: function() {
                     this.edit_mode = !this.edit_mode;

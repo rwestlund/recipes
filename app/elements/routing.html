@@ -17,10 +17,10 @@
       app.route = 'users';
     });
 
-    page('/recipes/:id', function(data) {
+    page('/recipes/:id', function(ctx) {
         console.log('loading recipe-details');
       app.route = 'recipe-details';
-      app.params = data.params;
+      app.params = ctx.params;
     });
 
     // add #! before urls

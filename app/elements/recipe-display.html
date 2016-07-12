@@ -80,12 +80,37 @@
                             </strong>
                             <div>[[recipe.notes]]</div>
                         </template>
+                        <template is="dom-if"
+                                    if="[[recipe.linked_recipes.length]]">
+                            <strong class="recipe-item-label">
+                                Linked Recipes
+                            </strong>
+                            <template is="dom-repeat"
+                                    items="[[recipe.linked_recipes]]">
+                                <a class="inherit-color"
+                                        href$="#!/recipes/[[item.id]]"
+                                        data-id$="[[item.id]]"
+                                        on-tap="load_recipe">
+                                    <paper-button raised>
+                                        <iron-icon icon="icons:link">
+                                        </iron-icon>
+                                        [[item.title]]
+                                    </paper-button>
+                                </a>
+                            </template>
+                        </template>
                         <!-- Edit recipe button. -->
                         <div class="layout horizontal end-justified">
-                            <paper-button raised on-tap="load_recipe_page">
-                                <iron-icon icon="icons:link"></iron-icon>
-                                Permalink
-                            </paper-button>
+                            <a class="inherit-color"
+                                    href$="#!/recipes/[[recipe.id]]"
+                                    data-id$="[[recipe.id]]"
+                                    on-tap="load_recipe">
+                                <paper-button raised>
+                                    <iron-icon icon="icons:description">
+                                    </iron-icon>
+                                    Permalink
+                                </paper-button>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -110,10 +135,6 @@
                 },
                 fmt_tags: function(tags) {
                     return tags.join(", ");
-                },
-                load_recipe_page: function(e) {
-                    e.stopPropagation();
-                    page.show('/recipes/' + this.recipe.id);
                 },
             });
         })();
