@@ -327,7 +327,7 @@ func handle_delete_user(res http.ResponseWriter, req *http.Request) {
 }
 
 func handle_get_tags(res http.ResponseWriter, req *http.Request) {
-    var tags []byte
+    var tags *[]byte
     var err error
     tags, err = db.FetchTags()
     if err != nil {
@@ -335,5 +335,17 @@ func handle_get_tags(res http.ResponseWriter, req *http.Request) {
         res.WriteHeader(500)
         return
     }
-    res.Write(tags)
+    res.Write(*tags)
+}
+
+func handle_get_recipe_titles(res http.ResponseWriter, req *http.Request) {
+    var titles *[]byte
+    var err error
+    titles, err = db.FetchRecipeTitles()
+    if err != nil {
+        log.Println(err)
+        res.WriteHeader(500)
+        return
+    }
+    res.Write(*titles)
 }

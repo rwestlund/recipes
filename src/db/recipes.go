@@ -139,6 +139,31 @@ func FetchRecipes(filter *defs.ItemFilter) (*[]defs.Recipe, error) {
     return &recipes, nil
 }
 
+func FetchRecipeTitles() (*[]byte, error) {
+    var rows *sql.Rows
+    var err error
+    /* Return them all in one row. */
+    rows, err = DB.Query(`SELECT json_agg(
+            json_build_object('id', id, 'title', title) ORDER BY title)
+            FROM recipes`)
+    if (err != nil) {
+        return nil, err
+    }
+    var titles []byte
+
+    /* In this case, we just want an empty list if nothing was returned. */
+    if !rows.Next() {
+        return &titles, nil
+    }
+
+    /* This is alredy JSON, so just leave it as a []byte. */
+    err = rows.Scan(&titles)
+    if err != nil {
+        return nil, err
+    }
+    return &titles, nil
+}
+
 
 /* Fetch one recipe by id. */
 func FetchRecipe(id uint32) (*defs.Recipe, error) {

@@ -7,7 +7,7 @@ import (
 )
 
 /* Get a list of all tags in the database. */
-func FetchTags() ([]byte, error) {
+func FetchTags() (*[]byte, error) {
     var rows *sql.Rows
     var err error
     /* Return them all in one row. */
@@ -19,7 +19,7 @@ func FetchTags() ([]byte, error) {
 
     /* In this case, we just want an empty list if nothing was returned. */
     if !rows.Next() {
-        return tags, nil
+        return &tags, nil
     }
 
     /* This is alredy JSON, so just leave it as a []byte. */
@@ -27,5 +27,5 @@ func FetchTags() ([]byte, error) {
     if err != nil {
         return nil, err
     }
-    return tags, nil
+    return &tags, nil
 }

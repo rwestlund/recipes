@@ -46,6 +46,12 @@ var routes = Routes {
         handle_recipes,
     },
     Route {
+        "recipe_titles",
+        []string{ "GET", "HEAD" },
+        "/recipes/titles",
+        handle_get_recipe_titles,
+    },
+    Route {
         "users",
         []string{ "GET", "HEAD" },
         "/users",
