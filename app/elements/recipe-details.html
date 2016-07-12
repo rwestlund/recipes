@@ -44,6 +44,14 @@
                 on-error="put_item_failed"
                 loading="{{loading.put_item}}">
         </iron-ajax>
+        <!-- All recipes for linked recipe typeahead. -->
+        <iron-ajax auto method="GET"
+                url="/recipes/titles"
+                handle-as="json"
+                last-response="{{recipes}}"
+                on-error="loading_data_failed"
+                loading="{{loading.get_recipes}}">
+        </iron-ajax>
 
         <div class="headerbar layout horizontal center">
             <!-- This path doesn't use the hashbang, so it doesn't need the
@@ -217,6 +225,41 @@
                                     label="Notes"
                                     value="{{recipe.notes}}">
                             </paper-textarea>
+
+                            <!-- Linked recipe list and typeahead. -->
+                            <strong class="recipe-item-label">
+                                Linked Recipes
+                            </strong>
+                            <template is="dom-repeat"
+                                    items="[[recipe.linked_recipes]]">
+                                <div class="layout horizontal center justified">
+                                    <span>[[item.title]]</span>
+                                    <paper-icon-button icon="icons:cancel"
+                                            data-index$="[[index]]"
+                                            on-tap="remove_linked_recipe">
+                                    </paper-icon-button>
+                                </div>
+                            </template>
+
+                            <!-- Select a new recipe from a drop down. -->
+                            <div class="layout vertical">
+                                <paper-dropdown-menu
+                                        label="Select New Linked Recipe"
+                                        vertical-align="bottom"
+                                        horizontal-align="right">
+                                    <paper-menu class="dropdown-content"
+                                            attr-for-selected="value"
+                                            selected="{{selected_recipe}}"
+                                            on-iron-select="add_selected_recipe">
+                                        <template is="dom-repeat"
+                                                items="[[recipes]]">
+                                            <paper-item value="[[item]]">
+                                                [[item.title]]
+                                            </paper-item>
+                                        </template>
+                                    </paper-menu>
+                                </paper-dropdown-menu>
+                            </div>
                         </div>
                     </div>
                 </template>
@@ -348,6 +391,7 @@
                             get_item: false,
                             put_item: false,
                             get_tags: false,
+                            get_recipes: false,
                         },
                     },
                     // True whenever we're loading XHR data.
@@ -479,6 +523,11 @@
                     var temp = this.splice('recipe.directions', index, 1)[0];
                     this.splice('recipe.directions', index - 1, 0, temp);
                 },
+                remove_linked_recipe: function(e) {
+                    var index = Number(
+                            e.currentTarget.attributes['data-index'].value);
+                    this.splice('recipe.linked_recipes', index, 1);
+                },
                 remove_tag: function(e) {
                     var index = Number(
                             e.currentTarget.attributes['data-index'].value);
@@ -493,6 +542,21 @@
                     this.add_tag(this.selected_tag);
                     //TODO this doesn't clear the menu
                     this.set('selected_tag', null);
+                },
+                add_selected_recipe: function() {
+                    // Don't link to self.
+                    // TODO this shouldn't be in the list at all
+                    if (this.recipe.id === this.selected_recipe.id) return;
+                    for (var i in this.recipe.linked_recipes)
+                        if (this.recipe.linked_recipes[i].id ===
+                                this.selected_recipe.id) return;
+                    this.push('recipe.linked_recipes', {
+                            id:     this.selected_recipe.id,
+                            title:  this.selected_recipe.title
+                    });
+                    console.log(this.recipe.linked_recipes);//DEBUG
+                    //TODO this doesn't clear the menu
+                    this.set('selected_recipe', null);
                 },
                 add_typed_tag: function() {
                     this.add_tag(this.typed_tag);
