@@ -53,6 +53,10 @@
                 loading="{{loading.get_recipes}}">
         </iron-ajax>
 
+        <cookie-display cookie-name="role" cookie-value="{{user_role}}">
+        </cookie-display>
+        <cookie-display cookie-name="user_id" cookie-value="{{user_id}}">
+        </cookie-display>
         <div class="headerbar layout horizontal center">
             <!-- This path doesn't use the hashbang, so it doesn't need the
                  load_recipe hack. -->
@@ -62,7 +66,8 @@
                     All Recipes
                 </paper-button>
             </a>
-            <paper-button raised on-tap="toggle_edit_mode">
+            <paper-button raised on-tap="toggle_edit_mode"
+                    disabled$="[[!allow_recipe_edit(user_role, user_id, recipe.author_id)]]">
                 <iron-icon icon="icons:create"></iron-icon>
                 <template is="dom-if" if="[[edit_mode]]">
                     Leave
@@ -415,6 +420,15 @@
                         .forEach( v => ret = ret || this.loading[v] );
                     return ret;
                 },
+                // Users may edit this recipe if they are an Admin,
+                // Modererator, or the User who owns it. Author id must be a
+                // param to make sure this updates on recipe load.
+                allow_recipe_edit: function(role, user_id, author_id) {
+                    return role === this.constants.user_role_enum.admin ||
+                            role === this.constants.user_role_enum.moderator ||
+                            (role === this.constants.user_role_enum.user &&
+                                Number(user_id) === author_id);
+                },
                 save_recipe: function() {
                     this.$.put_item_ajax.generateRequest();
                 },
@@ -451,6 +465,8 @@
                 },
                 /* Backup on GET. */
                 recipe_received: function() {
+                    // Make sure we're not in edit mode after changing recipes.
+                    this.edit_mode = false;
                     this.backup_recipe(this.recipe);
                     // This fires automatically before the backup happens, so
                     // call it manually here to fix state. This means that on

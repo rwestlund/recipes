@@ -121,7 +121,7 @@
                     </div>
 
                     <cookie-display
-                            cookie-name="name"
+                            cookie-name="username"
                             cookie-value="{{user_name}}">
                     </cookie-display>
                     <cookie-display
@@ -140,7 +140,15 @@
                 <iron-pages attr-for-selected="data-route" selected="{{route}}">
 
                     <section data-route="recipes">
-                        <item-collection item-name="recipes"></item-collection>
+                        <!-- Only set enable-fab if appropriate. -->
+                        <template is="dom-if" if="[[user_is_user(user_role)]]">
+                            <item-collection item-name="recipes" enable-fab>
+                            </item-collection>
+                        </template>
+                        <template is="dom-if" if="[[!user_is_user(user_role)]]">
+                            <item-collection item-name="recipes">
+                            </item-collection>
+                        </template>
                     </section>
 
                     <section data-route="recipe-details">
@@ -194,7 +202,7 @@
 
                     <template is="dom-if" if="[[user_is_admin(user_role)]]">
                         <section data-route="users">
-                            <item-collection item-name="users">
+                            <item-collection item-name="users" enable-fab>
                             </item-collection>
                         </section>
                     </template>
@@ -215,6 +223,9 @@
 
     app.user_is_admin = function(role) {
         return role === 'Admin';
+    };
+    app.user_is_user = function(role) {
+        return role === 'Admin' || role === 'Moderator' || role === 'User';
     };
     app.load_about = function(e) {
         e.stopPropagation();

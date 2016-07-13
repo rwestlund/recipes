@@ -46,12 +46,6 @@ recipe_behaviors.global_behavior = {
         var index = e.currentTarget.attributes['data-id'].value;
         page.show('/recipes/' + index);
     },
-    isUserAdmin: function(role) {
-        return (role === this.constants.userRoleEnum.admin);
-    },
-    isUserGuest: function(role) {
-        return (role === this.constants.userRoleEnum.guest);
-    },
     long_date: function(d) {
         var date = new Date(d);
         return date.toDateString() + ' ' + date.toLocaleTimeString();

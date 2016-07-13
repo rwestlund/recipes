@@ -101,8 +101,9 @@
             </recipe-form>
         </template>
 
-        <!-- FAB and creation forms. -->
-        <paper-fab icon="icons:add" on-tap="create_item">
+        <!-- FAB. -->
+        <paper-fab icon="icons:add" on-tap="create_item"
+                    hidden$="[[!enableFab]]">
         </paper-fab>
 
 
@@ -139,6 +140,11 @@
                     // The parent provides 'recipes' or 'users' here.
                     itemName: {
                         type: String,
+                    },
+                    // Whether to enable the FAB.
+                    enableFab: {
+                        type: Boolean,
+                        value: false,
                     },
                     items: {
                         type: Array,
