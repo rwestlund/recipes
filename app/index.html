@@ -74,7 +74,7 @@
                 <paper-menu class="list" attr-for-selected="data-route"
                     selected="[[route]]">
 
-                    <a data-route="recipes" href="/">
+                    <a data-route="recipes" href="/" on-tap="load_home">
                         <iron-icon icon="icons:list"></iron-icon>
                         <span>Recipes</span>
                     </a>
@@ -203,7 +203,7 @@
                             </div>
                             <br />
                             <br />
-                            <div>Version 2.0.0</div>
+                            <div>Version 2.0.1</div>
                             <div>Released 2016-07-13</div>
                         </paper-material>
                     </section>
@@ -255,6 +255,17 @@
             return;
         // Otherwise, navigate there manually.
         page.show('/users');
+    };
+    app.load_home = function(e) {
+        e.stopPropagation();
+        // If this is a ctrl-click or shift-click, do nothing; the browser will
+        // open it in a new tab. On OSX, it's metaKey instead of ctrlKey.
+        if (e.detail.sourceEvent.ctrlKey || e.detail.sourceEvent.metaKey ||
+                e.detail.sourceEvent.metaKey)
+            return;
+        // Otherwise, navigate there manually.
+        e.preventDefault();
+        page.show('/');
     };
 
   </script>

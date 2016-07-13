@@ -47,6 +47,18 @@ recipe_behaviors.global_behavior = {
         var index = e.currentTarget.attributes['data-id'].value;
         page.show('/recipes/' + index);
     },
+    // Same as above.
+    load_home: function(e) {
+        e.stopPropagation();
+        // If this is a ctrl-click or shift-click, do nothing; the browser will
+        // open it in a new tab. On OSX, it's metaKey instead of ctrlKey.
+        if (e.detail.sourceEvent.ctrlKey || e.detail.sourceEvent.metaKey ||
+                e.detail.sourceEvent.metaKey)
+            return;
+        // Otherwise, navigate there manually.
+        e.preventDefault();
+        page.show('/');
+    },
     long_date: function(d) {
         var date = new Date(d);
         return date.toDateString() + ' ' + date.toLocaleTimeString();
