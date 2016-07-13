@@ -17,6 +17,10 @@
       app.route = 'users';
     });
 
+    page('/about', function() {
+        app.route = 'about';
+    });
+
     page('/recipes/:id', function(ctx) {
         console.log('loading recipe-details');
       app.route = 'recipe-details';

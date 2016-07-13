@@ -74,7 +74,11 @@
                         <iron-icon icon="icons:list"></iron-icon>
                         <span>Recipes</span>
                     </a>
-                    <a data-route="users" href="/users"
+                    <a data-route="about" href="#!/about" on-tap="load_about">
+                        <iron-icon icon="icons:info"></iron-icon>
+                        <span>About</span>
+                    </a>
+                    <a data-route="users" href="#!/users" on-tap="load_users"
                             hidden$="[[!user_is_admin(user_role)]]">
                         <iron-icon icon="social:people"></iron-icon>
                         <span>Users</span>
@@ -140,12 +144,58 @@
                     </section>
 
                     <section data-route="recipe-details">
-                        <recipe-details recipe-id="[[params.id]]"></recipe-details>
+                        <recipe-details recipe-id="[[params.id]]">
+                        </recipe-details>
+                    </section>
+
+                    <section data-route="about">
+                        <paper-material class="card-item">
+                            <h3 class="card-title">About</h3>
+                            <div class="layout horizontal wrap">
+                                <div class="flex-6 item-col">
+                                    <p>
+                                        Welcome to our recipe database! This
+                                        started as a project just for my wife
+                                        and I, because we got tired of keeping
+                                        track of a bunch of links to other
+                                        websites with ads, inconsistent
+                                        formatting, changing links, etc.
+                                    </p>
+                                    <p>
+                                        We decided to improve it and open it to
+                                        others.  Anyone can access information
+                                        here, and family and friends will have
+                                        the ability to log in and add recipes.
+                                    </p>
+                                    </div>
+                                    <div class="flex-6 item-col">
+                                    <p>
+                                        If you don't have an account and would
+                                        like to add recipes, I'll add you if
+                                        one of my friends will vouch for you.
+                                        If you have any technical issues or
+                                        suggestions, contact me at
+                                        rwestlun@gmail.com.
+                                    </p>
+                                    <p>
+                                        The source for this site is on
+                                        <a href="https://github.com/rwestlund/recipes">
+                                            GitHub</a>
+                                        under the 2-Clause-BSD license.
+                                    </p>
+                                    <div>Randy Westlund</div>
+                                    <div><a href="https://www.textplain.net">
+                                        www.textplain.net</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </paper-material>
                     </section>
 
                     <template is="dom-if" if="[[user_is_admin(user_role)]]">
                         <section data-route="users">
-                            <item-collection item-name="users"></item-collection>
+                            <item-collection item-name="users">
+                            </item-collection>
                         </section>
                     </template>
                 </iron-pages>
@@ -165,6 +215,26 @@
 
     app.user_is_admin = function(role) {
         return role === 'Admin';
+    };
+    app.load_about = function(e) {
+        e.stopPropagation();
+        // If this is a ctrl-click or shift-click, do nothing; the browser will
+        // open it in a new tab. On OSX, it's metaKey instead of ctrlKey.
+        if (e.detail.sourceEvent.ctrlKey || e.detail.sourceEvent.metaKey ||
+                e.detail.sourceEvent.metaKey)
+            return;
+        // Otherwise, navigate there manually.
+        page.show('/about');
+    };
+    app.load_users = function(e) {
+        e.stopPropagation();
+        // If this is a ctrl-click or shift-click, do nothing; the browser will
+        // open it in a new tab. On OSX, it's metaKey instead of ctrlKey.
+        if (e.detail.sourceEvent.ctrlKey || e.detail.sourceEvent.metaKey ||
+                e.detail.sourceEvent.metaKey)
+            return;
+        // Otherwise, navigate there manually.
+        page.show('/users');
     };
 
   </script>
