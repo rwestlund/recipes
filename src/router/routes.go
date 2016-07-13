@@ -70,6 +70,12 @@ var routes = Routes {
         handle_put_or_post_recipe,
     },
     Route {
+        "recipes",
+        []string{ "DELETE" },
+        "/recipes/{id:[0-9]+}",
+        handle_delete_recipe,
+    },
+    Route {
         "users",
         []string{ "POST" },
         "/users",

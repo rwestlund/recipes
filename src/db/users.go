@@ -184,28 +184,24 @@ func UpdateUser(id uint32, user *defs.User) (*defs.User, error) {
 
 /* Delete a User by id.  */
 func DeleteUser(id uint32) error {
-    var rows *sql.Rows
     var err error
-    rows, err = DB.Query(`DELETE FROM USERS WHERE id = $1`, id)
+    _, err = DB.Exec(`DELETE FROM users WHERE id = $1`, id)
     if err != nil {
         return err
     }
-    defer rows.Close()
     return nil
 }
 
 /* Destroy a login token. */
 func UserLogout(token string) error {
-    var rows *sql.Rows
     var err error
-    rows, err = DB.Query(`UPDATE users SET (token, lastlog) =
+    _, err = DB.Query(`UPDATE users SET (token, lastlog) =
                 (NULL, CURRENT_TIMESTAMP)
             WHERE token = $1`,
             token)
     if err != nil {
         return err
     }
-    defer rows.Close()
     return nil
 }
 

@@ -16,7 +16,10 @@ var query_rows string = `SELECT recipes.id, recipes.revision,
             recipes.amount, recipes.author_id, recipes.directions,
             recipes.ingredients, recipes.notes, recipes.oven,
             recipes.source, recipes.summary, recipes.time, recipes.title,
-            COALESCE(json_agg(tags.tag), '[]'::json) AS tags, users.name,
+            COALESCE(json_agg(tags.tag) FILTER (WHERE tags.tag IS NOT NULL),
+                    '[]'::json)
+                AS tags,
+            users.name,
             COALESCE((SELECT json_agg(json_build_object(
                         'id', linked_recipes.dest,
                         'title', lr.title))
@@ -230,7 +233,7 @@ func CreateRecipe(recipe *defs.Recipe) (*defs.Recipe, error) {
  * Take a Recipe to save and the user_id of the current user trying the
  * operation. If the user does not match the author_id of the recipe in the
  * database, this will return sql.ErrNoRows. If the force flag is set, this
- * check is disabled (such as for an admin.
+ * check is disabled (such as for an admin).
  *
  * We must do the validation here to prevent a malicious user from setting the
  * author_id of the Recipe they're trying to save to their own.
@@ -342,4 +345,44 @@ func SaveRecipe(recipe *defs.Recipe, user_id uint32, force bool) (*defs.Recipe, 
     recipe, err = FetchRecipe(id)
 
     return recipe, err
+}
+
+/*
+ * Take a Recipe id to delete and the user_id of the current user trying the
+ * operation. If the user does not match the author_id of the recipe in the
+ * database, this will return sql.ErrNoRows. If the force flag is set, this
+ * check is disabled (such as for an admin).
+ *
+ * We must do the validation here to prevent a malicious user from setting the
+ * author_id of the Recipe they're trying to save to their own.
+ */
+func DeleteRecipe(recipe_id uint32, user_id uint32, force bool) error {
+    var rows *sql.Rows
+    var err error
+
+    /* Hold the dynamically generated portion of our SQL. */
+    var query_text string = "DELETE FROM recipes WHERE id = $1 "
+    /* Hold all the parameters for our query. */
+    var params []interface{}
+    params = []interface{}{ recipe_id }
+
+    /*
+     * If force is not set, we need to make sure the author is the one making
+     * this change.
+     */
+    if force == false {
+        query_text += "AND author_id = $2 "
+        params = append(params, user_id)
+    }
+
+    rows, err = DB.Query(query_text + "RETURNING id", params...)
+    if err != nil {
+        return err
+    }
+    defer rows.Close()
+    /* This happens if they are not authorized. */
+    if !rows.Next() {
+        return sql.ErrNoRows
+    }
+    return nil
 }

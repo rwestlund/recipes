@@ -134,7 +134,7 @@ func handle_recipe(res http.ResponseWriter, req *http.Request) {
     res.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
     /* Get id parameter. */
-    params := mux.Vars(req)
+    var params map[string]string = mux.Vars(req)
     bigid, err := strconv.ParseUint(params["id"], 10, 32)
     if err != nil {
         log.Println(err)
@@ -163,6 +163,58 @@ func handle_recipe(res http.ResponseWriter, req *http.Request) {
 
     /* If we made it here, send good response. */
     res.Write(j)
+}
+
+/*
+ * Delete a recipe by id.
+ * DELETE /recipes/4
+ */
+func handle_delete_recipe(res http.ResponseWriter, req *http.Request) {
+    /* Access control. */
+    var usr *defs.User
+    var err error
+    usr, err = check_auth(res, req)
+    if err != nil {
+        res.WriteHeader(500)
+        return
+    }
+    if usr == nil {
+        res.WriteHeader(401)
+        return
+    }
+    if usr.Role != "Admin" && usr.Role != "Moderator" && usr.Role != "User" {
+        res.WriteHeader(403)
+        return
+    }
+
+    res.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+    /* Get id parameter. */
+    var params map[string]string = mux.Vars(req)
+    var bigid uint64
+    bigid, err = strconv.ParseUint(params["id"], 10, 32)
+    if err != nil {
+        log.Println(err)
+        res.WriteHeader(400)
+        return
+    }
+    var recipe_id uint32 = uint32(bigid)
+
+    /* Bypass the author check if the user has sufficient privileges. */
+    var force bool
+    force = usr.Role == "Admin" || usr.Role == "Moderator"
+    err = db.DeleteRecipe(recipe_id, usr.Id, force)
+    if err == sql.ErrNoRows {
+        res.WriteHeader(403)
+        return
+    }
+    if err != nil {
+        log.Println(err)
+        res.WriteHeader(400)
+        return
+    }
+    /* If we made it here, send good response. */
+    res.WriteHeader(200)
 }
 
 /*
@@ -247,7 +299,7 @@ func handle_post_or_put_user(res http.ResponseWriter, req *http.Request) {
     /* Update a user in the database. */
     if req.Method == "PUT" {
         /* Get id parameter. */
-        params := mux.Vars(req)
+        var params map[string]string = mux.Vars(req)
         bigid, err := strconv.ParseUint(params["id"], 10, 32)
         if err != nil {
             log.Println(err)
@@ -305,8 +357,9 @@ func handle_delete_user(res http.ResponseWriter, req *http.Request) {
     res.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
     /* Get id parameter. */
-    params := mux.Vars(req)
-    bigid, err := strconv.ParseUint(params["id"], 10, 32)
+    var params map[string]string = mux.Vars(req)
+    var bigid uint64
+    bigid, err = strconv.ParseUint(params["id"], 10, 32)
     if err != nil {
         log.Println(err)
         res.WriteHeader(400)
