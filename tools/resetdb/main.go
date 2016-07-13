@@ -56,13 +56,13 @@ func main() {
         title       text NOT NULL
     )`)
     wrap_sql(db, `CREATE TABLE tags (
-        recipe_id       integer NOT NULL REFERENCES recipes(id),
+        recipe_id       integer REFERENCES recipes(id) ON DELETE CASCADE NOT NULL,
         tag             text NOT NULL,
         UNIQUE(recipe_id, tag)
     )`)
     wrap_sql(db, `CREATE TABLE linked_recipes (
-        src     integer REFERENCES recipes(id) NOT NULL,
-        dest    integer REFERENCES recipes(id) NOT NULL,
+        src     integer REFERENCES recipes(id) ON DELETE CASCADE NOT NULL,
+        dest    integer REFERENCES recipes(id) ON DELETE CASCADE NOT NULL,
         CONSTRAINT must_be_different CHECK ( src != dest ),
         UNIQUE (src, dest)
     )`)
