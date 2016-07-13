@@ -7,6 +7,7 @@ package router
 import (
     "fmt"
     "log"
+    "strconv"
     "database/sql"
     "net/http"
     "encoding/json"
@@ -133,14 +134,21 @@ func handle_oauth_callback(res http.ResponseWriter, req *http.Request) {
     }
     /* The client will display this. */
     var name_cookie = http.Cookie {
-        Name:       "name",
+        Name:       "username",
         Value:      user.Name,
+        Secure:     true,
+    }
+    /* The client will this for visibility control. */
+    var user_id_cookie = http.Cookie {
+        Name:       "user_id",
+        Value:      strconv.FormatUint(uint64(user.Id), 10),
         Secure:     true,
     }
     /* Set the cookies and send them home. */
     http.SetCookie(res, &auth_cookie)
     http.SetCookie(res, &role_cookie)
     http.SetCookie(res, &name_cookie)
+    http.SetCookie(res, &user_id_cookie)
     http.Redirect(res, req, "/", 302)
 }
 
@@ -160,7 +168,13 @@ func clear_cookies(res http.ResponseWriter) {
         MaxAge:     -1,
     }
     var name_cookie = http.Cookie {
-        Name:       "name",
+        Name:       "username",
+        Value:      "",
+        Secure:     true,
+        MaxAge:     -1,
+    }
+    var user_id_cookie = http.Cookie {
+        Name:       "user_id",
         Value:      "",
         Secure:     true,
         MaxAge:     -1,
@@ -169,6 +183,7 @@ func clear_cookies(res http.ResponseWriter) {
     http.SetCookie(res, &auth_cookie)
     http.SetCookie(res, &role_cookie)
     http.SetCookie(res, &name_cookie)
+    http.SetCookie(res, &user_id_cookie)
 }
 
 /*

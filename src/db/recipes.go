@@ -267,7 +267,7 @@ func SaveRecipe(recipe *defs.Recipe, user_id uint32, force bool) (*defs.Recipe, 
      * this change.
      */
     if force == false {
-        query_text = "AND author_id = $11 "
+        query_text += "AND author_id = $11 "
         params = append(params, user_id)
     }
 
