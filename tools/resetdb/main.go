@@ -1,6 +1,6 @@
 /*
  * Drop and recreate database objects. Used for testing and creating a new
- * deployment. Must be run after createdb/main.go. Also serves as table
+ * deployment. Must be run after tools/createdb/main.go. Also serves as table
  * documentation.
  */
 package main
@@ -9,10 +9,14 @@ import (
     "log"
     "database/sql"
     _ "github.com/lib/pq"
+    "config"
 )
 
 func main() {
-    db, err := sql.Open("postgres", "user=recipes dbname=recipes sslmode=disable")
+    var db *sql.DB
+    var err error
+    db, err = sql.Open("postgres", "user=" + config.DatabaseUserName +
+            " dbname=" + config.DatabaseName + " sslmode=disable")
     if err != nil {
         log.Println(err)
         log.Fatal("ERROR: connection params are invalid")
@@ -71,7 +75,7 @@ func main() {
 }
 
 func wrap_sql(db *sql.DB, s string) {
-    _, err := db.Query(s)
+    _, err := db.Exec(s)
     if err != nil {
         log.Println("error during:", s)
         log.Println(err)
