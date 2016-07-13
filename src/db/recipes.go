@@ -215,7 +215,7 @@ func CreateRecipe(recipe *defs.Recipe) (*defs.Recipe, error) {
         return nil, sql.ErrNoRows
     }
     /* Scan it in. */
-    var id uint32;
+    var id uint32
     err = rows.Scan(&id)
     if err != nil {
         return nil, err

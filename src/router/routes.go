@@ -60,7 +60,13 @@ var routes = Routes {
     Route {
         "recipes",
         []string{ "POST", "PUT" },
-        "/recipes/{id:[0-9]+?}",
+        "/recipes",
+        handle_put_or_post_recipe,
+    },
+    Route {
+        "recipes",
+        []string{ "POST", "PUT" },
+        "/recipes/{id:[0-9]+}",
         handle_put_or_post_recipe,
     },
     Route {
@@ -71,8 +77,14 @@ var routes = Routes {
     },
     Route {
         "users",
+        []string{ "POST" },
+        "/users",
+        handle_post_or_put_user,
+    },
+    Route {
+        "users",
         []string{ "PUT" },
-        "/users/{id:[0-9]+?}",
+        "/users/{id:[0-9]+}",
         handle_post_or_put_user,
     },
     Route {

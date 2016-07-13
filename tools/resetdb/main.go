@@ -44,16 +44,16 @@ func main() {
     wrap_sql(db, `CREATE TABLE recipes (
         id          serial PRIMARY KEY,
         revision    integer NOT NULL DEFAULT 0,
-        amount      text,
+        amount      text NOT NULL DEFAULT '',
         author_id   integer NOT NULL REFERENCES users(id),
-        directions  jsonb,
-        ingredients jsonb,
-        notes       text,
-        oven        text,
-        source      text,
-        summary     text,
-        time        text,
-        title       text
+        directions  jsonb NOT NULL DEFAULT '[]',
+        ingredients jsonb NOT NULL DEFAULT '[]',
+        notes       text NOT NULL DEFAULT '',
+        oven        text NOT NULL DEFAULT '',
+        source      text NOT NULL DEFAULT '',
+        summary     text NOT NULL DEFAULT '',
+        time        text NOT NULL DEFAULT '',
+        title       text NOT NULL
     )`)
     wrap_sql(db, `CREATE TABLE tags (
         recipe_id       integer NOT NULL REFERENCES recipes(id),
