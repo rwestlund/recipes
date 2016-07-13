@@ -5,6 +5,10 @@
 <!-- This module shows a list of items, with server-side pagination and
      search. -->
 
+<!-- TODO If you expand a recipe, click permalink, then delete it, you'll come
+     back to the list with the deleted item still showing. Not sure how to
+     reload recipes when that happens. -->
+
 <link rel="import" href="../bc/polymer/polymer.html">
 
 <dom-module id="item-collection">
@@ -244,11 +248,11 @@
                         this.push("items", this.new_item);
                     }
                     else if (this.itemName === "recipes") {
+                        page.show("/recipes/" + this.new_item.id);
                         this.fire("iron-signal", {
                             name: "success-toast",
-                            data: "Recipe " + this.new_item.title + " created",
+                            data: this.new_item.title + " created",
                         });
-                        page.show("/recipes/" + this.new_item.id);
                     }
                 },
                 creating_item_failed: function() {

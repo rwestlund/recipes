@@ -25,14 +25,6 @@
                 on-response="recipe_received"
                 loading="{{loading.get_item}}">
         </iron-ajax>
-        <iron-ajax auto="[[recipeId]]"
-                method="GET"
-                url="/tags"
-                handle-as="json"
-                last-response="{{tags}}"
-                on-error="loading_data_failed"
-                loading="{{loading.get_tags}}">
-        </iron-ajax>
         <iron-ajax method="PUT"
                 id="put_item_ajax"
                 url="/recipes/[[recipeId]]"
@@ -43,6 +35,23 @@
                 on-response="put_item_successful"
                 on-error="put_item_failed"
                 loading="{{loading.put_item}}">
+        </iron-ajax>
+        <iron-ajax id="delete_item_ajax"
+                method="DELETE"
+                url="/recipes/[[recipeId]]"
+                handle-as="json"
+                on-error="delete_item_failed"
+                on-response="delete_item_successful"
+                loading="{{loading.delete_item}}">
+        </iron-ajax>
+        <!-- All tags for the add tag typeahead. -->
+        <iron-ajax auto="[[recipeId]]"
+                method="GET"
+                url="/tags"
+                handle-as="json"
+                last-response="{{tags}}"
+                on-error="loading_data_failed"
+                loading="{{loading.get_tags}}">
         </iron-ajax>
         <!-- All recipes for linked recipe typeahead. -->
         <iron-ajax auto method="GET"
@@ -77,6 +86,13 @@
                 </template>
                 Edit Mode
             </paper-button>
+
+            <paper-button raised on-tap="open_delete_modal"
+                    disabled$="[[!allow_recipe_edit(user_role, user_id, recipe.author_id)]]">
+                <iron-icon icon="icons:delete"></iron-icon>
+                Delete Recipe
+            </paper-button>
+
             <paper-spinner class="nav-button" active="[[loading_data]]"
                     alt="loading recipes...">
             </paper-spinner>
@@ -365,10 +381,21 @@
             </div>
         </paper-material>
 
+        <paper-dialog id="delete_item_confirmation"
+                on-iron-overlay-closed="delete_item">
+            <div>
+                Delete [[recipe.title]]?
+            </div>
+            <div class="buttons">
+                <paper-button raised dialog-dismiss>Cancel</paper-button>
+                <paper-button raised dialog-confirm>Delete</paper-button>
+            </div>
+        </paper-dialog>
+
         <paper-toast id="save_toast"
                 class="warn-toast"
                 duration="0"
-                horizontal-align="right"
+                horizontal-align="left"
                 horizontal-offset="20"
                 no-cancel-on-esc-key
                 on-click="save_recipe"
@@ -393,10 +420,11 @@
                     loading: {
                         type: Object,
                         value: {
-                            get_item: false,
-                            put_item: false,
-                            get_tags: false,
-                            get_recipes: false,
+                            get_item:       false,
+                            delete_item:    false,
+                            put_item:       false,
+                            get_tags:       false,
+                            get_recipes:    false,
                         },
                     },
                     // True whenever we're loading XHR data.
@@ -432,6 +460,14 @@
                 save_recipe: function() {
                     this.$.put_item_ajax.generateRequest();
                 },
+                open_delete_modal: function() {
+                    this.$.delete_item_confirmation.open();
+                },
+                // Actually do it.
+                delete_item: function(e, reason) {
+                    if (reason.confirmed)
+                        this.$.delete_item_ajax.generateRequest();
+                },
                 put_item_failed: function() {
                     this.fire("iron-signal", {
                         name: "error-toast",
@@ -454,8 +490,22 @@
                     // Finally, show the success toast.
                     this.fire("iron-signal", {
                         name: "success-toast",
-                        data: (this.new_recipe.title || "Recipe") + " saved",
+                        data: this.new_recipe.title + " saved",
                     });
+                },
+                delete_item_failed: function() {
+                    this.fire("iron-signal", {
+                        name: "error-toast",
+                        data: "Failed to delete " + this.recipe.title + " :(",
+                    });
+                },
+                // Let the user know, then go back to the list of recipes.
+                delete_item_successful: function() {
+                    this.fire("iron-signal", {
+                        name: "success-toast",
+                        data: this.recipe.title + " deleted",
+                    });
+                    page.show('/');
                 },
                 loading_data_failed: function() {
                     this.fire("iron-signal", {
@@ -467,6 +517,11 @@
                 recipe_received: function() {
                     // Make sure we're not in edit mode after changing recipes.
                     this.edit_mode = false;
+                    // Clear these out to prevent showing old data.
+                    // TODO this doesn't clear the selected fields.
+                    this.selected_tag = null;
+                    this.typed_tag = null;
+                    this.selected_recipe = null;
                     this.backup_recipe(this.recipe);
                     // This fires automatically before the backup happens, so
                     // call it manually here to fix state. This means that on
