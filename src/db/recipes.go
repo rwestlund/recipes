@@ -1,4 +1,9 @@
-/* The database interface for recipes. */
+/*
+ * Copyright (c) 2016, Randy Westlund. All rights reserved.
+ * This code is under the BSD-2-Clause license.
+ *
+ * This file exposes the database interface for recipes.
+ */
 
 package db
 

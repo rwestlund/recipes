@@ -1,3 +1,8 @@
+// Copyright (c) 2016, Randy Westlund. All rights reserved.
+// This code is under the BSD-2-Clause license.
+
+// This is some JavaScript to help manipulate the main app. Most of this may be
+// unnecessary.
 
 (function(document) {
   'use strict';
@@ -6,24 +11,6 @@
   // and give it some initial binding values
   // Learn more about auto-binding templates at http://goo.gl/Dx1u2g
   var app = document.querySelector('#app');
-
-  app.displayInstalledToast = function() {
-    // Check to make sure caching is actually enabled—it won't be in the dev environment.
-    if (!document.querySelector('platinum-sw-cache').disabled) {
-      document.querySelector('#caching-complete').show();
-    }
-  };
-
-  // Listen for template bound event to know when bindings
-  // have resolved and content has been stamped to the page
-  app.addEventListener('dom-change', function() {
-    
-  });
-
-  // See https://github.com/Polymer/polymer/issues/1381
-  window.addEventListener('WebComponentsReady', function() {
-    // imports are loaded and elements have been registered
-  });
 
   // Main area's paper-scroll-header-panel custom condensing transformation of
   // the appName in the middle-container and the bottom title in the bottom-container.
@@ -50,7 +37,7 @@
     Polymer.Base.transform('scale(' + scaleMiddle + ') translateZ(0)', appName);
   });
 
-  // Scroll page to top and expand header
+  // Scroll page to top and expand header.
   app.scrollPageToTop = function() {
      document.getElementById('mainContainer').scrollTop = 0;
   };

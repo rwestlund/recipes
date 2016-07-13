@@ -1,8 +1,12 @@
 /*
+ * Copyright (c) 2016, Randy Westlund. All rights reserved.
+ * This code is under the BSD-2-Clause license.
+ *
  * Drop and recreate database objects. Used for testing and creating a new
  * deployment. Must be run after tools/createdb/main.go. Also serves as table
  * documentation.
  */
+
 package main
 
 import (

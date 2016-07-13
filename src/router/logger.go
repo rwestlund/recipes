@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2016, Randy Westlund. All rights reserved.
+ * This code is under the BSD-2-Clause license.
+ *
+ * This file wraps the HTTP handlers with a logging function.
+ */
+
 package router
 
 import (

@@ -1,5 +1,11 @@
+/*
+ * Copyright (c) 2016, Randy Westlund. All rights reserved.
+ * This code is under the BSD-2-Clause license.
+ *
+ * This defines the User struct, which represents a user from the DB.
+ */
+
 package defs
-/* This defines the User struct, which represents a user from the DB. */
 
 import (
     "time"

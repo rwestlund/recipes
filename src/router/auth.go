@@ -1,11 +1,14 @@
 /*
+ * Copyright (c) 2016, Randy Westlund. All rights reserved.
+ * This code is under the BSD-2-Clause license.
+ *
  * This file handles authentication workflows for the application, namely
  * OAuth2.
  */
+
 package router
 
 import (
-    "fmt"
     "log"
     "strconv"
     "database/sql"
@@ -61,7 +64,6 @@ func handle_oauth_callback(res http.ResponseWriter, req *http.Request) {
 
     /* Use the validation code and our client secret to get a user token. */
     var token  *oauth2.Token
-    fmt.Println("exchanging token") // DEBUG
     token, err = conf.Exchange(oauth2.NoContext, code)
     if err != nil {
         log.Println(err)
@@ -72,7 +74,6 @@ func handle_oauth_callback(res http.ResponseWriter, req *http.Request) {
      * At this point, they have successfully proven authentication; they are
      * who they claim to be. Now we need to see who they are.
      */
-    fmt.Println("getting profile")// DEBUG
     var client *http.Client;
     client = conf.Client(oauth2.NoContext, token)
     var resp *http.Response
@@ -83,7 +84,6 @@ func handle_oauth_callback(res http.ResponseWriter, req *http.Request) {
         res.WriteHeader(500)
         return
     }
-    fmt.Println("parsing profile")// DEBUG
     /* Use this commented block to print the JSON response if necessary. */
     //var bytes []byte
     //bytes, err = ioutil.ReadAll(resp.Body)
@@ -100,10 +100,8 @@ func handle_oauth_callback(res http.ResponseWriter, req *http.Request) {
         res.WriteHeader(500)
         return
     }
-    fmt.Println(oauth_profile)//DEBUG
 
     /* Now that we have their profile and token, record the login. */
-    fmt.Println("recording user in DB")//DEBUG
     var user *defs.User
     user, err = db.GoogleLogin(oauth_profile.Emails[0].Value,
             oauth_profile.DisplayName, token.AccessToken)

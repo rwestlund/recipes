@@ -1,14 +1,20 @@
+<!--
+    Copyright (c) 2016, Randy Westlund. All rights reserved.
+    This code is under the BSD-2-Clause license.
+-->
+<!-- This defines the client-side routes used in the application. -->
+
 <script src="/bc/page/page.js"></script>
 <script>
-  window.addEventListener('WebComponentsReady', function() {
+window.addEventListener('WebComponentsReady', function() {
 
-    // We use Page.js for routing. This is a Micro
-    // client-side router inspired by the Express router
-    // More info: https://visionmedia.github.io/page.js/
+    // This uses page.js for routing. See https://visionmedia.github.io/page.js/
+    // For any page, close the drawer first.
     page('*', function(ctx, next) {
         app.closeDrawer();
         next();
     });
+
     page('/', function() {
       app.route = 'recipes';
     });
@@ -22,7 +28,6 @@
     });
 
     page('/recipes/:id', function(ctx) {
-        console.log('loading recipe-details');
       app.route = 'recipe-details';
       app.params = ctx.params;
     });
@@ -31,6 +36,5 @@
     page({
         hashbang: true
     });
-
-  });
+});
 </script>

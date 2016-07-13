@@ -1,7 +1,11 @@
 /*
- * Drop and recreate database and uers. This should only be run once per
+ * Copyright (c) 2016, Randy Westlund. All rights reserved.
+ * This code is under the BSD-2-Clause license.
+ *
+ * Drop and recreate database and users. This should only be run once per
  * deployment, just to initialize things. Run tools/resetdb/main.go next.
  */
+
 package main
 
 import (

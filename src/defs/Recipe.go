@@ -1,5 +1,10 @@
+/*
+ * Copyright (c) 2016, Randy Westlund. All rights reserved.
+ * This code is under the BSD-2-Clause license.
+ *
+ * This defines the Recipe struct, which represents a recipe from the DB.
+ */
 package defs
-/* This defines the Recipe struct, which represents a recipe from the DB */
 
 type Recipe struct {
     Id              uint32          `json:"id"`

@@ -1,5 +1,8 @@
 /*
- * This is the config file for the site. It must be copied to
+ * Copyright (c) 2016, Randy Westlund. All rights reserved.
+ * This code is under the BSD-2-Clause license.
+ *
+ * This is the config file for the application. It must be copied to
  * src/config/config.go and modified.
  */
 package config

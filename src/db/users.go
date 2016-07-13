@@ -1,9 +1,13 @@
-/* The database interface for users. */
+/*
+ * Copyright (c) 2016, Randy Westlund. All rights reserved.
+ * This code is under the BSD-2-Clause license.
+ *
+ * This file exposes the database interface for users.
+ */
 
 package db
 
 import (
-    "log"
     "strconv"
     "strings"
     "database/sql"
@@ -47,7 +51,6 @@ func scan_user(rows *sql.Rows) (*defs.User, error) {
  * the filter can match either the name, email, or role.
  */
 func FetchUsers(filter *defs.ItemFilter) (*[]defs.User, error) {
-    _ = log.Println//DEBUG
 
     /* Hold the dynamically generated portion of our SQL. */
     var query_text string

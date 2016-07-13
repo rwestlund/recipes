@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2016, Randy Westlund. All rights reserved.
+ * This code is under the BSD-2-Clause license.
+ *
+ * This file connects to the database and exposes the handle to the other DB
+ * files.
+ */
 package db
 
 import (

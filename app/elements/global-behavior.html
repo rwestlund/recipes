@@ -1,7 +1,8 @@
 <!--
-    Randy Westlund
-    2016-07
+    Copyright (c) 2016, Randy Westlund. All rights reserved.
+    This code is under the BSD-2-Clause license.
 -->
+<!-- This defines behavior and utilities imported by all element. -->
 
 <script>
 var constants = {};
@@ -20,8 +21,8 @@ var to_array = function(obj) {
     return Object.keys(obj).map(k => obj[k]).sort();
 };
 
-// Provdide presorted lists.
-constants.user_roles =      to_array(constants.user_role_enum);
+// Provide presorted lists.
+constants.user_roles = to_array(constants.user_role_enum);
 
 var recipe_behaviors = recipe_behaviors || {};
 recipe_behaviors.global_behavior = {
@@ -57,6 +58,5 @@ recipe_behaviors.global_behavior = {
     first_defined: function(a, b) {
         return a || b;
     },
-
 };
 </script>
