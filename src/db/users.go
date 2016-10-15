@@ -198,7 +198,7 @@ func DeleteUser(id uint32) error {
 /* Destroy a login token. */
 func UserLogout(token string) error {
     var err error
-    _, err = DB.Query(`UPDATE users SET (token, lastlog) =
+    _, err = DB.Exec(`UPDATE users SET (token, lastlog) =
                 (NULL, CURRENT_TIMESTAMP)
             WHERE token = $1`,
             token)
