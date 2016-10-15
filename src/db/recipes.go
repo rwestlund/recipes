@@ -191,7 +191,7 @@ func FetchRecipe(id uint32) (*defs.Recipe, error) {
     defer rows.Close()
     /* Make sure we have a row returned. */
     if !rows.Next() {
-        return nil, nil
+        return nil, sql.ErrNoRows
     }
     /* Scan it in. */
     var r *defs.Recipe

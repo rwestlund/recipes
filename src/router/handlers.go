@@ -152,15 +152,14 @@ func handle_recipe(res http.ResponseWriter, req *http.Request) {
 
     var recipe *defs.Recipe
     recipe, err = db.FetchRecipe(id)
-    if err != nil {
+	if err == sql.ErrNoRows {
+        res.WriteHeader(404)
+        return
+	} else if err != nil {
         res.WriteHeader(500)
         log.Println(err)
         return
-    } else if recipe == nil {
-        res.WriteHeader(404)
-        return
     }
-
     j, e := json.Marshal(recipe)
     if e != nil {
         log.Println(err)
