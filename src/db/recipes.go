@@ -161,6 +161,7 @@ func FetchRecipeTitles() (*[]byte, error) {
     if (err != nil) {
         return nil, err
     }
+	defer rows.Close()
     var titles []byte
 
     /* In this case, we just want an empty list if nothing was returned. */
