@@ -8,10 +8,11 @@
 package config
 
 /* Format: [address]:port, passed to http.ListenAndServe(). */
-var ListenAddress       string = ":3000"
+var ListenAddress string = ":3000"
+
 /* Paramaters for connecting to a local PostgreSQL database. */
-var DatabaseUserName    string = "recipes"
-var DatabaseName        string = "recipes"
+var DatabaseUserName string = "recipes"
+var DatabaseName string = "recipes"
 
 /*
  * The following variables are used in OAuth, and must be set to your
@@ -19,8 +20,10 @@ var DatabaseName        string = "recipes"
  */
 
 /* Google OAuth client id. */
-var OAuthClientID       string = your value here!
+var OAuthClientID string = your value here!
+
 /* Google OAuth client secret. */
-var OAuthClientSecret   string = your value here!
+var OAuthClientSecret string = your value here!
+
 /* The hostname in the URL where this server can be found. */
-var LocalHostName       string = "recipes.textplain.net"
+var LocalHostName string = "recipes.textplain.net"

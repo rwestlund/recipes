@@ -10,36 +10,36 @@
 package main
 
 import (
-    "log"
-    "database/sql"
-    _ "github.com/lib/pq"
-    "config"
+	"config"
+	"database/sql"
+	_ "github.com/lib/pq"
+	"log"
 )
 
 func main() {
-    var db *sql.DB
-    var err error
-    db, err = sql.Open("postgres", "user=" + config.DatabaseUserName +
-            " dbname=" + config.DatabaseName + " sslmode=disable")
-    if err != nil {
-        log.Println(err)
-        log.Fatal("ERROR: connection params are invalid")
-    }
-    err = db.Ping()
-    if err != nil {
-        log.Println(err)
-        log.Fatal("ERROR: failed to connect to the DB")
-    }
+	var db *sql.DB
+	var err error
+	db, err = sql.Open("postgres", "user="+config.DatabaseUserName+
+		" dbname="+config.DatabaseName+" sslmode=disable")
+	if err != nil {
+		log.Println(err)
+		log.Fatal("ERROR: connection params are invalid")
+	}
+	err = db.Ping()
+	if err != nil {
+		log.Println(err)
+		log.Fatal("ERROR: failed to connect to the DB")
+	}
 
-    log.Println("dropping old objects")
-    wrap_sql(db, "DROP TABLE IF EXISTS linked_recipes")
-    wrap_sql(db, "DROP TABLE IF EXISTS tags CASCADE")
-    wrap_sql(db, "DROP TABLE IF EXISTS recipes CASCADE")
-    wrap_sql(db, "DROP TABLE IF EXISTS users")
+	log.Println("dropping old objects")
+	wrap_sql(db, "DROP TABLE IF EXISTS linked_recipes")
+	wrap_sql(db, "DROP TABLE IF EXISTS tags CASCADE")
+	wrap_sql(db, "DROP TABLE IF EXISTS recipes CASCADE")
+	wrap_sql(db, "DROP TABLE IF EXISTS users")
 
-    log.Println("creating new objects")
+	log.Println("creating new objects")
 
-    wrap_sql(db, `CREATE TABLE users (
+	wrap_sql(db, `CREATE TABLE users (
         id              serial PRIMARY KEY,
         email           text NOT NULL,
         name            text,
@@ -49,7 +49,7 @@ func main() {
                             DEFAULT CURRENT_TIMESTAMP,
         lastlog         timestamp WITH TIME ZONE
     )`)
-    wrap_sql(db, `CREATE TABLE recipes (
+	wrap_sql(db, `CREATE TABLE recipes (
         id          serial PRIMARY KEY,
         revision    integer NOT NULL DEFAULT 0,
         amount      text NOT NULL DEFAULT '',
@@ -63,26 +63,26 @@ func main() {
         time        text NOT NULL DEFAULT '',
         title       text NOT NULL
     )`)
-    wrap_sql(db, `CREATE TABLE tags (
+	wrap_sql(db, `CREATE TABLE tags (
         recipe_id       integer REFERENCES recipes(id) ON DELETE CASCADE NOT NULL,
         tag             text NOT NULL,
         UNIQUE(recipe_id, tag)
     )`)
-    wrap_sql(db, `CREATE TABLE linked_recipes (
+	wrap_sql(db, `CREATE TABLE linked_recipes (
         src     integer REFERENCES recipes(id) ON DELETE CASCADE NOT NULL,
         dest    integer REFERENCES recipes(id) ON DELETE CASCADE NOT NULL,
         CONSTRAINT must_be_different CHECK ( src != dest ),
         UNIQUE (src, dest)
     )`)
 
-    log.Println("complete")
+	log.Println("complete")
 }
 
 func wrap_sql(db *sql.DB, s string) {
-    _, err := db.Exec(s)
-    if err != nil {
-        log.Println("error during:", s)
-        log.Println(err)
-        log.Fatal()
-    }
+	_, err := db.Exec(s)
+	if err != nil {
+		log.Println("error during:", s)
+		log.Println(err)
+		log.Fatal()
+	}
 }

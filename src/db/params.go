@@ -8,27 +8,27 @@
 package db
 
 import (
-    "log"
-    "database/sql"
-    "config"
-    _ "github.com/lib/pq"
+	"config"
+	"database/sql"
+	_ "github.com/lib/pq"
+	"log"
 )
 
 /* Make db handle global to this package. */
 var DB *sql.DB
 
-func Init () {
-    /* Connect to database. */
-    var err error
-    DB, err = sql.Open("postgres", "user=" + config.DatabaseUserName +
-            " dbname=" + config.DatabaseName + " sslmode=disable")
-    if err != nil {
-        log.Println(err)
-        log.Fatal("ERROR: connection params are invalid")
-    }
-    err = DB.Ping()
-    if err != nil {
-        log.Println(err)
-        log.Fatal("ERROR: failed to connect to the DB")
-    }
+func Init() {
+	/* Connect to database. */
+	var err error
+	DB, err = sql.Open("postgres", "user="+config.DatabaseUserName+
+		" dbname="+config.DatabaseName+" sslmode=disable")
+	if err != nil {
+		log.Println(err)
+		log.Fatal("ERROR: connection params are invalid")
+	}
+	err = DB.Ping()
+	if err != nil {
+		log.Println(err)
+		log.Fatal("ERROR: failed to connect to the DB")
+	}
 }
