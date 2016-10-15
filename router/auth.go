@@ -9,10 +9,10 @@
 package router
 
 import (
-	"config"
+	"github.com/rwestlund/recipes/config"
 	"database/sql"
-	"db"
-	"defs"
+	"github.com/rwestlund/recipes/db"
+	"github.com/rwestlund/recipes/defs"
 	"encoding/json"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"

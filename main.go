@@ -8,11 +8,11 @@
 package main
 
 import (
-	"config"
-	"db"
+	"github.com/rwestlund/recipes/config"
+	"github.com/rwestlund/recipes/db"
 	"log"
 	"net/http"
-	"router"
+	"github.com/rwestlund/recipes/router"
 )
 
 func main() {

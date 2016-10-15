@@ -7,6 +7,7 @@ A client-side web application for managing recipes, written in Go and Polymer.
 - PostgreSQL >= 9.4
 - Node.js and NPM
 - Go
+- Govendor
 - NGINX, or another reverse proxy to handle TLS
 
 ## Description
@@ -31,14 +32,13 @@ The old version using Node.js and MongoDB is still available at
 ## Installation
 
 1. Install dependencies list above
-2. Clone this repo
+2. Clone this repo in your GOPATH: $GOPATH/src/github.com/rwestlund/recipes
 3. Run `npm install`
 4. Run `npm run bower install`
-5. Run `git submodule update --init`
+5. Run `govendor sync`
 6. Copy `src/config/config.go.example` to `src/config/config.go` and set
     parameters
 7. Configure a reverse proxy (like NGINX) to handle TLS
-8. Set the `GOPATH` environment variable to the root of this repository
 9. Manually add yourself to the `users` table in PostgreSQL
 10. Run `go run main.go`
 

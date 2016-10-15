@@ -9,7 +9,7 @@ package db
 
 import (
 	"database/sql"
-	"defs"
+	"github.com/rwestlund/recipes/defs"
 	"github.com/lib/pq"
 	"strconv"
 	"strings"

@@ -9,7 +9,7 @@ package db
 
 import (
 	"database/sql"
-	"defs"
+	"github.com/rwestlund/recipes/defs"
 	"encoding/json"
 	"log"
 	"strconv"
