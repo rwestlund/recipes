@@ -189,12 +189,17 @@ func clear_cookies(res http.ResponseWriter) {
  * GET /logout
  */
 func handle_logout(res http.ResponseWriter, req *http.Request) {
+	var auth_cookie *http.Cookie
 	var err error
-	err = db.UserLogout("TODO NEED TOKEN")
-	if err != nil {
-		log.Println(err)
-		res.WriteHeader(500)
-		return
+	auth_cookie, err = req.Cookie("authentication")
+	/* If there is no auth cookie, skip deleting it and just return success. */
+	if err == nil {
+		var e error = db.UserLogout(auth_cookie.Value)
+		if e != nil {
+			log.Println(err)
+			res.WriteHeader(500)
+			return
+		}
 	}
 	clear_cookies(res)
 	http.Redirect(res, req, "/", 302)
