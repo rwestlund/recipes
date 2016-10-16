@@ -10,9 +10,9 @@ package main
 import (
 	"github.com/rwestlund/recipes/config"
 	"github.com/rwestlund/recipes/db"
+	"github.com/rwestlund/recipes/router"
 	"log"
 	"net/http"
-	"github.com/rwestlund/recipes/router"
 )
 
 func main() {

@@ -9,10 +9,10 @@ package router
 
 import (
 	"database/sql"
-	"github.com/rwestlund/recipes/db"
-	"github.com/rwestlund/recipes/defs"
 	"encoding/json"
 	"github.com/gorilla/mux"
+	"github.com/rwestlund/recipes/db"
+	"github.com/rwestlund/recipes/defs"
 	"log"
 	"net/http"
 	"net/url"

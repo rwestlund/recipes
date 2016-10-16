@@ -8,9 +8,9 @@
 package db
 
 import (
-	"github.com/rwestlund/recipes/config"
 	"database/sql"
 	_ "github.com/lib/pq"
+	"github.com/rwestlund/recipes/config"
 	"log"
 )
 
