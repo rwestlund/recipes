@@ -121,6 +121,7 @@ func handle_oauth_callback(res http.ResponseWriter, req *http.Request) {
 	var auth_cookie = http.Cookie{
 		Name:     "authentication",
 		Value:    token.AccessToken,
+		Path:     "/",
 		Secure:   true,
 		HttpOnly: true,
 	}
