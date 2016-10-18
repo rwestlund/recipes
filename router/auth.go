@@ -214,7 +214,7 @@ func check_auth(res http.ResponseWriter, req *http.Request) (*defs.User, error) 
 	auth_cookie, err = req.Cookie("authentication")
 	/* If there is no auth cookie, just return a nil User. */
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 	var user *defs.User
 	user, err = db.FetchUserByToken(auth_cookie.Value)

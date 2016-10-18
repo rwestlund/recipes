@@ -74,6 +74,7 @@ func handle_put_or_post_recipe(res http.ResponseWriter, req *http.Request) {
 	var err error
 	usr, err = check_auth(res, req)
 	if err != nil {
+		log.Println(err)
 		res.WriteHeader(500)
 		return
 	}
@@ -181,6 +182,7 @@ func handle_delete_recipe(res http.ResponseWriter, req *http.Request) {
 	var err error
 	usr, err = check_auth(res, req)
 	if err != nil {
+		log.Println(err)
 		res.WriteHeader(500)
 		return
 	}
@@ -233,6 +235,7 @@ func handle_users(res http.ResponseWriter, req *http.Request) {
 	var err error
 	usr, err = check_auth(res, req)
 	if err != nil {
+		log.Println(err)
 		res.WriteHeader(500)
 		return
 	}
@@ -277,6 +280,7 @@ func handle_post_or_put_user(res http.ResponseWriter, req *http.Request) {
 	var err error
 	usr, err = check_auth(res, req)
 	if err != nil {
+		log.Println(err)
 		res.WriteHeader(500)
 		return
 	}
@@ -346,6 +350,7 @@ func handle_delete_user(res http.ResponseWriter, req *http.Request) {
 	var err error
 	usr, err = check_auth(res, req)
 	if err != nil {
+		log.Println(err)
 		res.WriteHeader(500)
 		return
 	}
