@@ -9,9 +9,9 @@
 package main
 
 import (
-	"config"
 	"database/sql"
 	_ "github.com/lib/pq"
+	"github.com/rwestlund/recipes/config"
 	"log"
 )
 
@@ -35,7 +35,8 @@ func main() {
 	wrap_sql(db, "DROP USER IF EXISTS "+config.DatabaseUserName)
 	log.Println("creating new database")
 	wrap_sql(db, "CREATE USER "+config.DatabaseUserName+" WITH LOGIN")
-	wrap_sql(db, "CREATE DATABASE "+config.DatabaseName+" WITH OWNER recipes")
+	wrap_sql(db, "CREATE DATABASE "+config.DatabaseName+" WITH OWNER "+
+		config.DatabaseUserName)
 	log.Println("complete")
 }
 
