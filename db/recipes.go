@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Randy Westlund. All rights reserved.
+ * Copyright (c) 2016-2017, Randy Westlund. All rights reserved.
  * This code is under the BSD-2-Clause license.
  *
  * This file exposes the database interface for recipes.
@@ -10,14 +10,14 @@ package db
 import (
 	"database/sql"
 	"encoding/json"
-	"github.com/rwestlund/recipes/defs"
-	"log"
 	"strconv"
 	"strings"
+
+	"github.com/rwestlund/recipes/defs"
 )
 
-/* SQL to select recipes. */
-var query_rows string = `SELECT recipes.id, recipes.revision,
+// SQL to select recipes.
+var queryRows = `SELECT recipes.id, recipes.revision,
             recipes.amount, recipes.author_id, recipes.directions,
             recipes.ingredients, recipes.notes, recipes.oven,
             recipes.source, recipes.summary, recipes.time, recipes.title,
@@ -39,21 +39,19 @@ var query_rows string = `SELECT recipes.id, recipes.revision,
         LEFT JOIN tags
             ON recipes.id = tags.recipe_id `
 
-/* Helper function to read Recipe out of a sql.Rows object. */
-func scan_recipe(row *sql.Rows) (*defs.Recipe, error) {
-	/* JSON fields will need special handling. */
+// scanRecipe is a helper function to read Recipe out of a sql.Rows object.
+func scanRecipe(row *sql.Rows) (*defs.Recipe, error) {
+	// JSON fields need special handling.
 	var ingredients, directions, tags string
-	var linked_recipes []byte
-	/* The recipe we're going to read in. */
+	var linkedRecipes []byte
 	var r defs.Recipe
-
-	err := row.Scan(&r.Id, &r.Revision, &r.Amount, &r.AuthorId, &directions,
+	err := row.Scan(&r.ID, &r.Revision, &r.Amount, &r.AuthorID, &directions,
 		&ingredients, &r.Notes, &r.Oven, &r.Source, &r.Summary,
-		&r.Time, &r.Title, &tags, &r.AuthorName, &linked_recipes)
+		&r.Time, &r.Title, &tags, &r.AuthorName, &linkedRecipes)
 	if err != nil {
 		return nil, err
 	}
-	/* Unpack JSON fields. */
+	// Unpack JSON fields.
 	e := json.Unmarshal([]byte(directions), &r.Directions)
 	if e != nil {
 		return nil, e
@@ -66,98 +64,78 @@ func scan_recipe(row *sql.Rows) (*defs.Recipe, error) {
 	if e != nil {
 		return nil, e
 	}
-	e = json.Unmarshal(linked_recipes, &r.LinkedRecipes)
+	e = json.Unmarshal(linkedRecipes, &r.LinkedRecipes)
 	if e != nil {
 		return nil, e
 	}
 	return &r, nil
 }
 
-/*
- * Fetch all recipes from the database that match the given filter. The query
- * in the filter can match either the title or the tag.
- */
+// FetchRecipes returns all recipes from the database that match the given
+// filter. The query in the filter can match either the title or the tag.
 func FetchRecipes(filter *defs.ItemFilter) (*[]defs.Recipe, error) {
-	_ = log.Println //DEBUG
-
-	/* Hold the dynamically generated portion of our SQL. */
-	var query_text string
-	/* Hold all the parameters for our query. */
+	// Hold the dynamically generated portion of our SQL.
+	var queryText string
+	// Hold all the parameters for our query.
 	var params []interface{}
 
-	/* Tokenize search string on spaces. Each term must be matched in the title
-	 * or tags for a recipe to be returned.
-	 */
-	var terms []string = strings.Split(filter.Query, " ")
-	/* Build and apply having_text. */
+	// Tokenize search string on spaces. Each term must be matched in the title
+	// or tags for a recipe to be returned.
+	var terms = strings.Split(filter.Query, " ")
 	for i, term := range terms {
-		/* Ignore blank terms (comes from leading/trailing spaces). */
+		// Ignore blank terms (comes from leading/trailing spaces).
 		if term == "" {
 			continue
 		}
-
 		if i == 0 {
-			query_text += "\n\t HAVING (title ILIKE $"
+			queryText += "\n\t HAVING (title ILIKE $"
 		} else {
-			query_text += " AND (title ILIKE $"
+			queryText += " AND (title ILIKE $"
 		}
 		params = append(params, "%"+term+"%")
-		query_text += strconv.Itoa(len(params)) +
+		queryText += strconv.Itoa(len(params)) +
 			"\n\t\t OR string_agg(tags.tag, ' ') ILIKE $" +
 			strconv.Itoa(len(params)) + ") "
 	}
+	queryText += "\n\t ORDER BY title "
 
-	query_text += "\n\t ORDER BY title "
-
-	/* Apply count. */
 	if filter.Count != 0 {
 		params = append(params, filter.Count)
-		query_text += "\n\t LIMIT $" + strconv.Itoa(len(params))
+		queryText += "\n\t LIMIT $" + strconv.Itoa(len(params))
 	}
-	/* Apply skip. */
 	if filter.Skip != 0 {
 		params = append(params, filter.Count*filter.Skip)
-		query_text += "\n\t OFFSET $" + strconv.Itoa(len(params))
+		queryText += "\n\t OFFSET $" + strconv.Itoa(len(params))
 	}
-	/* Run the actual query. */
-	var rows *sql.Rows
-	var err error
-	rows, err = DB.Query(query_rows+
+	// Run the actual query.
+	var rows, err = DB.Query(queryRows+
 		"\n\t GROUP BY recipes.id, users.name "+
-		query_text, params...)
+		queryText, params...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	/*
-	 * The array we're going to fill. The append() builtin will approximately
-	 * double the capacity when it needs to reallocate, but we can save some
-	 * copying by starting at a decent number.
-	 */
+	// The array we're going to fill. The append() builtin will approximately
+	// double the capacity when it needs to reallocate, but we can save some
+	// copying by starting at a decent number.
 	var recipes = make([]defs.Recipe, 0, 200)
 	var r *defs.Recipe
-	/* Iterate over rows, reading in each Recipe as we go. */
+	// Iterate over rows, reading in each Recipe as we go.
 	for rows.Next() {
-		r, err = scan_recipe(rows)
+		r, err = scanRecipe(rows)
 		if err != nil {
 			return nil, err
 		}
-		/* Add it to our list. */
 		recipes = append(recipes, *r)
 	}
-	err = rows.Err()
-	if err != nil {
-		return nil, err
-	}
-	return &recipes, nil
+	return &recipes, rows.Err()
 }
 
+// FetchRecipeTitles returns a JSON list of existing titles.
 func FetchRecipeTitles() (*[]byte, error) {
-	var rows *sql.Rows
-	var err error
-	/* Return them all in one row. */
-	rows, err = DB.Query(`SELECT json_agg(
+	// Return them all in one row.
+	var rows, err = DB.Query(`SELECT json_agg(
             json_build_object('id', id, 'title', title) ORDER BY title)
             FROM recipes`)
 	if err != nil {
@@ -166,228 +144,177 @@ func FetchRecipeTitles() (*[]byte, error) {
 	defer rows.Close()
 	var titles []byte
 
-	/* In this case, we just want an empty list if nothing was returned. */
+	// In this case, we just want an empty list if nothing was returned.
 	if !rows.Next() {
 		return &titles, nil
 	}
 
-	/* This is alredy JSON, so just leave it as a []byte. */
+	// This is alredy JSON, so just leave it as a []byte.
 	err = rows.Scan(&titles)
-	if err != nil {
-		return nil, err
-	}
-	return &titles, nil
+	return &titles, err
 }
 
-/* Fetch one recipe by id. */
+// FetchRecipe returns one Recipe by ID.
 func FetchRecipe(id uint32) (*defs.Recipe, error) {
-	/* Read recipe from database. */
-	var rows *sql.Rows
-	var err error
-	rows, err = DB.Query(query_rows+
+	var rows, err = DB.Query(queryRows+
 		" WHERE recipes.id = $1 GROUP BY recipes.id, users.name", id)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	/* Make sure we have a row returned. */
 	if !rows.Next() {
 		return nil, sql.ErrNoRows
 	}
-	/* Scan it in. */
-	var r *defs.Recipe
-	r, err = scan_recipe(rows)
-	if err != nil {
-		return nil, err
-	}
-	return r, nil
+	return scanRecipe(rows)
 }
 
-/*
- * Take a reference to a Recipe and create it in the database, returning fields
- * in the passed object.  Only Recipe.Title, Recipe.Summary, and
- * Recipe.AuthorId are read.
- */
+// CreateRecipe creates a recipe in the database, returning fields in the
+// passed object. Only Recipe.Title, Recipe.Summary, and Recipe.AuthorId are
+// read.
 func CreateRecipe(recipe *defs.Recipe) (*defs.Recipe, error) {
-	var rows *sql.Rows
-	var err error
 	//TODO some input validation on would be nice
-	rows, err = DB.Query(`INSERT INTO recipes (title, summary, author_id)
+	var rows, err = DB.Query(`INSERT INTO recipes (title, summary, author_id)
             VALUES ($1, $2, $3)
                 RETURNING id`,
-		recipe.Title, recipe.Summary, recipe.AuthorId)
+		recipe.Title, recipe.Summary, recipe.AuthorID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	/* Make sure we have a row returned. */
 	if !rows.Next() {
 		return nil, sql.ErrNoRows
 	}
-	/* Scan it in. */
 	var id uint32
 	err = rows.Scan(&id)
 	if err != nil {
 		return nil, err
 	}
-	/* At this point, we just need to read back the new recipe. */
-	recipe, err = FetchRecipe(id)
-
-	return recipe, err
+	return FetchRecipe(id)
 }
 
-/*
- * Take a Recipe to save and the user_id of the current user trying the
- * operation. If the user does not match the author_id of the recipe in the
- * database, this will return sql.ErrNoRows. If the force flag is set, this
- * check is disabled (such as for an admin).
- *
- * We must do the validation here to prevent a malicious user from setting the
- * author_id of the Recipe they're trying to save to their own.
- */
-func SaveRecipe(recipe *defs.Recipe, user_id uint32, force bool) (*defs.Recipe, error) {
-	var rows *sql.Rows
-	var err error
+// SaveRecipe takes a Recipe to save and the userID of the current user trying
+// the operation. If the user does not match the AuthorID of the recipe in the
+// database, this will return sql.ErrNoRows. If the force flag is set, this
+// check is disabled (such as for an admin).
+//
+// We must do the validation here to prevent a malicious user from setting the
+// AuthorID of the Recipe they're trying to save to their own.
+func SaveRecipe(recipe *defs.Recipe, userID uint32, force bool) (*defs.Recipe, error) {
 	//TODO some input validation on would be nice
 	/* Build JSON from complex fields. */
-	var directions []byte
-	var ingredients []byte
-	directions, err = json.Marshal(recipe.Directions)
+	var directions, err = json.Marshal(recipe.Directions)
 	if err != nil {
 		return nil, err
 	}
-	ingredients, err = json.Marshal(recipe.Ingredients)
+	ingredients, err := json.Marshal(recipe.Ingredients)
 	if err != nil {
 		return nil, err
 	}
-	/* Hold the dynamically generated portion of our SQL. */
-	var query_text string
-	/* Hold all the parameters for our query. */
+	// Hold the dynamically generated portion of our SQL.
+	var queryText string
+	// Hold all the parameters for our query.
 	var params []interface{}
 
-	query_text = `UPDATE recipes SET (revision, amount, directions,
+	queryText = `UPDATE recipes SET (revision, amount, directions,
                 ingredients, notes, oven, source, summary, time, title) =
                 (revision + 1, $1, $2, $3, $4, $5, $6, $7, $8, $9)
             WHERE id = $10 `
 	params = []interface{}{recipe.Amount, directions, ingredients,
 		recipe.Notes, recipe.Oven, recipe.Source, recipe.Summary,
-		recipe.Time, recipe.Title, recipe.Id}
-	/*
-	 * If force is not set, we need to make sure the author is the one making
-	 * this change.
-	 */
+		recipe.Time, recipe.Title, recipe.ID}
+	// If force is not set, we need to make sure the author is the one making
+	// this change.
 	if force == false {
-		query_text += "AND author_id = $11 "
-		params = append(params, user_id)
+		queryText += "AND author_id = $11 "
+		params = append(params, userID)
 	}
 
-	/* Start a transaction. */
-	var tx *sql.Tx
-	tx, err = DB.Begin()
-	/* Implicitly rollback if we exit with an error. */
+	tx, err := DB.Begin()
 	defer tx.Rollback()
 
-	/*
-	 * First we update tags. If the auther check fails, this will be rolled
-	 * back at the end of the function. This deleting and then inserting is
-	 * somewhat wasteful, but it's simple to implement.
-	 */
-	/* Use _ and use Exec as in http://go-database-sql.org/modifying.html. */
-	_, err = tx.Exec("DELETE FROM tags WHERE recipe_id = $1", recipe.Id)
+	// First we update tags. If the auther check fails, this will be rolled
+	// back at the end of the function. This deleting and then inserting is
+	// somewhat wasteful, but it's simple to implement.
+
+	_, err = tx.Exec("DELETE FROM tags WHERE recipe_id = $1", recipe.ID)
 	if err != nil {
 		return nil, err
 	}
-	/* Insert the new tags. */
-	var tag string
-	for _, tag = range recipe.Tags {
+	// Insert the new tags.
+	for _, tag := range recipe.Tags {
 		_, err = tx.Exec(`INSERT INTO tags (recipe_id, tag)
-                VALUES ($1, $2)`, recipe.Id, tag)
+                VALUES ($1, $2)`, recipe.ID, tag)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	/*
-	 * Second, we update linked_recipes. If the auther check fails, this will
-	 * be rolled back at the end of the function. This deleting and then
-	 * inserting is somewhat wasteful, but it's simple to implement.
-	 */
-	_, err = tx.Exec("DELETE FROM linked_recipes WHERE src = $1", recipe.Id)
+	// Second, we update linked_recipes. If the auther check fails, this will
+	// be rolled back at the end of the function. This deleting and then
+	// inserting is somewhat wasteful, but it's simple to implement.
+	_, err = tx.Exec("DELETE FROM linked_recipes WHERE src = $1", recipe.ID)
 	if err != nil {
 		return nil, err
 	}
-	/* Insert the new linked_recipes. */
+	// Insert the new linked_recipes.
 	var lr defs.LinkedRecipe
 	for _, lr = range recipe.LinkedRecipes {
 		_, err = tx.Exec(`INSERT INTO linked_recipes (src, dest)
-                VALUES ($1, $2)`, recipe.Id, lr.Id)
+                VALUES ($1, $2)`, recipe.ID, lr.ID)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	/* Finally, run the actual query to update the Recipe fields. */
-	rows, err = tx.Query(query_text+"RETURNING id", params...)
+	// Finally, run the actual query to update the Recipe fields.
+	rows, err := tx.Query(queryText+"RETURNING id", params...)
 	if err != nil {
 		return nil, err
 	}
-	/* Make sure we have a row returned. */
 	if !rows.Next() {
 		return nil, sql.ErrNoRows
 	}
-	/* Scan it in. */
 	var id uint32
 	err = rows.Scan(&id)
 	if err != nil {
 		return nil, err
 	}
-	/* This must be closed before commit; defer doesn't work. */
 	rows.Close()
-	/* Everything worked, time to commit the transaction. */
+	// Everything worked, time to commit the transaction.
 	err = tx.Commit()
 	if err != nil {
 		return nil, err
 	}
-	/* At this point, we just need to read back the new recipe. */
-	recipe, err = FetchRecipe(id)
-
-	return recipe, err
+	return FetchRecipe(id)
 }
 
-/*
- * Take a Recipe id to delete and the user_id of the current user trying the
- * operation. If the user does not match the author_id of the recipe in the
- * database, this will return sql.ErrNoRows. If the force flag is set, this
- * check is disabled (such as for an admin).
- *
- * We must do the validation here to prevent a malicious user from setting the
- * author_id of the Recipe they're trying to save to their own.
- */
-func DeleteRecipe(recipe_id uint32, user_id uint32, force bool) error {
-	var rows *sql.Rows
-	var err error
-
-	/* Hold the dynamically generated portion of our SQL. */
-	var query_text string = "DELETE FROM recipes WHERE id = $1 "
-	/* Hold all the parameters for our query. */
+// DeleteRecipe takes a Recipe id to delete and the userID of the current user
+// trying the operation. If the user does not match the AuthorID of the recipe
+// in the database, this will return sql.ErrNoRows. If the force flag is set,
+// this check is disabled (such as for an admin).
+//
+// We must do the validation here to prevent a malicious user from setting the
+// author_id of the Recipe they're trying to save to their own.
+func DeleteRecipe(recipeID uint32, userID uint32, force bool) error {
+	// Hold the dynamically generated portion of our SQL.
+	var queryText = "DELETE FROM recipes WHERE id = $1 "
+	// Hold all the parameters for our query.
 	var params []interface{}
-	params = []interface{}{recipe_id}
+	params = []interface{}{recipeID}
 
-	/*
-	 * If force is not set, we need to make sure the author is the one making
-	 * this change.
-	 */
+	// If force is not set, we need to make sure the author is the one making
+	// this change.
 	if force == false {
-		query_text += "AND author_id = $2 "
-		params = append(params, user_id)
+		queryText += "AND author_id = $2 "
+		params = append(params, userID)
 	}
 
-	rows, err = DB.Query(query_text+"RETURNING id", params...)
+	var rows, err = DB.Query(queryText+"RETURNING id", params...)
 	if err != nil {
 		return err
 	}
 	defer rows.Close()
-	/* This happens if they are not authorized. */
+	// This happens if they are not authorized.
 	if !rows.Next() {
 		return sql.ErrNoRows
 	}

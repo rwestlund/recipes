@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Randy Westlund. All rights reserved.
+ * Copyright (c) 2016-2017, Randy Westlund. All rights reserved.
  * This code is under the BSD-2-Clause license.
  *
  * This file contains HTTP handlers for the application.
@@ -10,25 +10,22 @@ package router
 import (
 	"database/sql"
 	"encoding/json"
-	"github.com/gorilla/mux"
-	"github.com/rwestlund/recipes/db"
-	"github.com/rwestlund/recipes/defs"
 	"log"
 	"net/http"
 	"net/url"
 	"strconv"
+
+	"github.com/gorilla/mux"
+	"github.com/rwestlund/recipes/db"
+	"github.com/rwestlund/recipes/defs"
 )
 
-/*
- * Take a url.URL object (from req.URL) and fill an ItemFilter.
- */
-func build_item_filter(url *url.URL) *defs.ItemFilter {
-	/* We can ignore the error because count=0 means disabled. */
-	var bigcount uint64
-	bigcount, _ = strconv.ParseUint(url.Query().Get("count"), 10, 32)
-	var bigskip uint64
-	bigskip, _ = strconv.ParseUint(url.Query().Get("skip"), 10, 32)
-	/* Build ItemFilter from query params. */
+// buildItemFilter takes a url.URL object (from req.URL) and fills an ItemFilter.
+func buildItemFilter(url *url.URL) *defs.ItemFilter {
+	// We can ignore the error because count=0 means disabled.
+	var bigcount, _ = strconv.ParseUint(url.Query().Get("count"), 10, 32)
+	var bigskip, _ = strconv.ParseUint(url.Query().Get("skip"), 10, 32)
+	// Build ItemFilter from query params.
 	var filter defs.ItemFilter = defs.ItemFilter{
 		Query: url.Query().Get("query"),
 		Count: uint32(bigcount),
@@ -37,18 +34,12 @@ func build_item_filter(url *url.URL) *defs.ItemFilter {
 	return &filter
 }
 
-/*
- * Request a list of recipes.
- * GET /recipes
- */
-func handle_recipes(res http.ResponseWriter, req *http.Request) {
+// handleRecipes handles a request for a list of recipes.
+// GET /recipes
+func handleRecipes(res http.ResponseWriter, req *http.Request) {
 	res.Header().Set("Content-Type", "application/json; charset=UTF-8")
-
-	var filter = build_item_filter(req.URL)
-
-	var recipes *[]defs.Recipe
-	var err error
-	recipes, err = db.FetchRecipes(filter)
+	var filter = buildItemFilter(req.URL)
+	var recipes, err = db.FetchRecipes(filter)
 	if err != nil {
 		log.Println(err)
 		res.WriteHeader(500)
@@ -60,19 +51,16 @@ func handle_recipes(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(500)
 		return
 	}
-	/* If we made it here, send good response. */
 	res.Write(j)
 }
 
-/*
- * Create a new recipe or update an existing one.
- * POST /recipes, PUT /recipes/4
- */
-func handle_put_or_post_recipe(res http.ResponseWriter, req *http.Request) {
-	/* Access control. */
+// handlePutOrPostRecipe creates a new recipe or updates an existing one.
+// POST /recipes, PUT /recipes/4
+func handlePutOrPostRecipe(res http.ResponseWriter, req *http.Request) {
+	// Access control.
 	var usr *defs.User
 	var err error
-	usr, err = check_auth(res, req)
+	usr, err = checkAuth(res, req)
 	if err != nil {
 		log.Println(err)
 		res.WriteHeader(500)
@@ -89,7 +77,7 @@ func handle_put_or_post_recipe(res http.ResponseWriter, req *http.Request) {
 
 	res.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-	/* Decode body. */
+	// Decode body.
 	var recipe defs.Recipe
 	err = json.NewDecoder(req.Body).Decode(&recipe)
 	if err != nil {
@@ -98,61 +86,55 @@ func handle_put_or_post_recipe(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	var new_recipe *defs.Recipe
+	var newRecipe *defs.Recipe
 
-	/* Update it. */
+	// Update it.
 	if req.Method == "PUT" {
-		/* Bypass the author check if the user has sufficient privileges. */
+		// Bypass the author check if the user has sufficient privileges.
 		var force bool
 		force = usr.Role == "Admin" || usr.Role == "Moderator"
-		new_recipe, err = db.SaveRecipe(&recipe, usr.Id, force)
+		newRecipe, err = db.SaveRecipe(&recipe, usr.ID, force)
 		if err == sql.ErrNoRows {
 			res.WriteHeader(403)
 			return
 		}
-		/* Create it. */
 	} else {
-		/* Fill in the currently logged-in user as the author. */
-		recipe.AuthorId = usr.Id
-		new_recipe, err = db.CreateRecipe(&recipe)
+		// Create it with the currently logged-in user as the author.
+		recipe.AuthorID = usr.ID
+		newRecipe, err = db.CreateRecipe(&recipe)
 	}
-
 	if err != nil {
 		log.Println(err)
 		res.WriteHeader(400)
 		return
 	}
 
-	/* Send it back. */
-	j, e := json.Marshal(new_recipe)
+	// Send it back.
+	j, e := json.Marshal(newRecipe)
 	if e != nil {
 		log.Println(e)
 		res.WriteHeader(500)
 		return
 	}
-	/* If we made it here, send good response. */
 	res.Write(j)
 }
 
-/*
- * Request a specific recipe.
- * GET /recipes/3
- */
-func handle_recipe(res http.ResponseWriter, req *http.Request) {
+// handleRecipe handles a request for a specific recipe.
+// GET /recipes/3
+func handleRecipe(res http.ResponseWriter, req *http.Request) {
 	res.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-	/* Get id parameter. */
+	// Get id parameter.
 	var params map[string]string = mux.Vars(req)
-	bigid, err := strconv.ParseUint(params["id"], 10, 32)
+	var id, err = strconv.ParseUint(params["id"], 10, 32)
 	if err != nil {
 		log.Println(err)
 		res.WriteHeader(400)
 		return
 	}
-	var id uint32 = uint32(bigid)
 
 	var recipe *defs.Recipe
-	recipe, err = db.FetchRecipe(id)
+	recipe, err = db.FetchRecipe(uint32(id))
 	if err == sql.ErrNoRows {
 		res.WriteHeader(404)
 		return
@@ -167,20 +149,14 @@ func handle_recipe(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(500)
 		return
 	}
-
-	/* If we made it here, send good response. */
 	res.Write(j)
 }
 
-/*
- * Delete a recipe by id.
- * DELETE /recipes/4
- */
-func handle_delete_recipe(res http.ResponseWriter, req *http.Request) {
-	/* Access control. */
-	var usr *defs.User
-	var err error
-	usr, err = check_auth(res, req)
+// handleDeleteRecipe deletes a recipe by id.
+// DELETE /recipes/4
+func handleDeleteRecipe(res http.ResponseWriter, req *http.Request) {
+	// Access control.
+	var usr, err = checkAuth(res, req)
 	if err != nil {
 		log.Println(err)
 		res.WriteHeader(500)
@@ -197,21 +173,18 @@ func handle_delete_recipe(res http.ResponseWriter, req *http.Request) {
 
 	res.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-	/* Get id parameter. */
+	// Get id parameter.
 	var params map[string]string = mux.Vars(req)
-	var bigid uint64
-	bigid, err = strconv.ParseUint(params["id"], 10, 32)
+	id, err := strconv.ParseUint(params["id"], 10, 32)
 	if err != nil {
 		log.Println(err)
 		res.WriteHeader(400)
 		return
 	}
-	var recipe_id uint32 = uint32(bigid)
 
-	/* Bypass the author check if the user has sufficient privileges. */
-	var force bool
-	force = usr.Role == "Admin" || usr.Role == "Moderator"
-	err = db.DeleteRecipe(recipe_id, usr.Id, force)
+	// Bypass the author check if the user has sufficient privileges.
+	var force = usr.Role == "Admin" || usr.Role == "Moderator"
+	err = db.DeleteRecipe(uint32(id), usr.ID, force)
 	if err == sql.ErrNoRows {
 		res.WriteHeader(403)
 		return
@@ -221,19 +194,14 @@ func handle_delete_recipe(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(400)
 		return
 	}
-	/* If we made it here, send good response. */
 	res.WriteHeader(200)
 }
 
-/*
- * Request a list of users.
- * GET /users
- */
-func handle_users(res http.ResponseWriter, req *http.Request) {
-	/* Access control. */
-	var usr *defs.User
-	var err error
-	usr, err = check_auth(res, req)
+// handleUsers handles a request for a list of users.
+// GET /users
+func handleUsers(res http.ResponseWriter, req *http.Request) {
+	// Access control.
+	var usr, err = checkAuth(res, req)
 	if err != nil {
 		log.Println(err)
 		res.WriteHeader(500)
@@ -249,11 +217,9 @@ func handle_users(res http.ResponseWriter, req *http.Request) {
 	}
 
 	res.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	var filter = buildItemFilter(req.URL)
 
-	var filter = build_item_filter(req.URL)
-
-	var users *[]defs.User
-	users, err = db.FetchUsers(filter)
+	users, err := db.FetchUsers(filter)
 	if err != nil {
 		log.Println(err)
 		res.WriteHeader(500)
@@ -265,20 +231,14 @@ func handle_users(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(500)
 		return
 	}
-	/* If we made it here, send good response. */
 	res.Write(j)
 }
 
-/*
- * Receive a new user to create.
- * POST /users or PUT /users/4
- * Example: { email: ..., role: ... }
- */
-func handle_post_or_put_user(res http.ResponseWriter, req *http.Request) {
-	/* Access control. */
-	var usr *defs.User
-	var err error
-	usr, err = check_auth(res, req)
+// handlePutOrPostUser receives a user to update or create.
+// POST /users or PUT /users/4
+func handlePutOrPostUser(res http.ResponseWriter, req *http.Request) {
+	// Access control.
+	var usr, err = checkAuth(res, req)
 	if err != nil {
 		log.Println(err)
 		res.WriteHeader(500)
@@ -292,10 +252,9 @@ func handle_post_or_put_user(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(403)
 		return
 	}
-
 	res.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-	/* Decode body. */
+	// Decode body.
 	var user defs.User
 	err = json.NewDecoder(req.Body).Decode(&user)
 	if err != nil {
@@ -304,51 +263,44 @@ func handle_post_or_put_user(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	var new_user *defs.User
-	/* Update a user in the database. */
+	var newUser *defs.User
+	// Update a user in the database.
 	if req.Method == "PUT" {
-		/* Get id parameter. */
+		// Get id parameter.
 		var params map[string]string = mux.Vars(req)
-		bigid, err := strconv.ParseUint(params["id"], 10, 32)
+		id, err := strconv.ParseUint(params["id"], 10, 32)
 		if err != nil {
 			log.Println(err)
 			res.WriteHeader(400)
 			return
 		}
-		var id uint32 = uint32(bigid)
 
-		new_user, err = db.UpdateUser(id, &user)
-		/* Create new user in DB. */
+		newUser, err = db.UpdateUser(uint32(id), &user)
 	} else {
-		new_user, err = db.CreateUser(&user)
+		// Create a new user in the DB.
+		newUser, err = db.CreateUser(&user)
 	}
-
 	if err != nil {
 		log.Println(err)
 		res.WriteHeader(400)
 		return
 	}
 
-	/* Send it back. */
-	j, e := json.Marshal(new_user)
+	// Send it back.
+	j, e := json.Marshal(newUser)
 	if e != nil {
 		log.Println(e)
 		res.WriteHeader(500)
 		return
 	}
-	/* If we made it here, send good response. */
 	res.Write(j)
 }
 
-/*
- * Delete a user by id.
- * DELETE /users/4
- */
-func handle_delete_user(res http.ResponseWriter, req *http.Request) {
-	/* Access control. */
-	var usr *defs.User
-	var err error
-	usr, err = check_auth(res, req)
+// handleDeleteUser deletes a user by id.
+// DELETE /users/4
+func handleDeleteUser(res http.ResponseWriter, req *http.Request) {
+	// Access control.
+	var usr, err = checkAuth(res, req)
 	if err != nil {
 		log.Println(err)
 		res.WriteHeader(500)
@@ -362,36 +314,27 @@ func handle_delete_user(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(403)
 		return
 	}
-
 	res.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-	/* Get id parameter. */
+	// Get id parameter.
 	var params map[string]string = mux.Vars(req)
-	var bigid uint64
-	bigid, err = strconv.ParseUint(params["id"], 10, 32)
+	id, err := strconv.ParseUint(params["id"], 10, 32)
 	if err != nil {
 		log.Println(err)
 		res.WriteHeader(400)
 		return
 	}
-	var id uint32 = uint32(bigid)
-
-	err = db.DeleteUser(id)
-
+	err = db.DeleteUser(uint32(id))
 	if err != nil {
 		log.Println(err)
 		res.WriteHeader(400)
 		return
 	}
-
-	/* If we made it here, send good response. */
 	res.WriteHeader(200)
 }
 
-func handle_get_tags(res http.ResponseWriter, req *http.Request) {
-	var tags *[]byte
-	var err error
-	tags, err = db.FetchTags()
+func handleGetTags(res http.ResponseWriter, req *http.Request) {
+	var tags, err = db.FetchTags()
 	if err != nil {
 		log.Println(err)
 		res.WriteHeader(500)
@@ -400,10 +343,8 @@ func handle_get_tags(res http.ResponseWriter, req *http.Request) {
 	res.Write(*tags)
 }
 
-func handle_get_recipe_titles(res http.ResponseWriter, req *http.Request) {
-	var titles *[]byte
-	var err error
-	titles, err = db.FetchRecipeTitles()
+func handleGetRecipeTitles(res http.ResponseWriter, req *http.Request) {
+	var titles, err = db.FetchRecipeTitles()
 	if err != nil {
 		log.Println(err)
 		res.WriteHeader(500)

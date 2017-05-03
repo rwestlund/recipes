@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Randy Westlund. All rights reserved.
+ * Copyright (c) 2016-2017, Randy Westlund. All rights reserved.
  * This code is under the BSD-2-Clause license.
  *
  * This file defines the application's routes, mapping them to handlers.
@@ -11,105 +11,105 @@ import (
 	"net/http"
 )
 
-/* Routes are a list of these structs. */
-type Route struct {
+// Routes are a list of these structs.
+type route struct {
 	name    string
 	methods []string
 	pattern string
 	handler http.HandlerFunc
 }
-type Routes []Route
+type routelist []route
 
-/* Define the actual routes here. */
-var routes = Routes{
-	Route{
+// Define the actual routes here.
+var routes = routelist{
+	route{
 		"auth",
 		[]string{"GET"},
 		"/auth/google/login",
-		oauth_redirect,
+		oauthRedirect,
 	},
-	Route{
+	route{
 		"auth",
 		[]string{"GET"},
 		"/oauth2callback",
-		handle_oauth_callback,
+		handleOauthCallback,
 	},
-	Route{
+	route{
 		"logout",
 		[]string{"GET"},
 		"/logout",
-		handle_logout,
+		handleLogout,
 	},
-	Route{
+	route{
 		"recipe",
 		[]string{"GET", "HEAD"},
 		"/recipes/{id:[0-9]+}",
-		handle_recipe,
+		handleRecipe,
 	},
-	Route{
+	route{
 		"recipes",
 		[]string{"GET", "HEAD"},
 		"/recipes",
-		handle_recipes,
+		handleRecipes,
 	},
-	Route{
+	route{
 		"recipe_titles",
 		[]string{"GET", "HEAD"},
 		"/recipes/titles",
-		handle_get_recipe_titles,
+		handleGetRecipeTitles,
 	},
-	Route{
+	route{
 		"users",
 		[]string{"GET", "HEAD"},
 		"/users",
-		handle_users,
+		handleUsers,
 	},
-	Route{
+	route{
 		"recipes",
 		[]string{"POST", "PUT"},
 		"/recipes",
-		handle_put_or_post_recipe,
+		handlePutOrPostRecipe,
 	},
-	Route{
+	route{
 		"recipes",
 		[]string{"POST", "PUT"},
 		"/recipes/{id:[0-9]+}",
-		handle_put_or_post_recipe,
+		handlePutOrPostRecipe,
 	},
-	Route{
+	route{
 		"recipes",
 		[]string{"DELETE"},
 		"/recipes/{id:[0-9]+}",
-		handle_delete_recipe,
+		handleDeleteRecipe,
 	},
-	Route{
+	route{
 		"users",
 		[]string{"POST"},
 		"/users",
-		handle_post_or_put_user,
+		handlePutOrPostUser,
 	},
-	Route{
+	route{
 		"users",
 		[]string{"POST"},
 		"/users",
-		handle_post_or_put_user,
+		handlePutOrPostUser,
 	},
-	Route{
+	route{
 		"users",
 		[]string{"PUT"},
 		"/users/{id:[0-9]+}",
-		handle_post_or_put_user,
+		handlePutOrPostUser,
 	},
-	Route{
+	route{
 		"users",
 		[]string{"DELETE"},
 		"/users/{id:[0-9]+}",
-		handle_delete_user,
+		handleDeleteUser,
 	},
-	Route{
+	route{
 		"tags",
 		[]string{"GET", "HEAD"},
 		"/tags",
-		handle_get_tags,
+		handleGetTags,
 	},
 }

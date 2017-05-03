@@ -1,16 +1,16 @@
 /*
- * Copyright (c) 2016, Randy Westlund. All rights reserved.
+ * Copyright (c) 2016-2017, Randy Westlund. All rights reserved.
  * This code is under the BSD-2-Clause license.
- *
- * This defines the Recipe struct, which represents a recipe from the DB.
  */
+
 package defs
 
+// Recipe represents a recipe from the DB.
 type Recipe struct {
-	Id          uint32   `json:"id"`
+	ID          uint32   `json:"id"`
 	Revision    uint32   `json:"revision"`
 	Amount      string   `json:"amount"`
-	AuthorId    uint32   `json:"author_id"`
+	AuthorID    uint32   `json:"author_id"`
 	Directions  []string `json:"directions"`
 	Ingredients []string `json:"ingredients"`
 	Notes       string   `json:"notes"`
@@ -25,7 +25,8 @@ type Recipe struct {
 	LinkedRecipes []LinkedRecipe `json:"linked_recipes"`
 }
 
+// LinkedRecipe is a reference from one recipe to another.
 type LinkedRecipe struct {
-	Id    uint32 `json:"id"`
+	ID    uint32 `json:"id"`
 	Title string `json:"title"`
 }
