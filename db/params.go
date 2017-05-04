@@ -11,18 +11,18 @@ package db
 import (
 	"database/sql"
 
-	// Import the Postgres driver.
+	// Import the PostgreSQL driver.
 	_ "github.com/lib/pq"
-	"github.com/rwestlund/recipes/config"
 )
 
 // DB is the database handle for other files in this package.
 var DB *sql.DB
 
 // Init connects to the database.
-func Init() error {
-	DB, err := sql.Open("postgres", "user="+config.DatabaseUserName+
-		" dbname="+config.DatabaseName+" sslmode=disable")
+func Init(dbname, dbuser string) error {
+	var err error
+	DB, err = sql.Open("postgres",
+		"user="+dbuser+" dbname="+dbname+" sslmode=disable")
 	if err != nil {
 		return err
 	}

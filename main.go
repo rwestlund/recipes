@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-	var err = db.Init()
+	var err = db.Init(config.DatabaseUserName, config.DatabaseName)
 	if err != nil {
 		log.Fatal(err)
 	}
