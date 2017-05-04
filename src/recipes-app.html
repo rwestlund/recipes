@@ -103,7 +103,7 @@
                 <neon-animated-pages
                         entry-animation="fade-in-animation"
                         exit-animation="fade-out-animation"
-                        selected="[[route_date.page]]"
+                        selected="[[route_data.page]]"
                         attr-for-selected="name"
                         fallback-selection="404">
 
@@ -120,7 +120,7 @@
                     </neon-animatable>
 
                     <neon-animatable name="recipes">
-                        <recipe-details recipe-id="[[params.id]]">
+                        <recipe-details recipe-id="[[recipes_route_data.id]]">
                         </recipe-details>
                     </neon-animatable>
 
@@ -199,11 +199,7 @@
     <app-location route="{{route}}" url-space-regex="^/(?!(api|s)/)">
     </app-location>
 
-    <app-route
-            route="{{route}}"
-            pattern="/:page"
-            data="{{route_data}}"
-            tail="{{subroute}}">
+    <app-route route="{{route}}" pattern="/:page" data="{{route_data}}">
     </app-route>
     <app-scrollpos-control selected="[[route_data.page]]">
     </app-scrollpos-control>
@@ -215,24 +211,16 @@
     <app-route
             route="{{route}}"
             pattern="/recipes/:id"
-            data="recipes_route_data">
+            data="{{recipes_route_data}}">
     </app-route>
     <app-scrollpos-control selected="[[recipes_route_data.id]]">
-    </app-scrollpos-control>
-
-    <app-route
-            route="{{route}}"
-            pattern="/users/:id"
-            data="users_route_data">
-    </app-route>
-    <app-scrollpos-control selected="[[users_route_data.id]]">
     </app-scrollpos-control>
 
     <!-- All the application's forms are contained in here and triggered with
          iron-signals. This is a workaround for:
          https://github.com/PolymerElements/iron-overlay-behavior/issues/208#issuecomment-234024428
     -->
-    <recipe-forms user-role="[[user_role]]"></recipe-forms>
+    <!--<recipe-forms user-role="[[user_role]]"></recipe-forms>-->
 
     <!-- This displays toast events. -->
     <recipe-notifications></recipe-notifications>
@@ -242,9 +230,9 @@
     (function () {
         "use strict";
         Polymer({
-            is: "recipes-app"
+            is: "recipes-app",
             user_is_admin: role => role === 'Admin',
-            user_is_user = role =>
+            user_is_user: role =>
                 role === 'Admin' || role === 'Moderator' || role === 'User',
             drawer_toggle: () => {
                 if (this.$.drawer_layout.narrow) this.$.drawer.toggle();

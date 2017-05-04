@@ -33,43 +33,12 @@ recipe_behaviors.global_behavior = {
             value: constants,
         },
     },
-    // Handle clicks to load other pages. This is a hack needed due
-    // to limitation in the page.js router not handling new tab
-    // clicks properly.  See
-    // https://github.com/visionmedia/page.js/issues/276
-    load_recipe: function(e) {
-        e.stopPropagation();
-        // If this is a ctrl-click or shift-click, do nothing; the browser will
-        // open it in a new tab. On OSX, it's metaKey instead of ctrlKey.
-        if (e.detail.sourceEvent.ctrlKey || e.detail.sourceEvent.metaKey ||
-                e.detail.sourceEvent.metaKey)
-            return;
-        // Otherwise, navigate there manually.
-        var index = e.currentTarget.attributes['data-id'].value;
-        page.show('/recipes/' + index);
-    },
-    // Same as above.
-    load_home: function(e) {
-        e.stopPropagation();
-        // If this is a ctrl-click or shift-click, do nothing; the browser will
-        // open it in a new tab. On OSX, it's metaKey instead of ctrlKey.
-        if (e.detail.sourceEvent.ctrlKey || e.detail.sourceEvent.metaKey ||
-                e.detail.sourceEvent.metaKey)
-            return;
-        // Otherwise, navigate there manually.
-        e.preventDefault();
-        page.show('/');
-    },
     long_date: function(d) {
         var date = new Date(d);
         return date.toDateString() + ' ' + date.toLocaleTimeString();
     },
     to_array: to_array,
-    equal: function(a, b) {
-        return a === b;
-    },
-    first_defined: function(a, b) {
-        return a || b;
-    },
+    equal: (a, b) => a === b,
+    first_defined: (a, b) => a || b,
 };
 </script>
