@@ -1,27 +1,21 @@
 <!doctype html>
 <!--
-    Copyright (c) 2016, Randy Westlund. All rights reserved.
+    Copyright (c) 2016-2017, Randy Westlund. All rights reserved.
     This code is under the BSD-2-Clause license.
 -->
 <html lang="en-US">
 
 <head>
     <meta charset="utf-8">
-    <meta name="description" content="recipes">
+    <meta name="description" content="Recipes">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
     <title>Recipes</title>
 
-    <!-- Chrome for Android theme color -->
-    <meta name="theme-color" content="#2E3AA1">
-
-    <!-- Tile color for Win8 -->
-    <meta name="msapplication-TileColor" content="#3372DF">
-
     <!-- Add to homescreen for Chrome on Android -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Recipes">
-    <link rel="icon" sizes="192x192" href="images/touch/chrome-touch-icon-192x192.png">
+    <link rel="icon" sizes="192x192" href="src/images/touch/chrome-touch-icon-192x192.png">
 
     <!-- Add to homescreen for Safari on iOS -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -29,13 +23,7 @@
     <meta name="apple-mobile-web-app-title" content="Recipes">
     <link rel="apple-touch-icon" href="images/touch/apple-touch-icon.png">
 
-    <!-- Tile icon for Win8 (144x144) -->
-    <meta name="msapplication-TileImage"
-        content="images/touch/ms-touch-icon-144x144-precomposed.png">
-
-    <script src="bc/webcomponentsjs/webcomponents-lite.js"></script>
-    <!-- build:js bc/webcomponentsjs/webcomponents-lite.min.js -->
-    <!--<script src="../bc/webcomponentsjs/webcomponents.js"></script> -->
+    <script src="/bc/webcomponentsjs/webcomponents-lite.js"></script>
 
     <!-- Google Font: Montserrat -->
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700'
@@ -50,224 +38,10 @@
         window.Polymer.dom = 'shady';
     </script>
 
-    <link rel="import" href="elements/elements.html">
+    <link rel="import" href="/src/recipes-app.html">
 </head>
 
 <body unresolved class="fullbleed layout vertical">
-    <template is="dom-bind" id="app">
-        <style is="custom-style" include="global-styles"></style>
-        <!-- The drawer panel holds the nav drawer and the main toolbar. -->
-        <paper-drawer-panel
-                id="paperDrawerPanel"
-                drawer-width="260px"
-                force-narrow
-                class="mainContentBackground"
-                responsive-width="1035px">
-            <!-- The first header panel is for the drawer. -->
-            <paper-header-panel drawer>
-                <paper-toolbar>
-                    <div class="middle middle-container center horizontal layout">
-                        <div class="menu-header-text">Menu</div>
-                    </div>
-                </paper-toolbar>
-                 <!-- Main navbar with page links. -->
-                <paper-menu class="list" attr-for-selected="data-route"
-                    selected="[[route]]">
-
-                    <a data-route="recipes" href="/" on-tap="load_home">
-                        <iron-icon icon="icons:list"></iron-icon>
-                        <span>Recipes</span>
-                    </a>
-                    <a data-route="about" href="#!/about" on-tap="load_about">
-                        <iron-icon icon="icons:info"></iron-icon>
-                        <span>About</span>
-                    </a>
-                    <a data-route="users" href="#!/users" on-tap="load_users"
-                            hidden$="[[!user_is_admin(user_role)]]">
-                        <iron-icon icon="social:people"></iron-icon>
-                        <span>Users</span>
-                    </a>
-                    <template is="dom-if" if="[[!user_name]]">
-                        <a href="/auth/google/login">
-                            <iron-icon icon="icons:exit-to-app"></iron-icon>
-                            <span>Sign in with Google</span>
-                        </a>
-                    </template>
-                    <template is="dom-if" if="[[user_name]]">
-                        <a href="/logout">
-                            <iron-icon icon="maps:directions-run"></iron-icon>
-                            <span>Logout</span>
-                        </a>
-                    </template>
-                </paper-menu>
-            </paper-header-panel>
-
-            <!-- The second header panel is the main page, including
-                 the main toolbar. -->
-            <paper-header-panel main>
-                <!-- Main toolbar. -->
-                <paper-toolbar id="mainToolbar" >
-                    <paper-icon-button id="paperToggle" icon="menu"
-                            paper-drawer-toggle>
-                    </paper-icon-button>
-                    <span class="flex"></span>
-
-                    <div class="top-right-bar">
-                        <span class="user-name">
-                            <iron-icon icon="icons:account-circle"></iron-icon>
-                            <template is="dom-if" if="[[!user_name]]">
-                                <span>Not signed in</span>
-                            </template>
-                            <template is="dom-if" if="[[user_name]]">
-                                <span>[[user_name]]</span>
-                            </template>
-                        </span>
-                    </div>
-
-                    <cookie-display
-                            cookie-name="username"
-                            cookie-value="{{user_name}}">
-                    </cookie-display>
-                    <cookie-display
-                            cookie-name="role"
-                            cookie-value="{{user_role}}">
-                    </cookie-display>
-                    <!-- Application name -->
-                    <div class="middle middle-container center horizontal layout">
-                        <div class="app-name">
-                            <span>Recipes</span>
-                        </div>
-                    </div>
-                </paper-toolbar>
-
-                <!-- Main page content. -->
-                <iron-pages attr-for-selected="data-route" selected="{{route}}">
-
-                    <section data-route="recipes">
-                        <!-- Only set enable-fab if appropriate. -->
-                        <template is="dom-if" if="[[user_is_user(user_role)]]">
-                            <item-collection item-name="recipes" enable-fab>
-                            </item-collection>
-                        </template>
-                        <template is="dom-if" if="[[!user_is_user(user_role)]]">
-                            <item-collection item-name="recipes">
-                            </item-collection>
-                        </template>
-                    </section>
-
-                    <section data-route="recipe-details">
-                        <recipe-details recipe-id="[[params.id]]">
-                        </recipe-details>
-                    </section>
-
-                    <section data-route="about">
-                        <paper-material class="card-item">
-                            <h3 class="card-title">About</h3>
-                            <div class="layout horizontal wrap">
-                                <div class="flex-6 item-col">
-                                    <p>
-                                        Welcome to our recipe database! This
-                                        started as a project just for my wife
-                                        and I, because we got tired of keeping
-                                        track of a bunch of links to other
-                                        websites with ads, inconsistent
-                                        formatting, changing links, etc.
-                                    </p>
-                                    <p>
-                                        We decided to improve it and open it to
-                                        others.  Anyone can access information
-                                        here, and family and friends will have
-                                        the ability to log in and add recipes.
-                                    </p>
-                                    </div>
-                                    <div class="flex-6 item-col">
-                                    <p>
-                                        If you don't have an account and would
-                                        like to add recipes, I'll add you if
-                                        one of my friends will vouch for you.
-                                        If you have any technical issues or
-                                        suggestions, contact me at
-                                        rwestlun@gmail.com.
-                                    </p>
-                                    <p>
-                                        The source for this site is on
-                                        <a href="https://github.com/rwestlund/recipes">
-                                            GitHub</a>
-                                        under the BSD-2-Clause license.
-                                    </p>
-                                    <div>Randy Westlund</div>
-                                    <div><a href="https://www.textplain.net">
-                                        www.textplain.net</a>
-                                    </div>
-                                </div>
-                            </div>
-                            <br />
-                            <br />
-                            <div>Version 2.0.1</div>
-                            <div>Released 2016-07-13</div>
-                        </paper-material>
-                    </section>
-
-                    <template is="dom-if" if="[[user_is_admin(user_role)]]">
-                        <section data-route="users">
-                            <item-collection item-name="users" enable-fab>
-                            </item-collection>
-                        </section>
-                    </template>
-                </iron-pages>
-                <br />
-                <br />
-                <br />
-            </paper-header-panel>
-        </paper-drawer-panel>
-
-        <!-- This displays toast events. -->
-        <recipe-notifications></recipe-notifications>
-    </template>
-
-    <script src="/js/app.js"></script>
-
-  <script>
-    var app = document.querySelector('#app');
-
-    app.user_is_admin = function(role) {
-        return role === 'Admin';
-    };
-    app.user_is_user = function(role) {
-        return role === 'Admin' || role === 'Moderator' || role === 'User';
-    };
-    app.load_about = function(e) {
-        e.stopPropagation();
-        // If this is a ctrl-click or shift-click, do nothing; the browser will
-        // open it in a new tab. On OSX, it's metaKey instead of ctrlKey.
-        if (e.detail.sourceEvent.ctrlKey || e.detail.sourceEvent.metaKey ||
-                e.detail.sourceEvent.metaKey)
-            return;
-        // Otherwise, navigate there manually.
-        page.show('/about');
-    };
-    app.load_users = function(e) {
-        e.stopPropagation();
-        // If this is a ctrl-click or shift-click, do nothing; the browser will
-        // open it in a new tab. On OSX, it's metaKey instead of ctrlKey.
-        if (e.detail.sourceEvent.ctrlKey || e.detail.sourceEvent.metaKey ||
-                e.detail.sourceEvent.metaKey)
-            return;
-        // Otherwise, navigate there manually.
-        page.show('/users');
-    };
-    app.load_home = function(e) {
-        e.stopPropagation();
-        // If this is a ctrl-click or shift-click, do nothing; the browser will
-        // open it in a new tab. On OSX, it's metaKey instead of ctrlKey.
-        if (e.detail.sourceEvent.ctrlKey || e.detail.sourceEvent.metaKey ||
-                e.detail.sourceEvent.metaKey)
-            return;
-        // Otherwise, navigate there manually.
-        e.preventDefault();
-        page.show('/');
-    };
-
-  </script>
+    <photos-app></photos-app>
 </body>
 </html>
