@@ -1,5 +1,5 @@
 <!--
-    Copyright (c) 2016, Randy Westlund. All rights reserved.
+    Copyright (c) 2016-2017, Randy Westlund. All rights reserved.
     This code is under the BSD-2-Clause license.
 -->
 <!-- This defines behavior common to all forms, such as clearing fields. -->
@@ -7,6 +7,7 @@
 <script>
 'use strict';
 var recipe_behaviors = recipe_behaviors || {};
+/** @polymerBehavior recipe_behaviors.form_behavior */
 recipe_behaviors.form_behavior = {
     open: function() {
         this.$.dialog.open();

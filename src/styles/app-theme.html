@@ -5,12 +5,13 @@
 <!-- This defines a general theme for the application. -->
 
 <!-- TODO do these do anything? -->
-<link rel="import" href="../bc/polymer/polymer.html">
-<link rel="import" href="../bc/paper-styles/typography.html">
-<link rel="import" href="../bc/paper-styles/color.html">
+<link rel="import" href="../../bc/polymer/polymer.html">
+<link rel="import" href="../../bc/paper-styles/typography.html">
+<link rel="import" href="../../bc/paper-styles/color.html">
 
-<style is="custom-style">
-
+<dom-module id="app-theme">
+<template>
+<style>
     /* Application theme */
 
     :root {
@@ -157,3 +158,5 @@
     /* desktop-xlarge */
     @media all and (min-width: 1601px) and (max-width: 1920px) { }
 </style>
+</template>
+</dom-module>

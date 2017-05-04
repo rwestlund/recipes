@@ -1,5 +1,5 @@
 <!--
-    Copyright (c) 2016, Randy Westlund. All rights reserved.
+    Copyright (c) 2016-2017, Randy Westlund. All rights reserved.
     This code is under the BSD-2-Clause license.
 -->
 <!-- This defines behavior and utilities imported by all element. -->
@@ -25,6 +25,7 @@ var to_array = function(obj) {
 constants.user_roles = to_array(constants.user_role_enum);
 
 var recipe_behaviors = recipe_behaviors || {};
+/** @polymerBehavior recipe_behaviors.global_behavior */
 recipe_behaviors.global_behavior = {
     properties: {
         constants: {

@@ -3,12 +3,35 @@
     This code is under the BSD-2-Clause license.
 -->
 <!-- This is the main application. -->
+
+<link rel="import" href="../bc/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../bc/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../bc/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bc/app-layout/app-header/app-header.html">
+<link rel="import" href="../bc/app-layout/app-scroll-effects/effects/waterfall.html">
+<link rel="import" href="../bc/app-layout/app-scrollpos-control/app-scrollpos-control.html">
+<link rel="import" href="../bc/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bc/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bc/app-route/app-location.html">
+<link rel="import" href="../bc/app-route/app-route.html">
+<link rel="import" href="../bc/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../bc/iron-icons/maps-icons.html">
+<link rel="import" href="../bc/iron-icons/social-icons.html">
+<link rel="import" href="../bc/neon-animation/neon-animatable.html">
+<link rel="import" href="../bc/neon-animation/neon-animated-pages.html">
+
+<link rel="import" href="cookie-display.html">
+<link rel="import" href="item-collection.html">
+<link rel="import" href="recipe-details.html">
+<!--<link rel="import" href="recipe-forms.html">-->
+<link rel="import" href="recipe-notifications.html">
 <link rel="import" href="styles/app-theme.html">
-<link rel="import" href="elements.html">
+<link rel="import" href="styles/global-styles.html">
 
 <dom-module id="recipes-app">
 <template>
     <style include="app-theme"></style>
+    <style include="iron-flex iron-flex-alignment"></style>
     <style include="global-styles"></style>
 
     <app-drawer-layout id="drawer_layout" fullbleed responsive-width="900px">
@@ -167,7 +190,6 @@
     </app-drawer-layout>
 
     <!-- Invisible stuff below here. -->
-
     <cookie-display cookie-name="username" cookie-value="{{user_name}}">
     </cookie-display>
     <cookie-display cookie-name="role" cookie-value="{{user_role}}">

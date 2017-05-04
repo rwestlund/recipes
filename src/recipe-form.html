@@ -4,11 +4,19 @@
 -->
 <!-- This module displays a recipe creation form. -->
 
+<link rel="import" href="../bc/iron-icons/iron-icons.html">
+<link rel="import" href="../bc/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bc/paper-input/paper-input.html">
+<link rel="import" href="../bc/polymer-responsive-dialog/responsive-dialog.html">
 <link rel="import" href="../bc/polymer/polymer.html">
 
+<link rel="import" href="form-behavior.html">
+<link rel="import" href="global-behavior.html">
+<link rel="import" href="styles/global-styles.html">
+
 <dom-module id="recipe-form">
-    <style include="global-styles"></style>
     <template>
+        <style include="global-styles"></style>
         <responsive-dialog id="dialog"
                    title="[[title]]"
                    dismiss-text="Cancel"
