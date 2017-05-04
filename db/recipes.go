@@ -73,7 +73,7 @@ func scanRecipe(row *sql.Rows) (*defs.Recipe, error) {
 
 // FetchRecipes returns all recipes from the database that match the given
 // filter. The query in the filter can match either the title or the tag.
-func FetchRecipes(filter *defs.ItemFilter) (*[]defs.Recipe, error) {
+func FetchRecipes(filter defs.ItemFilter) ([]defs.Recipe, error) {
 	// Hold the dynamically generated portion of our SQL.
 	var queryText string
 	// Hold all the parameters for our query.
@@ -129,11 +129,11 @@ func FetchRecipes(filter *defs.ItemFilter) (*[]defs.Recipe, error) {
 		}
 		recipes = append(recipes, *r)
 	}
-	return &recipes, rows.Err()
+	return recipes, rows.Err()
 }
 
 // FetchRecipeTitles returns a JSON list of existing titles.
-func FetchRecipeTitles() (*[]byte, error) {
+func FetchRecipeTitles() ([]byte, error) {
 	// Return them all in one row.
 	var rows, err = DB.Query(`SELECT json_agg(
             json_build_object('id', id, 'title', title) ORDER BY title)
@@ -146,12 +146,12 @@ func FetchRecipeTitles() (*[]byte, error) {
 
 	// In this case, we just want an empty list if nothing was returned.
 	if !rows.Next() {
-		return &titles, nil
+		return titles, nil
 	}
 
 	// This is alredy JSON, so just leave it as a []byte.
 	err = rows.Scan(&titles)
-	return &titles, err
+	return titles, err
 }
 
 // FetchRecipe returns one Recipe by ID.

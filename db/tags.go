@@ -8,7 +8,7 @@
 package db
 
 // FetchTags retuns a JSON list of all tags in the database.
-func FetchTags() (*[]byte, error) {
+func FetchTags() ([]byte, error) {
 	var rows, err = DB.Query("SELECT json_agg(DISTINCT tag ORDER BY tag) FROM tags")
 	if err != nil {
 		return nil, err
@@ -18,10 +18,10 @@ func FetchTags() (*[]byte, error) {
 
 	// In this case, we just want an empty list if nothing was returned.
 	if !rows.Next() {
-		return &tags, nil
+		return tags, nil
 	}
 
 	// This is alredy JSON, so just leave it as a []byte.
 	err = rows.Scan(&tags)
-	return &tags, err
+	return tags, err
 }

@@ -48,7 +48,7 @@ func scanUser(rows *sql.Rows) (*defs.User, error) {
 
 // FetchUsers returns all users in the database that match the given filter.
 // The query in the filter can match either the name, email, or role.
-func FetchUsers(filter *defs.ItemFilter) (*[]defs.User, error) {
+func FetchUsers(filter defs.ItemFilter) ([]defs.User, error) {
 	// Hold the dynamically generated portion of our SQL.
 	var queryText string
 	// Hold all the parameters for our query.
@@ -107,7 +107,7 @@ func FetchUsers(filter *defs.ItemFilter) (*[]defs.User, error) {
 		}
 		users = append(users, *user)
 	}
-	return &users, rows.Err()
+	return users, rows.Err()
 }
 
 // CreateUser creates a new User in the database, returning fields in the

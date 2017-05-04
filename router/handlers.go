@@ -21,17 +21,17 @@ import (
 )
 
 // buildItemFilter takes a url.URL object (from req.URL) and fills an ItemFilter.
-func buildItemFilter(url *url.URL) *defs.ItemFilter {
+func buildItemFilter(url *url.URL) defs.ItemFilter {
 	// We can ignore the error because count=0 means disabled.
 	var bigcount, _ = strconv.ParseUint(url.Query().Get("count"), 10, 32)
 	var bigskip, _ = strconv.ParseUint(url.Query().Get("skip"), 10, 32)
 	// Build ItemFilter from query params.
-	var filter defs.ItemFilter = defs.ItemFilter{
+	var filter = defs.ItemFilter{
 		Query: url.Query().Get("query"),
 		Count: uint32(bigcount),
 		Skip:  uint32(bigskip),
 	}
-	return &filter
+	return filter
 }
 
 // handleRecipes handles a request for a list of recipes.
@@ -340,7 +340,7 @@ func handleGetTags(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(500)
 		return
 	}
-	res.Write(*tags)
+	res.Write(tags)
 }
 
 func handleGetRecipeTitles(res http.ResponseWriter, req *http.Request) {
@@ -350,5 +350,5 @@ func handleGetRecipeTitles(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(500)
 		return
 	}
-	res.Write(*titles)
+	res.Write(titles)
 }
