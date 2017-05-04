@@ -5,6 +5,7 @@
         "polymer": "1.6.0",
         "iron-elements": "1.0.10",
         "paper-elements": "1.0.7",
+        "polymer-responsive-dialog": "rwestlund/responsive-dialog#1.2.0",
         "page": "1.7.1"
     }
 }
