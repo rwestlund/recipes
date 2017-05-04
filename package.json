@@ -1,9 +1,11 @@
 {
     "private": true,
     "scripts": {
-        "bower": "node_modules/.bin/bower"
+        "bower": "node_modules/.bin/bower",
+        "polymer": "node_modules/.bin/polymer"
     },
     "devDependencies": {
-        "bower": "1.7.7"
+        "bower": "1.8.0",
+        "polymer-cli": "0.18.1"
     }
 }

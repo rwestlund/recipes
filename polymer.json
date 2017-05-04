@@ -1,0 +1,23 @@
+{
+    "entrypoint": "index.html",
+    "shell": "src/recipes-app.html",
+    "sources": [
+        "src/**/*"
+    ],
+    "fragments": [
+        "src/elements.html"
+    ],
+    "extraDependencies": [
+        "bc/webcomponentsjs/webcomponents-lite.js"
+    ],
+    "lint": {
+        "rules": ["polymer-2-hybrid"]
+    },
+    "builds": [{
+        "addServiceWorker": false,
+        "swPrecacheConfig": "sw-precache-config.js",
+        "html": { "minify": true },
+        "css": { "minify": true },
+        "js": { "minify": false, "does true break polymer?": "yes :(" }
+    }]
+}
