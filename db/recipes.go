@@ -119,7 +119,7 @@ func FetchRecipes(filter defs.ItemFilter) ([]defs.Recipe, error) {
 	// The array we're going to fill. The append() builtin will approximately
 	// double the capacity when it needs to reallocate, but we can save some
 	// copying by starting at a decent number.
-	var recipes = make([]defs.Recipe, 0, 200)
+	var recipes = make([]defs.Recipe, 0, 20)
 	var r *defs.Recipe
 	// Iterate over rows, reading in each Recipe as we go.
 	for rows.Next() {
