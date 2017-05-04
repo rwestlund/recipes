@@ -4,9 +4,6 @@
     "sources": [
         "src/**/*"
     ],
-    "fragments": [
-        "src/elements.html"
-    ],
     "extraDependencies": [
         "bc/webcomponentsjs/webcomponents-lite.js"
     ],
