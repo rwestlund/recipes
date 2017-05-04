@@ -125,7 +125,7 @@ func handleRecipe(res http.ResponseWriter, req *http.Request) {
 	res.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	// Get id parameter.
-	var params map[string]string = mux.Vars(req)
+	var params = mux.Vars(req)
 	var id, err = strconv.ParseUint(params["id"], 10, 32)
 	if err != nil {
 		log.Println(err)
@@ -174,7 +174,7 @@ func handleDeleteRecipe(res http.ResponseWriter, req *http.Request) {
 	res.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	// Get id parameter.
-	var params map[string]string = mux.Vars(req)
+	var params = mux.Vars(req)
 	id, err := strconv.ParseUint(params["id"], 10, 32)
 	if err != nil {
 		log.Println(err)
@@ -267,7 +267,7 @@ func handlePutOrPostUser(res http.ResponseWriter, req *http.Request) {
 	// Update a user in the database.
 	if req.Method == "PUT" {
 		// Get id parameter.
-		var params map[string]string = mux.Vars(req)
+		var params = mux.Vars(req)
 		id, err := strconv.ParseUint(params["id"], 10, 32)
 		if err != nil {
 			log.Println(err)
@@ -317,7 +317,7 @@ func handleDeleteUser(res http.ResponseWriter, req *http.Request) {
 	res.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	// Get id parameter.
-	var params map[string]string = mux.Vars(req)
+	var params = mux.Vars(req)
 	id, err := strconv.ParseUint(params["id"], 10, 32)
 	if err != nil {
 		log.Println(err)
