@@ -24,5 +24,6 @@ func main() {
 	// Create router from routes.go.
 	myRouter := router.NewRouter()
 	log.Println("starting server on " + config.ListenAddress)
-	http.ListenAndServe(config.ListenAddress, myRouter)
+	err = http.ListenAndServe(config.ListenAddress, myRouter)
+	log.Fatal(err)
 }
