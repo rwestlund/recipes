@@ -25,14 +25,67 @@
 <link rel="import" href="recipe-details.html">
 <!--<link rel="import" href="recipe-forms.html">-->
 <link rel="import" href="recipe-notifications.html">
-<link rel="import" href="styles/app-theme.html">
 <link rel="import" href="styles/global-styles.html">
 
 <dom-module id="recipes-app">
 <template>
-    <style include="app-theme"></style>
     <style include="iron-flex iron-flex-alignment"></style>
     <style include="global-styles"></style>
+    <style>
+        :host {
+            --dark-primary-color: #303F9F;
+            --default-primary-color: #3F51B5;
+            --light-primary-color: #C5CAE9;
+            --text-primary-color: #ffffff; /*text/icons*/
+            --accent-color: #FF4081;
+            /* Also defined in index.html. */
+            --primary-background-color: #e9e9ef;
+            --dark-background-color: #d9d9df;
+            --primary-text-color: #212121;
+            --secondary-text-color: #727272;
+            --disabled-text-color: #bdbdbd;
+            --divider-color: #B6B6B6;
+
+            /* paper-menu */
+            /*--paper-menu-background-color: #fff; */
+
+            /* paper-fab */
+            --paper-fab-background: var(--default-primary-color);
+
+            --app-drawer-width: 10em;
+            --app-drawer-content-container: {
+                border-right: 1px solid var(--dark-primary-color);
+                background-color: var(--primary-background-color);
+            }
+            --responsive-dialog-paper-dialog {
+                width: 500px;
+            }
+        }
+        div[main-title] {
+            font-size: x-large;
+            font-weight: bold;
+        }
+        div.main-content {
+            padding: 0 10px;
+        }
+        app-toolbar {
+            color: #DEDEDE;
+            background-color: var(--dark-primary-color);
+            font-size: medium;
+        }
+        paper-menu a {
+            text-decoration: none;
+            color: #111111;
+        }
+        paper-menu .iron-selected paper-item {
+            color: var(--dark-primary-color);
+            background-color: var(--dark-background-color);
+            font-weight: bold;
+        }
+        iron-icon {
+            margin-right: 5px;
+        }
+    </style>
 
     <app-drawer-layout id="drawer_layout" fullbleed responsive-width="900px">
         <app-drawer id="drawer" swipe-open>
