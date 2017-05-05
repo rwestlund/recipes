@@ -98,9 +98,8 @@
                             <template is="dom-repeat"
                                     items="[[recipe.linked_recipes]]">
                                 <a class="inherit-color"
-                                        href$="#!/recipes/[[item.id]]"
-                                        data-id$="[[item.id]]"
-                                        on-tap="load_recipe">
+                                        href$="/recipes/[[item.id]]/"
+                                        on-tap="stop_propagation">
                                     <paper-button raised>
                                         <iron-icon icon="icons:link">
                                         </iron-icon>
@@ -112,9 +111,8 @@
                         <!-- Edit recipe button. -->
                         <div class="layout horizontal end-justified">
                             <a class="inherit-color"
-                                    href$="#!/recipes/[[recipe.id]]"
-                                    data-id$="[[recipe.id]]"
-                                    on-tap="load_recipe">
+                                    href$="/recipes/[[recipe.id]]/"
+                                    on-tap="stop_propagation">
                                 <paper-button raised>
                                     <iron-icon icon="icons:description">
                                     </iron-icon>

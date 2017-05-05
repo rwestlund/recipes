@@ -33,6 +33,7 @@ recipe_behaviors.global_behavior = {
             value: constants,
         },
     },
+    stop_propagation: e => e.stopPropagation(),
     long_date: function(d) {
         var date = new Date(d);
         return date.toDateString() + ' ' + date.toLocaleTimeString();
