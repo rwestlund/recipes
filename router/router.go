@@ -8,7 +8,9 @@
 package router
 
 import (
+	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -17,16 +19,30 @@ import (
 func NewRouter() *mux.Router {
 	router := mux.NewRouter()
 	for _, route := range routes {
-		// Wrap handler in logger from logger.go.
-		var handler http.Handler = logger(route.handler, route.name)
-
 		router.
 			Methods(route.methods...).
 			Path(route.pattern).
 			Name(route.name).
-			Handler(handler)
+			Handler(logger(route.handler, route.name))
 	}
 	// Add route to handle static files.
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./build/default/")))
 	return router
+}
+
+// Add logging functionality to HTTP requests.
+func logger(inner http.Handler, name string) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var start = time.Now()
+		// Handle request.
+		inner.ServeHTTP(w, r)
+		// Log request with time elapsed.
+		log.Printf(
+			"%s\t%s\t%s\t%s",
+			r.Method,
+			r.RequestURI,
+			name,
+			time.Since(start),
+		)
+	})
 }
