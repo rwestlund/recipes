@@ -28,12 +28,12 @@ var routes = routelist{
 	},
 	route{
 		[]string{"GET"},
-		"/oauth2callback",
+		"/auth/oauth2callback",
 		handleOauthCallback,
 	},
 	route{
 		[]string{"GET"},
-		"/logout",
+		"/auth/logout",
 		handleLogout,
 	},
 	route{
