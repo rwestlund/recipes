@@ -22,8 +22,7 @@ func NewRouter() *mux.Router {
 		router.
 			Methods(route.methods...).
 			Path(route.pattern).
-			Name(route.name).
-			Handler(logger(route.handler, route.name))
+			Handler(logger(route.handler))
 	}
 	// Add route to handle static files.
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./build/default/")))
@@ -31,18 +30,12 @@ func NewRouter() *mux.Router {
 }
 
 // Add logging functionality to HTTP requests.
-func logger(inner http.Handler, name string) http.Handler {
+func logger(inner http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var start = time.Now()
 		// Handle request.
 		inner.ServeHTTP(w, r)
 		// Log request with time elapsed.
-		log.Printf(
-			"%s\t%s\t%s\t%s",
-			r.Method,
-			r.RequestURI,
-			name,
-			time.Since(start),
-		)
+		log.Printf("%s\t%s\t%s", r.Method, r.RequestURI, time.Since(start))
 	})
 }
