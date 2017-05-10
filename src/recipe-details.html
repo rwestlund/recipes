@@ -87,9 +87,7 @@
         <cookie-display cookie-name="user_id" cookie-value="{{user_id}}">
         </cookie-display>
         <div class="headerbar layout horizontal center">
-            <!-- This path doesn't use the hashbang, so it doesn't need the
-                 load_recipe hack. -->
-            <a class="inherit-color" href="/" on-tap="load_home">
+            <a class="inherit-color" href="/">
                 <paper-button raised>
                     <iron-icon icon="icons:arrow-back"></iron-icon>
                     All Recipes
@@ -384,9 +382,7 @@
                                 <template is="dom-repeat"
                                         items="[[recipe.linked_recipes]]">
                                     <a class="inherit-color"
-                                            href$="#!/recipes/[[item.id]]"
-                                            data-id$="[[item.id]]"
-                                            on-tap="load_recipe">
+                                            href$="/recipes/[[item.id]]">
                                         <paper-button raised>
                                             <iron-icon icon="icons:link">
                                             </iron-icon>
