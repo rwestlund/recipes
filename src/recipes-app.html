@@ -116,7 +116,7 @@
                 </a>
                 <hr>
                 <template is="dom-if" if="[[!user_name]]">
-                    <a href="/auth/google/login">
+                    <a href="/api/auth/google/login">
                         <paper-item>
                             <iron-icon icon="icons:exit-to-app"></iron-icon>
                             <span>Sign in with Google</span>
@@ -124,7 +124,7 @@
                     </a>
                 </template>
                 <template is="dom-if" if="[[user_name]]">
-                    <a href="/auth/logout">
+                    <a href="/api/auth/logout">
                         <paper-item>
                             <iron-icon icon="maps:directions-run"></iron-icon>
                             <span>Logout</span>

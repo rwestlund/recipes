@@ -18,8 +18,9 @@ import (
 // NewRouter builds a router by iterating over all routes.
 func NewRouter() *mux.Router {
 	router := mux.NewRouter()
+	apiRouter := router.PathPrefix("/api/").Subrouter()
 	for _, route := range routes {
-		router.
+		apiRouter.
 			Methods(route.methods...).
 			Path(route.pattern).
 			Handler(logger(route.handler))

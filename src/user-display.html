@@ -25,7 +25,7 @@
 
         <iron-ajax method="PUT"
                 id="put_ajax"
-                url="/users/[[user.id]]"
+                url="/api/users/[[user.id]]"
                 body="[[item_to_edit]]"
                 content-type="application/json"
                 handle-as="json"
@@ -36,7 +36,7 @@
         </iron-ajax>
         <iron-ajax id="delete_item_ajax"
                 method="DELETE"
-                url="/users/[[user.id]]"
+                url="/api/users/[[user.id]]"
                 handle-as="json"
                 on-error="delete_item_failed"
                 on-response="delete_item_successful"

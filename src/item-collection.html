@@ -47,7 +47,7 @@
         <!-- AJAX requests. -->
         <iron-ajax auto method="GET"
                 id="get_items_ajax"
-                url="/[[itemName]]"
+                url="/api/[[itemName]]"
                 params="[[search_filter]]"
                 handle-as="json"
                 last-response="{{items}}"
@@ -58,7 +58,7 @@
         </iron-ajax>
         <iron-ajax id="create_item_ajax"
                 method="POST"
-                url="/[[itemName]]"
+                url="/api/[[itemName]]"
                 body="[[new_item]]"
                 content-type="application/json"
                 handle-as="json"

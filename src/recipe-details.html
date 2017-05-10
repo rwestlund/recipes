@@ -38,7 +38,7 @@
         <!-- AJAX requests. -->
         <iron-ajax auto="[[recipeId]]"
                 method="GET"
-                url="/recipes/[[recipeId]]"
+                url="/api/recipes/[[recipeId]]"
                 handle-as="json"
                 last-response="{{recipe}}"
                 on-error="loading_data_failed"
@@ -47,7 +47,7 @@
         </iron-ajax>
         <iron-ajax method="PUT"
                 id="put_item_ajax"
-                url="/recipes/[[recipeId]]"
+                url="/api/recipes/[[recipeId]]"
                 body="[[recipe]]"
                 content-type="application/json"
                 handle-as="json"
@@ -58,7 +58,7 @@
         </iron-ajax>
         <iron-ajax id="delete_item_ajax"
                 method="DELETE"
-                url="/recipes/[[recipeId]]"
+                url="/api/recipes/[[recipeId]]"
                 handle-as="json"
                 on-error="delete_item_failed"
                 on-response="delete_item_successful"
@@ -67,7 +67,7 @@
         <!-- All tags for the add tag typeahead. -->
         <iron-ajax auto="[[recipeId]]"
                 method="GET"
-                url="/tags"
+                url="/api/tags"
                 handle-as="json"
                 last-response="{{tags}}"
                 on-error="loading_data_failed"
@@ -75,7 +75,7 @@
         </iron-ajax>
         <!-- All recipes for linked recipe typeahead. -->
         <iron-ajax auto method="GET"
-                url="/recipes/titles"
+                url="/api/recipes/titles"
                 handle-as="json"
                 last-response="{{recipes}}"
                 on-error="loading_data_failed"
