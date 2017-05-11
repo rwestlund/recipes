@@ -108,7 +108,7 @@
                     </paper-item>
                 </a>
                 <a name="users" href="/users/"
-                        hidden$="[[!user_is_admin(user_role)]]">
+                        hidden$="[[!is_admin(user_role)]]">
                     <paper-item>
                         <iron-icon icon="social:people"></iron-icon>
                         <span>Users</span>
@@ -162,11 +162,11 @@
 
                     <neon-animatable name="">
                         <!-- Only set enable-fab if appropriate. -->
-                        <template is="dom-if" if="[[user_is_user(user_role)]]">
+                        <template is="dom-if" if="[[is_user(user_role)]]">
                             <item-collection item-name="recipes" enable-fab>
                             </item-collection>
                         </template>
-                        <template is="dom-if" if="[[!user_is_user(user_role)]]">
+                        <template is="dom-if" if="[[!is_user(user_role)]]">
                             <item-collection item-name="recipes">
                             </item-collection>
                         </template>
@@ -225,7 +225,7 @@
                         </paper-material>
                     </neon-animatable>
 
-                    <template is="dom-if" if="[[user_is_admin(user_role)]]">
+                    <template is="dom-if" if="[[is_admin(user_role)]]">
                         <neon-animatable name="users">
                             <item-collection item-name="users" enable-fab>
                             </item-collection>
@@ -284,9 +284,7 @@
         "use strict";
         Polymer({
             is: "recipes-app",
-            user_is_admin: role => role === 'Admin',
-            user_is_user: role =>
-                role === 'Admin' || role === 'Moderator' || role === 'User',
+            behaviors: [ recipe_behaviors.global_behavior ],
             drawer_toggle: function() {
                 if (this.$.drawer_layout.narrow) this.$.drawer.toggle();
             },

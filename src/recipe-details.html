@@ -450,10 +450,8 @@
                 // Modererator, or the User who owns it. Author id must be a
                 // param to make sure this updates on recipe load.
                 allow_recipe_edit: function(role, user_id, author_id) {
-                    return role === this.constants.user_role_enum.admin ||
-                            role === this.constants.user_role_enum.moderator ||
-                            (role === this.constants.user_role_enum.user &&
-                                Number(user_id) === author_id);
+                    return this.is_moderator(role) ||
+                        (this.is_user(role) && Number(user_id) === author_id);
                 },
                 save_recipe: function() {
                     this.$.put_item_ajax.generateRequest();

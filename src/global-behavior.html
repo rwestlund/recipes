@@ -33,6 +33,18 @@ recipe_behaviors.global_behavior = {
             value: constants,
         },
     },
+    is_admin: function(role) {
+        return role === this.constants.user_role_enum.admin;
+    },
+    is_moderator: function(role) {
+        return role === this.constants.user_role_enum.admin
+            || role === this.constants.user_role_enum.moderator;
+    },
+    is_user: function(role) {
+        return role === this.constants.user_role_enum.admin
+            || role === this.constants.user_role_enum.moderator
+            || role === this.constants.user_role_enum.user;
+    },
     stop_propagation: e => e.stopPropagation(),
     long_date: function(d) {
         var date = new Date(d);
