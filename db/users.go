@@ -26,15 +26,9 @@ var usersQuery = `SELECT users.id, users.email, users.name,
 // scanUser takes a row set and scans the result into a User struct.
 func scanUser(rows *sql.Rows) (*defs.User, error) {
 	var u defs.User
-	// Name may be null, but we've fine converting that to an empty string.
-	var name sql.NullString
-	var err = rows.Scan(&u.ID, &u.Email, &name, &u.Role, &u.Lastlog,
+	var err = rows.Scan(&u.ID, &u.Email, &u.Name, &u.Role, &u.Lastlog,
 		&u.CreationDate, &u.RecipesAuthored)
-	if err != nil {
-		return nil, err
-	}
-	u.Name = name.String
-	return &u, nil
+	return &u, err
 }
 
 // FetchUsers returns all users in the database that match the given filter.

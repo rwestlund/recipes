@@ -12,8 +12,9 @@ package main
 import (
 	"config"
 	"database/sql"
-	_ "github.com/lib/pq"
 	"log"
+
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -42,7 +43,7 @@ func main() {
 	wrap_sql(db, `CREATE TABLE users (
         id              serial PRIMARY KEY,
         email           text NOT NULL,
-        name            text,
+        name            text NOT NULL DEFAULT '',
         role            text NOT NULL,
         token           text,
         creation_date   timestamp WITH TIME ZONE NOT NULL
