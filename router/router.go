@@ -25,8 +25,6 @@ func NewRouter() *mux.Router {
 			Path(route.pattern).
 			Handler(logger(route.handler))
 	}
-	// Add route to handle static files.
-	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./build/default/")))
 	return router
 }
 
