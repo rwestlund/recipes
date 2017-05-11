@@ -112,12 +112,6 @@
             </template>
         </template>
 
-        <!-- FAB. -->
-        <paper-fab icon="icons:add" on-tap="create_item"
-                    hidden$="[[!enableFab]]">
-        </paper-fab>
-
-
         <!-- Show bottom buttons if there are several items listed. -->
         <template is="dom-if" if="[[show_bottom_buttons(items)]]">
             <div class="layout horizontal center around-justified wrap">
@@ -139,6 +133,12 @@
                 </div>
             </div>
         </template>
+
+        <!-- FAB. -->
+        <paper-fab mini icon="icons:add" on-tap="create_item"
+                    hidden$="[[!enableFab]]">
+        </paper-fab>
+
     </template>
 
     <script>
