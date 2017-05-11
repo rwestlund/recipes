@@ -305,12 +305,6 @@
                     if (this.items && !this.items.length && this.skip)
                         this.skip--;
                 },
-                loading_data_failed: function() {
-                    this.fire("iron-signal", {
-                        name: "error-toast",
-                        data: "Failed to communicate with server :(",
-                    });
-                },
             });
         })();
     </script>

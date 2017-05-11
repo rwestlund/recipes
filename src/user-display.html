@@ -205,12 +205,6 @@
                         data: "Failed to delete user :(",
                     });
                 },
-                loading_data_failed: function() {
-                    this.fire("iron-signal", {
-                        name: "error-toast",
-                        data: "Failed to communicate with server :(",
-                    });
-                },
                 // Copy response from PUT to update the display. The rationale
                 // for not loading the PUT response directly into user is
                 // to prevent a failed return status from clearing the display.

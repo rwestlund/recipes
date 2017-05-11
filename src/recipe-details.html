@@ -504,12 +504,6 @@
                     window.history.pushState({}, null, "/");
                     window.dispatchEvent(new CustomEvent("location-changed"));
                 },
-                loading_data_failed: function() {
-                    this.fire("iron-signal", {
-                        name: "error-toast",
-                        data: "Failed to communicate with server :(",
-                    });
-                },
                 /* Backup on GET. */
                 recipe_received: function() {
                     // Make sure we're not in edit mode after changing recipes.
