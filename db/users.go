@@ -12,7 +12,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/lib/pq"
 	"github.com/rwestlund/recipes/defs"
 )
 
@@ -27,20 +26,12 @@ var usersQuery = `SELECT users.id, users.email, users.name,
 // scanUser takes a row set and scans the result into a User struct.
 func scanUser(rows *sql.Rows) (*defs.User, error) {
 	var u defs.User
-	// Because lastlog may be null, read into NullTime first. The User object
-	// holds a pointer to a time.Time rather than a time.Time directly because
-	// this is the only way to make json.Marshal() encode a null when the time
-	// is not valid.
-	var lastlog pq.NullTime
 	// Name may be null, but we've fine converting that to an empty string.
 	var name sql.NullString
-	var err = rows.Scan(&u.ID, &u.Email, &name, &u.Role, &lastlog,
+	var err = rows.Scan(&u.ID, &u.Email, &name, &u.Role, &u.Lastlog,
 		&u.CreationDate, &u.RecipesAuthored)
 	if err != nil {
 		return nil, err
-	}
-	if lastlog.Valid {
-		u.Lastlog = &lastlog.Time
 	}
 	u.Name = name.String
 	return &u, nil

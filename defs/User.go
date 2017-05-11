@@ -7,17 +7,18 @@ package defs
 
 import (
 	"time"
+
+	null "gopkg.in/guregu/null.v3"
 )
 
 // User represents a User from the database.
 type User struct {
-	ID    uint32 `json:"id"`
-	Email string `json:"email"`
-	Name  string `json:"name"`
-	Role  string `json:"role"`
-	// See the comment in db/users.go:scan_user() for why this is a pointer.
-	Lastlog      *time.Time `json:"lastlog"`
-	CreationDate time.Time  `json:"creation_date"`
+	ID           uint32    `json:"id"`
+	Email        string    `json:"email"`
+	Name         string    `json:"name"`
+	Role         string    `json:"role"`
+	Lastlog      null.Time `json:"lastlog"`
+	CreationDate time.Time `json:"creation_date"`
 	// Fields from other tables.
 	RecipesAuthored uint32 `json:"recipes_authored"`
 }

@@ -361,6 +361,12 @@
 			"path": "google.golang.org/grpc/transport",
 			"revision": "68a5d50f4517bae2b44b18092410fe248d153f1e",
 			"revisionTime": "2017-05-02T22:55:05Z"
+		},
+		{
+			"checksumSHA1": "PoHLopxwkiXxa3uVhezeq/qJ/Vo=",
+			"path": "gopkg.in/guregu/null.v3",
+			"revision": "41961cea0328defc5f95c1c473f89ebf0d1813f6",
+			"revisionTime": "2016-02-28T00:53:16Z"
 		}
 	],
 	"rootPath": "github.com/rwestlund/recipes"
