@@ -31,12 +31,10 @@
                     value="{{item}}">
                 <paper-icon-button suffix
                         icon="icons:cancel"
-                        data-index$="[[index]]"
                         on-tap="delete_ingredient">
                 </paper-icon-button>
                 <paper-icon-button suffix
                         icon="icons:arrow-upward"
-                        data-index$="[[index]]"
                         disabled$="[[!index]]"
                         on-tap="move_ingredient_up">
                 </paper-icon-button>
@@ -70,15 +68,12 @@
                 this.size_changed();
             },
             delete_ingredient: function(e) {
-                var index = Number(e.currentTarget.attributes["data-index"].value);
-                this.splice("recipe.ingredients", index, 1);
+                this.splice("recipe.ingredients", e.model.index, 1);
                 this.size_changed();
             },
             move_ingredient_up: function(e) {
-                var index = Number(e.currentTarget.attributes["data-index"].value);
-                if (!index) return;
-                var temp = this.splice("recipe.ingredients", index, 1)[0];
-                this.splice("recipe.ingredients", index - 1, 0, temp);
+                var temp = this.splice("recipe.ingredients", e.model.index, 1)[0];
+                this.splice("recipe.ingredients", e.model.index - 1, 0, temp);
             },
             add_one: val => val + 1,
         });

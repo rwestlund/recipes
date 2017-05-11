@@ -31,15 +31,12 @@
                         value="{{item}}">
                 </paper-textarea>
                 <div class="layout horizontal end-justified">
-                    <paper-button
-                            data-index$="[[index]]"
-                            on-tap="delete_direction">
+                    <paper-button on-tap="delete_direction">
                         <iron-icon icon="icons:cancel"></iron-icon>
                         Remove Step [[add_one(index)]]
                     </paper-button>
                     <paper-icon-button
                             icon="icons:arrow-upward"
-                            data-index$="[[index]]"
                             disabled$="[[!index]]"
                             on-tap="move_direction_up">
                     </paper-icon-button>
@@ -73,15 +70,12 @@
                 this.size_changed();
             },
             delete_direction: function(e) {
-                var index = Number(e.currentTarget.attributes["data-index"].value);
-                this.splice("recipe.directions", index, 1);
+                this.splice("recipe.directions", e.model.index, 1);
                 this.size_changed();
             },
             move_direction_up: function(e) {
-                var index = Number(e.currentTarget.attributes["data-index"].value);
-                if (!index) return;
-                var temp = this.splice("recipe.directions", index, 1)[0];
-                this.splice("recipe.directions", index - 1, 0, temp);
+                var temp = this.splice("recipe.directions", e.model.index, 1)[0];
+                this.splice("recipe.directions", e.model.index - 1, 0, temp);
             },
             add_one: val => val + 1,
         });

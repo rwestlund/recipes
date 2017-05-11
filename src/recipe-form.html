@@ -55,9 +55,7 @@
             <template is="dom-repeat" items="[[recipe.tags]]">
                 <div class="layout horizontal center justified">
                     <span>[[item]]</span>
-                    <paper-icon-button icon="icons:cancel"
-                            data-index$="[[index]]"
-                            on-tap="remove_tag">
+                    <paper-icon-button icon="icons:cancel" on-tap="remove_tag">
                     </paper-icon-button>
                 </div>
             </template>
@@ -90,7 +88,6 @@
                     list="tags">
                 <paper-icon-button suffix
                         icon="icons:check-circle"
-                        data-index$="[[index]]"
                         on-tap="add_typed_tag">
                 </paper-icon-button>
             </paper-input>
@@ -129,9 +126,7 @@
                     this.$.dialog.open();
                 },
                 remove_tag: function(e) {
-                    var index = Number(
-                            e.currentTarget.attributes["data-index"].value);
-                    this.splice("recipe.tags", index, 1);
+                    this.splice("recipe.tags", e.model.index, 1);
                     this.size_changed();
                 },
                 // Call add_tag with the appropriate variable.

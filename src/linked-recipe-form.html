@@ -34,7 +34,6 @@
                 <div class="layout horizontal center justified">
                     <span>[[item.title]]</span>
                     <paper-icon-button icon="icons:cancel"
-                            data-index$="[[index]]"
                             on-tap="remove_linked_recipe">
                     </paper-icon-button>
                 </div>
@@ -88,9 +87,7 @@
                     this.$.dialog.open();
                 },
                 remove_linked_recipe: function(e) {
-                    var index = Number(
-                            e.currentTarget.attributes["data-index"].value);
-                    this.splice("recipe.linked_recipes", index, 1);
+                    this.splice("recipe.linked_recipes", e.model.index, 1);
                     this.size_changed();
                 },
                 add_selected_recipe: function() {
