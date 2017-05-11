@@ -199,10 +199,8 @@
                         data: this.user.role + " " + this.first_defined(
                                 this.user.name, this.user.email) + " deleted",
                     });
-                    // Ask the parent element to delete this item. It can't be
-                    // done here because this whole element needs to be
-                    // removed.
-                    this.fire('delete-item', this.user);
+                    // Let the parent know that this was deleted.
+                    this.fire("item-deleted");
                 },
                 delete_item_failed: function() {
                     this.fire("iron-signal", {

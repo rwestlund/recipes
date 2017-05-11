@@ -97,18 +97,13 @@
              item-collection may include a form for the FAB. -->
         <template is="dom-if" if="[[equal(itemName, 'users')]]">
             <template is="dom-repeat" items="[[items]]">
-                <user-display allow-edit user="{{item}}"
-                        on-delete-item="remove_item">
-                </user-display>
+                <user-display allow-edit user="{{item}}"></user-display>
             </template>
         </template>
 
         <template is="dom-if" if="[[equal(itemName, 'recipes')]]">
             <template is="dom-repeat" items="[[items]]">
-                <recipe-display
-                        recipe="[[item]]"
-                        on-delete-item="remove_item">
-                </recipe-display>
+                <recipe-display recipe="[[item]]"></recipe-display>
             </template>
         </template>
 
@@ -139,6 +134,11 @@
                     hidden$="[[!enableFab]]">
         </paper-fab>
 
+        <!-- Recipes have their delete mechanish outside the context of this
+             element. In orde to refresh this list when they are deleted, they
+             send this signal. -->
+        <iron-signals on-iron-signal-item-collection-refresh="refresh_signal">
+        </iron-signals>
     </template>
 
     <script>
@@ -198,6 +198,8 @@
                         computed: "compute_loading_data(loading.*)",
                     },
                 },
+                // When a child is deleted, refresh the list.
+                listeners: { "item-deleted": "refresh" },
                 // Loading is true if any flags in it are true.
                 compute_loading_data: function(loading) {
                     var ret = false;
@@ -223,6 +225,10 @@
                 // Reload the collection of items.
                 refresh: function() {
                     this.$.get_items_ajax.generateRequest();
+                },
+                refresh_signal: function(e, itemName) {
+                    // Only refresh the one that was changed.
+                    if (this.itemName == itemName) this.refresh();
                 },
                 // Open the appropriate form after a click on the FAB.
                 create_item: function() {
@@ -280,11 +286,6 @@
                         data: data,
                     });
                 },
-                // Simply remove the element from the DOM.
-                remove_item: function(e, item) {
-                    this.splice('items', this.items.indexOf(item), 1);
-                },
-
                 previous: function() {
                     if (this.skip) this.skip--;
                 },

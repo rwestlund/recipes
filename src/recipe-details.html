@@ -361,6 +361,11 @@
                         name: "success-toast",
                         data: this.recipe.title + " deleted",
                     });
+                    // Let the parent know that it should refresh its list.
+                    this.fire("iron-signal", { name: "item-collection-refresh",
+                        data: "recipes"
+                    });
+                    // Go back to the list.
                     window.history.pushState({}, null, "/");
                     window.dispatchEvent(new CustomEvent("location-changed"));
                 },
