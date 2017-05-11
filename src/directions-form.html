@@ -28,7 +28,9 @@
             <template is="dom-repeat" items="{{recipe.directions}}">
                 <paper-textarea type="text"
                         label="Step [[add_one(index)]]"
-                        value="{{item}}">
+                        value="{{item}}"
+                        autocapitalize="sentences"
+                        char-counter maxlength="200">
                 </paper-textarea>
                 <div class="layout horizontal end-justified">
                     <paper-button on-tap="delete_direction">

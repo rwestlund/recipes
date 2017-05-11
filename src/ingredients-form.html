@@ -28,7 +28,8 @@
         <template is="dom-repeat" items="{{recipe.ingredients}}">
             <paper-input type="text"
                     label="Item [[add_one(index)]]"
-                    value="{{item}}">
+                    value="{{item}}"
+                    char-counter maxlength="40">
                 <paper-icon-button suffix
                         icon="icons:cancel"
                         on-tap="delete_ingredient">

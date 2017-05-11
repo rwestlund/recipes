@@ -33,6 +33,7 @@
                     type="text"
                     label="Title"
                     value="{{recipe.title}}"
+                    autocapitalize="words"
                     char-counter maxlength="30">
                 <paper-icon-button suffix
                         icon="icons:clear"
@@ -44,6 +45,7 @@
                     type="text"
                     label="Summary"
                     value="{{recipe.summary}}"
+                    autocapitalize="sentences"
                     char-counter maxlength="50">
                 <paper-icon-button suffix
                         icon="icons:clear"
@@ -85,7 +87,8 @@
             <paper-input type="text"
                     label="Type New Tag"
                     value="{{typed_tag}}"
-                    list="tags">
+                    list="tags"
+                    char-counter maxlength="30">
                 <paper-icon-button suffix
                         icon="icons:check-circle"
                         on-tap="add_typed_tag">

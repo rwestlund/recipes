@@ -28,23 +28,29 @@
 
         <paper-input type="text"
                 label="Amount"
-                value="{{recipe.amount}}">
+                value="{{recipe.amount}}"
+                char-counter maxlength="20">
         </paper-input>
         <paper-input type="text"
                 label="Time"
-                value="{{recipe.time}}">
+                value="{{recipe.time}}"
+                char-counter maxlength="20">
         </paper-input>
         <paper-input type="text"
                 label="Oven"
-                value="{{recipe.oven}}">
+                value="{{recipe.oven}}"
+                char-counter maxlength="20">
         </paper-input>
         <paper-input type="text"
                 label="Source"
-                value="{{recipe.source}}">
+                value="{{recipe.source}}"
+                char-counter maxlength="60">
         </paper-input>
         <paper-textarea type="text"
                 label="Notes"
-                value="{{recipe.notes}}">
+                value="{{recipe.notes}}"
+                autocapitalize="sentences"
+                char-counter maxlength="300">
         </paper-textarea>
 
     </responsive-dialog>
