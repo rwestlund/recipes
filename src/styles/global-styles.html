@@ -1,5 +1,5 @@
 <!--
-    Copyright (c) 2016, Randy Westlund. All rights reserved.
+    Copyright (c) 2016-2017, Randy Westlund. All rights reserved.
     This code is under the BSD-2-Clause license.
 -->
 <!-- This defines CSS that is imported by every element. -->
@@ -23,7 +23,6 @@
             paper-material {
                 background-color: white;
             }
-
             a.inherit-color {
                 color:              inherit;
                 text-decoration:    none;
@@ -65,12 +64,6 @@
                 margin-left: 0.8em;
                 margin-right: 0.8em;
             }
-            div.headerbar {
-                /*
-                margin-top: 1em;
-                margin-bottom: 1em;
-                    */
-            }
             div.headerbar > paper-button {
                 margin-top: 1.2em;
                 margin-bottom: 1.2em;
@@ -80,161 +73,17 @@
                 display: block;
             }
 
-            .page-title {
-                @apply(--paper-font-display2);
-            }
-
-            @media (max-width: 600px) {
-                .page-title {
-                    font-size: 24px!important;
-                }
-            }
-
-            .form-control {
-                border-radius: 1px;
-            }
-
-            /*hide spinner in type=number input fields */
-            input::-webkit-outer-spin-button,
-            input::-webkit-inner-spin-button {
-                display: none;
-                -webkit-appearance: none;
-                /* Apparently some margin are still there even though it's hidden */
-                margin: 0;
-            }
-            input[type=number] {
-                -moz-appearance:textfield;
-            }
-
-            .details-card {
-                -webkit-box-flex: 0;
-                -webkit-flex: 0 0 auto;
-                    -ms-flex: 0 0 auto;
-                        flex: 0 0 auto;
-                -webkit-align-self: auto;
-                    -ms-flex-item-align: auto;
-                        align-self: auto;
-                min-height: auto;
-
-                /*margin: 10px;*/
-                padding: 10px;
-                min-width: 100%;
-                margin-top: 20px;
-                @apply(--shadow-elevation-3dp);
-                color: #373737;
-            }
-
-            .details-card hr {
-                margin-top: 5px;
-                margin-bottom: 20px;
-            }
-
-            .details-card .details-card-heading {
-                font-weight: bold;
-                /*color: #444444;*/
-                font-size: 1.1em;
-                font-variant: small-caps;
-            }
-
-
-            .details-card paper-button.heading-action {
-                position: absolute;
-                top: 0px;
-                right: 0px;
-                min-width: 40px;
-                margin: 3px !important;
-                padding: 3px !important;
-                color: #777777;
-            }
-
-            .details-card paper-button.heading-action:hover {
-                @apply(--shadow-elevation-2dp);
-            }
-
-            .item-label-sm {
-                color: #727272;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                font-family: 'Roboto', 'Noto', sans-serif;
-                -webkit-font-smoothing: antialiased;
-                font-size: 11.5px;
-                font-weight: 400;
-                line-height: 24px;
-            }
-
-            .item-label {
-                color: #727272;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                font-family: 'Roboto', 'Noto', sans-serif;
-                -webkit-font-smoothing: antialiased;
-                font-size: 15px;
-                font-weight: bold;
-                line-height: 24px;
-            }
-
-            input.mat-design {
-                border-top-style: none;
-                border-left-style: none;
-                border-right-style: none;
-                border-bottom-color: #727272;
-                background-color: rgba(0,0,0,0);
-            }
-            input.mat-design:focus {
-                border-color: #3F51B5;
-            }
-
-            a.no-decor:link {
-                text-decoration: none;
-                color: inherit;
-            }
-
-            a.no-decor:visited {
-                text-decoration: none;
-                color: inherit;
-            }
-
-            a.no-decor:hover {
-                text-decoration: none;
-                color: inherit;
-            }
-
-            a.no-decor:active {
-                text-decoration: none;
-                color: inherit;
-            }
-
             paper-toast.success-toast {
                 --paper-toast-background-color: green;
                 --paper-toast-color: white;
             }
-
             paper-toast.warn-toast {
                 --paper-toast-background-color: orange;
                 --paper-toast-color: white;
             }
-
             paper-toast.error-toast {
                 --paper-toast-background-color: red;
                 --paper-toast-color: white;
-            }
-
-
-            
-          /*disable ability to select text
-            this is useful on mobile when tap events will
-            try to select text around it
-            used on colon in time pickers*/
-            .noselect {
-                -webkit-touch-callout: none; /* iOS Safari */
-                -webkit-user-select: none;   /* Chrome/Safari/Opera */
-                -khtml-user-select: none;    /* Konqueror */
-                -moz-user-select: none;      /* Firefox */
-                -ms-user-select: none;       /* IE/Edge */
-                user-select: none;           /* non-prefixed version, currently
-                                              not supported by any browser */
             }
         </style>
     </template>
