@@ -13,6 +13,7 @@
 <link rel="import" href="../bc/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../bc/iron-icon/iron-icon.html">
 <link rel="import" href="../bc/iron-icons/iron-icons.html">
+<link rel="import" href="../bc/iron-signals/iron-signals.html">
 <link rel="import" href="../bc/paper-button/paper-button.html">
 <link rel="import" href="../bc/paper-fab/paper-fab.html">
 <link rel="import" href="../bc/paper-icon-button/paper-icon-button.html">
@@ -22,10 +23,8 @@
 
 <link rel="import" href="global-behavior.html">
 <link rel="import" href="recipe-display.html">
-<link rel="import" href="recipe-form.html">
 <link rel="import" href="styles/global-styles.html">
 <link rel="import" href="user-display.html">
-<link rel="import" href="user-form.html">
 
 <dom-module id="item-collection">
     <template>
@@ -102,11 +101,6 @@
                         on-delete-item="remove_item">
                 </user-display>
             </template>
-            <user-form id="create_user_form"
-                    title="Create user"
-                    user="{{new_item}}"
-                    on-closed="resolve_create_item">
-            </user-form>
         </template>
 
         <template is="dom-if" if="[[equal(itemName, 'recipes')]]">
@@ -116,11 +110,6 @@
                         on-delete-item="remove_item">
                 </recipe-display>
             </template>
-            <recipe-form id="create_recipe_form"
-                    title="Create Recipe"
-                    recipe="{{new_item}}"
-                    on-closed="resolve_create_item">
-            </recipe-form>
         </template>
 
         <!-- FAB. -->
@@ -235,17 +224,20 @@
                 refresh: function() {
                     this.$.get_items_ajax.generateRequest();
                 },
-
-
                 // Open the appropriate form after a click on the FAB.
                 create_item: function() {
                     this.set('new_item', {});
+                    var data = { that: this, callback: "resolve_create_item" };
                     if (this.itemName === "users") {
-                        this.$$("#create_user_form").open();
+                        data.name = "create_user_form";
+                        data.user = this.new_item;
                     }
                     else if (this.itemName === "recipes") {
-                        this.$$("#create_recipe_form").open();
+                        data.name = "create_recipe_form";
+                        data.recipe = this.new_item;
                     }
+                    // Ask for the form to be opened.
+                    this.fire("iron-signal", { name: "open-form", data: data });
                 },
                 // Handle response from dialog. Reason is either confirmed or
                 // canceled.

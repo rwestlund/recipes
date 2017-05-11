@@ -5,6 +5,7 @@
 <!-- This module shows a user card. -->
 
 <link rel="import" href="../bc/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bc/iron-signals/iron-signals.html">
 <link rel="import" href="../bc/paper-button/paper-button.html">
 <link rel="import" href="../bc/paper-material/paper-material.html">
 <link rel="import" href="../bc/paper-spinner/paper-spinner.html">
@@ -12,7 +13,6 @@
 
 <link rel="import" href="global-behavior.html">
 <link rel="import" href="styles/global-styles.html">
-<link rel="import" href="user-form.html">
 
 <dom-module id="user-display">
     <template>
@@ -105,16 +105,6 @@
             </div>
         </paper-material>
 
-        <!--TODO does this need a delay render option? -->
-        <!-- Form for editing items withing this element. -->
-        <template is="dom-if" if="[[allowEdit]]">
-            <user-form
-                    id="edit_item_dialog"
-                    user="{{item_to_edit}}"
-                    on-closed="resolve_edit_item_dialog">
-            </user-form>
-        </template>
-
         <paper-dialog id="delete_item_confirmation"
                 on-iron-overlay-closed="delete_item">
             <div>
@@ -125,7 +115,6 @@
                 <paper-button raised dialog-confirm>Delete</paper-button>
             </div>
         </paper-dialog>
-
     </template>
 
     <script>
@@ -167,17 +156,21 @@
                 edit_item: function() {
                     // Deep copy the object so we don't change the card's
                     // display until the save is successful.
-                    var item_to_edit = {};
-                    Object.keys(this.user)
-                        .forEach(k => item_to_edit[k] = this.user[k]);
-                    this.set('item_to_edit', item_to_edit);
-                    this.$$("#edit_item_dialog").open();
+                    this.item_to_edit = JSON.parse(JSON.stringify(this.user));
+                    // Ask for the form to be opened.
+                    this.fire("iron-signal", { name: "open-form",
+                        data: {
+                            name:     "edit_user_form",
+                            user:     this.item_to_edit,
+                            that:     this,
+                            callback: "resolve_edit_item_dialog",
+                        },
+                    });
                 },
                 // Handle response from dialog. Reason is either confirmed or
                 // canceled.
                 resolve_edit_item_dialog: function(e, reason) {
-                    if (reason.confirmed)
-                        this.$.put_ajax.generateRequest();
+                    if (reason.confirmed) this.$.put_ajax.generateRequest();
                 },
                 open_delete_item_confirmation: function() {
                     this.$.delete_item_confirmation.open();

@@ -1,0 +1,87 @@
+<!--
+    Copyright (c) 2017, Randy Westlund. All rights reserved.
+    This code is under the BSD-2-Clause license.
+-->
+<!--
+    This module contains all the application's forms. They are triggered
+     with iron-signals. This is a workaround for:
+     https://github.com/PolymerElements/iron-overlay-behavior/issues/208#issuecomment-234024428
+-->
+
+<link rel="import" href="../bc/iron-signals/iron-signals.html">
+<link rel="import" href="../bc/polymer/polymer.html">
+
+<link rel="import" href="global-behavior.html">
+<link rel="import" href="recipe-form.html">
+<link rel="import" href="user-form.html">
+
+<dom-module id="recipe-forms">
+    <template>
+        <iron-signals on-iron-signal-open-form="open_form"></iron-signals>
+
+        <template is="dom-if" if="[[is_moderator(userRole)]]">
+            <recipe-form id="create_recipe_form" title="Create Recipe">
+            </recipe-form>
+        </template>
+
+        <template is="dom-if" if="[[is_admin(userRole)]]">
+            <user-form id="create_user_form" title="Create user"></user-form>
+            <user-form id="edit_user_form"></user-form>
+        </template>
+    </template>
+
+    <script>
+        (function() {
+            'use strict';
+            Polymer({
+                is: "recipe-forms",
+                behaviors: [ recipe_behaviors.global_behavior ],
+                properties: {
+                    // Passed in by the parent to conditionally render forms.
+                    userRole: {
+                        type: String,
+                    },
+                    // A reference to the element that asked to open a form.
+                    dialog_parent: {
+                        type: Object,
+                        value: null,
+                    },
+                    // The name of the callback function on the requesting
+                    // element.
+                    dialog_callback: {
+                        type: String,
+                    },
+                },
+                listeners: {
+                    // Every form fires a "closed" event. Rather than binding
+                    // a listener to each one, let it bubble up and catch them
+                    // all here.
+                    "closed": "dialog_closed",
+                },
+                // On close, notify the element that asked for the form.
+                dialog_closed: function(e, reason) {
+                    if (this.dialog_parent)
+                        this.dialog_parent[this.dialog_callback](e, reason);
+                },
+                // Open whichever form was requested by iron-signals.
+                open_form: function(e, data) {
+                    // Save a reference to the element that sent the request so
+                    // we can tell it when the form closes.
+                    this.dialog_parent = data.that;
+                    // If the sender requests a special callback, use it.
+                    // Otherwise, use "resolve_dialog".
+                    this.dialog_callback = data.callback ? data.callback :
+                            "resolve_dialog";
+                    // If any of these properties are given from the signal,
+                    // assign them to the form. This prevents needing a large
+                    // switch to set up each form.
+                    var props = [ "recipe", "user" ];
+                    props.forEach(p => {
+                        if (data[p]) this.$$("#" + [data.name])[p] = data[p];
+                    });
+                    this.$$("#" + [data.name]).open();
+                },
+            });
+        })();
+    </script>
+</dom-module>
