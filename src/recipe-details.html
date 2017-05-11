@@ -4,21 +4,17 @@
 -->
 <!-- This module allows editing of a recipe. -->
 
+<link rel="import" href="../bc/app-layout/app-grid/app-grid-style.html">
 <link rel="import" href="../bc/iron-ajax/iron-ajax.html">
 <link rel="import" href="../bc/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../bc/iron-icon/iron-icon.html">
+<link rel="import" href="../bc/iron-signals/iron-signals.html">
 <link rel="import" href="../bc/iron-icons/iron-icons.html">
 <link rel="import" href="../bc/paper-button/paper-button.html">
 <link rel="import" href="../bc/paper-dialog/paper-dialog.html">
-<link rel="import" href="../bc/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../bc/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bc/paper-input/paper-input.html">
-<link rel="import" href="../bc/paper-input/paper-textarea.html">
-<link rel="import" href="../bc/paper-item/paper-item.html">
 <link rel="import" href="../bc/paper-material/paper-material.html">
-<link rel="import" href="../bc/paper-menu/paper-menu.html">
 <link rel="import" href="../bc/paper-spinner/paper-spinner.html">
-<link rel="import" href="../bc/paper-toast/paper-toast.html">
 <link rel="import" href="../bc/polymer/polymer.html">
 
 <link rel="import" href="cookie-display.html">
@@ -28,13 +24,28 @@
 <dom-module id="recipe-details">
     <template>
         <style include="iron-flex iron-flex-alignment"></style>
+        <style include="app-grid-style"></style>
         <style include="global-styles"></style>
         <style>
             :host {
                 display: block;
             }
+            @media (min-width:700px) {
+                :host {
+                    --app-grid-columns: 2;
+                }
+            }
             paper-button {
                 background-color: white;
+            }
+            h3.recipe-title {
+                margin-top: 0;
+                margin-bottom: 0;
+            }
+            div.summary {
+                font-style: italic;
+                font-size: large;
+                text-align: center;
             }
         </style>
 
@@ -45,16 +56,15 @@
                 handle-as="json"
                 last-response="{{recipe}}"
                 on-error="loading_data_failed"
-                on-response="recipe_received"
                 loading="{{loading.get_item}}">
         </iron-ajax>
         <iron-ajax method="PUT"
                 id="put_item_ajax"
                 url="/api/recipes/[[recipeId]]"
-                body="[[recipe]]"
+                body="[[recipe_to_edit]]"
                 content-type="application/json"
                 handle-as="json"
-                last-response="{{new_recipe}}"
+                last-response="{{recipe_to_edit}}"
                 on-response="put_item_successful"
                 on-error="put_item_failed"
                 loading="{{loading.put_item}}">
@@ -67,319 +77,133 @@
                 on-response="delete_item_successful"
                 loading="{{loading.delete_item}}">
         </iron-ajax>
-        <!-- All tags for the add tag typeahead. -->
-        <iron-ajax auto="[[recipeId]]"
-                method="GET"
-                url="/api/tags"
-                handle-as="json"
-                last-response="{{tags}}"
-                on-error="loading_data_failed"
-                loading="{{loading.get_tags}}">
-        </iron-ajax>
-        <!-- All recipes for linked recipe typeahead. -->
-        <iron-ajax auto method="GET"
-                url="/api/recipes/titles"
-                handle-as="json"
-                last-response="{{recipes}}"
-                on-error="loading_data_failed"
-                loading="{{loading.get_recipes}}">
-        </iron-ajax>
 
         <cookie-display cookie-name="role" cookie-value="{{user_role}}">
         </cookie-display>
         <cookie-display cookie-name="user_id" cookie-value="{{user_id}}">
         </cookie-display>
+
         <div class="headerbar layout horizontal center">
             <a class="inherit-color" href="/">
-                <paper-button raised>
-                    <iron-icon icon="icons:arrow-back"></iron-icon>
-                    All Recipes
-                </paper-button>
+                <paper-icon-button icon="icons:arrow-back"></paper-icon-button>
             </a>
-            <paper-button raised on-tap="toggle_edit_mode"
-                    disabled$="[[!allow_recipe_edit(user_role, user_id, recipe.author_id)]]">
-                <iron-icon icon="icons:create"></iron-icon>
-                <template is="dom-if" if="[[edit_mode]]">
-                    Leave
-                </template>
-                <template is="dom-if" if="[[!edit_mode]]">
-                    Enter
-                </template>
-                &nbsp;Edit Mode
-            </paper-button>
-
-            <paper-button raised on-tap="open_delete_modal"
-                    disabled$="[[!allow_recipe_edit(user_role, user_id, recipe.author_id)]]">
-                <iron-icon icon="icons:delete"></iron-icon>
-                Delete Recipe
-            </paper-button>
-
+            <h3 class="recipe-title">[[recipe.title]]</h3>
             <paper-spinner class="nav-button" active="[[loading_data]]"
                     alt="loading recipes...">
             </paper-spinner>
+            <div class="flex"></div>
+            <span class="page-subtitle">
+                [[format_recipe_tags(recipe.tags)]]
+            </span>
+        </div>
+        <div class="layout horizontal center">
+            <div class="summary flex">[[recipe.summary]]</div>
+            <template is="dom-if"
+                    if="[[allow_recipe_edit(user_role, user_id, recipe.author_id)]]">
+                <paper-icon-button icon="icons:create" on-tap="edit_recipe">
+                </paper-icon-button>
+            </template>
         </div>
 
-        <!-- The recipe card itself. --> 
-        <paper-material class="card-item">
-            <!-- Form version. -->
-            <template is="dom-if" if="[[edit_mode]]">
-                <div class="layout horizontal wrap">
-                    <div class="flex-4 item-col">
-                        <paper-input type="text"
-                                label="Title"
-                                value="{{recipe.title}}">
-                        </paper-input>
-                        <paper-textarea type="text"
-                                label="Summary"
-                                value="{{recipe.summary}}">
-                        </paper-textarea>
-                        <strong class="recipe-item-label">Tags</strong>
-                        <template is="dom-repeat" items="[[recipe.tags]]">
-                            <div class="layout horizontal center justified">
-                                <span>[[item]]</span>
-                                <paper-icon-button icon="icons:cancel"
-                                        data-index$="[[index]]"
-                                        on-tap="remove_tag">
-                                </paper-icon-button>
-                            </div>
-                        </template>
-                        <!-- Select a new tag from a drop down. -->
-                        <div class="layout vertical">
-                            <paper-dropdown-menu label="Select New Tag"
-                                    vertical-align="top"
-                                    horizontal-align="right">
-                                <paper-menu class="dropdown-content"
-                                        attr-for-selected="value"
-                                        selected="{{selected_tag}}"
-                                        on-iron-select="add_selected_tag">
-                                    <template is="dom-repeat" items="[[tags]]">
-                                        <paper-item value="[[item]]">
-                                            [[item]]
-                                        </paper-item>
-                                    </template>
-                                </paper-menu>
-                            </paper-dropdown-menu>
-                        </div>
-                        <!-- Type a new tag from typeahead. -->
-                        <datalist id="tags">
-                            <template is="dom-repeat" items="[[tags]]">
-                                <option value="[[item]]"></option>
-                            </template>
-                        </datalist>
-                        <paper-input type="text"
-                                label="Type New Tag"
-                                value="{{typed_tag}}"
-                                list="tags">
-                            <paper-icon-button suffix
-                                    icon="icons:check-circle"
-                                    data-index$="[[index]]"
-                                    on-tap="add_typed_tag">
-                            </paper-icon-button>
-                        </paper-input>
+        <div class="app-grid">
+            <paper-material class="card-item">
+                <div class="layout horizontal justified">
+                    <h3 class="card-title">Ingredients</h3>
+                    <template is="dom-if"
+                            if="[[allow_recipe_edit(user_role, user_id, recipe.author_id)]]">
+                        <paper-icon-button icon="icons:create"
+                                on-tap="edit_ingredients">
+                        </paper-icon-button>
+                    </template>
+                </div>
+                <ul class="ingredients-list">
+                    <template is="dom-repeat" items="[[recipe.ingredients]]">
+                        <li>[[item]]</li>
+                    </template>
+                </ul>
+            </paper-material>
 
-                        <!-- Ingredients inputs. -->
-                        <strong class="recipe-item-label">Ingredients</strong>
-                        <template is="dom-repeat"
-                                items="{{recipe.ingredients}}">
-                            <paper-input type="text"
-                                    label="Item [[add_one(index)]]"
-                                    value="{{item}}">
-                                <paper-icon-button suffix
-                                        icon="icons:cancel"
-                                        data-index$="[[index]]"
-                                        on-tap="delete_ingredient">
-                                </paper-icon-button>
-                                <paper-icon-button suffix
-                                        icon="icons:arrow-upward"
-                                        data-index$="[[index]]"
-                                        disabled$="[[!index]]"
-                                        on-tap="move_ingredient_up">
-                                </paper-icon-button>
-                            </paper-input>
-                        </template>
+            <paper-material class="card-item">
+                <div class="layout horizontal justified">
+                <h3 class="card-title">Directions</h3>
+                    <template is="dom-if"
+                            if="[[allow_recipe_edit(user_role, user_id, recipe.author_id)]]">
+                        <paper-icon-button icon="icons:create"
+                                on-tap="edit_directions">
+                        </paper-icon-button>
+                    </template>
+                </div>
+                <ol class="directions-list">
+                    <template is="dom-repeat" items="[[recipe.directions]]">
+                        <li>[[item]]</li>
+                    </template>
+                </ol>
+            </paper-material>
 
-                        <div class="layout horizontal center-justified">
-                            <paper-button on-tap="add_ingredient">
-                                <iron-icon icon="icons:add-circle"></iron-icon>
-                                Add item
+            <paper-material class="card-item">
+                <div class="layout horizontal justified">
+                <h3 class="card-title">Info</h3>
+                    <template is="dom-if"
+                            if="[[allow_recipe_edit(user_role, user_id, recipe.author_id)]]">
+                        <paper-icon-button icon="icons:create"
+                                on-tap="edit_info">
+                        </paper-icon-button>
+                    </template>
+                </div>
+                <template is="dom-if" if="[[recipe.amount]]">
+                    <strong class="recipe-item-label">Amount</strong>
+                    <div>[[recipe.amount]]</div>
+                </template>
+                <template is="dom-if" if="[[recipe.time]]">
+                    <strong class="recipe-item-label">Time</strong>
+                    <div>[[recipe.time]]</div>
+                </template>
+                <template is="dom-if" if="[[recipe.oven]]">
+                    <Strong class="recipe-item-label">Oven</Strong>
+                    <div>[[recipe.oven]]</div>
+                </template>
+                <strong class="recipe-item-label">Author</strong>
+                <div>[[recipe.author_name]]</div>
+                <template is="dom-if" if="[[recipe.source]]">
+                    <strong class="recipe-item-label">Source</strong>
+                    <div>[[recipe.source]]</div>
+                </template>
+                <strong class="recipe-item-label">Revision</strong>
+                <div>[[recipe.revision]]</div>
+                <template is="dom-if" if="[[recipe.notes]]">
+                    <strong class="recipe-item-label">Notes</strong>
+                    <div>[[recipe.notes]]</div>
+                </template>
+
+                <template is="dom-if"
+                        if="[[!allow_recipe_edit(user_role, user_id, recipe.author_id)]]">
+                    <paper-button raised on-tap="open_delete_modal">
+                        <iron-icon icon="icons:delete"></iron-icon>
+                        Delete Recipe
+                    </paper-button>
+                </template>
+            </paper-material>
+
+            <paper-material class="card-item">
+                <div class="layout horizontal justified">
+                <h3 class="card-title">Linked Recipes</h3>
+                    <template is="dom-if"
+                            if="[[allow_recipe_edit(user_role, user_id, recipe.author_id)]]">
+                        <paper-icon-button icon="icons:create"
+                                on-tap="edit_linked">
+                        </paper-icon-button>
+                    </template>
+                    <template is="dom-repeat" items="[[recipe.linked_recipes]]">
+                        <a class="inherit-color" href$="/recipes/[[item.id]]">
+                            <paper-button raised>
+                                <iron-icon icon="icons:link"></iron-icon>
+                                [[item.title]]
                             </paper-button>
-                        </div>
-                    </div>
-
-                    <div class="flex-4 item-col">
-                        <!-- Directions inputs. -->
-                        <strong class="recipe-item-label">Directions</strong>
-                        <template is="dom-repeat" items="{{recipe.directions}}">
-                            <paper-textarea type="text"
-                                    label="Step [[add_one(index)]]"
-                                    value="{{item}}">
-                            </paper-textarea>
-                            <div class="layout horizontal end-justified">
-                                <paper-button
-                                        data-index$="[[index]]"
-                                        on-tap="delete_direction">
-                                    <iron-icon icon="icons:cancel"></iron-icon>
-                                    Remove Step [[add_one(index)]]
-                                </paper-button>
-                                <paper-icon-button
-                                        icon="icons:arrow-upward"
-                                        data-index$="[[index]]"
-                                        disabled$="[[!index]]"
-                                        on-tap="move_direction_up">
-                                </paper-icon-button>
-                            </div>
-                        </template>
-                        <div class="layout horizontal center-justified">
-                            <paper-button on-tap="add_direction">
-                                <iron-icon icon="icons:add-circle"></iron-icon>
-                                Add item
-                            </paper-button>
-                        </div>
-                    </div>
-                    <div class="flex-4 item-col">
-                        <paper-input type="text"
-                                label="Amount"
-                                value="{{recipe.amount}}">
-                        </paper-input>
-                        <paper-input type="text"
-                                label="Time"
-                                value="{{recipe.time}}">
-                        </paper-input>
-                        <paper-input type="text"
-                                label="Oven"
-                                value="{{recipe.oven}}">
-                        </paper-input>
-                        <paper-input type="text"
-                                label="Source"
-                                value="{{recipe.source}}">
-                        </paper-input>
-                        <paper-textarea type="text"
-                                label="Notes"
-                                value="{{recipe.notes}}">
-                        </paper-textarea>
-
-                        <!-- Linked recipe list and typeahead. -->
-                        <strong class="recipe-item-label">
-                            Linked Recipes
-                        </strong>
-                        <template is="dom-repeat"
-                                items="[[recipe.linked_recipes]]">
-                            <div class="layout horizontal center justified">
-                                <span>[[item.title]]</span>
-                                <paper-icon-button icon="icons:cancel"
-                                        data-index$="[[index]]"
-                                        on-tap="remove_linked_recipe">
-                                </paper-icon-button>
-                            </div>
-                        </template>
-
-                        <!-- Select a new recipe from a drop down. -->
-                        <div class="layout vertical">
-                            <paper-dropdown-menu
-                                    label="Select New Linked Recipe"
-                                    vertical-align="bottom"
-                                    horizontal-align="right">
-                                <paper-menu class="dropdown-content"
-                                        attr-for-selected="value"
-                                        selected="{{selected_recipe}}"
-                                        on-iron-select="add_selected_recipe">
-                                    <template is="dom-repeat"
-                                            items="[[recipes]]">
-                                        <paper-item value="[[item]]">
-                                            [[item.title]]
-                                        </paper-item>
-                                    </template>
-                                </paper-menu>
-                            </paper-dropdown-menu>
-                        </div>
-                    </div>
+                        </a>
+                    </template>
                 </div>
-            </template>
-
-
-            <!-- Display version. -->
-            <template is="dom-if" if="[[!edit_mode]]">
-                <div class="layout horizontal end end-justified wrap">
-                    <h3 class="card-title">[[recipe.title]]</h3>
-                    <!--<div class="layout horizontal end-justified">-->
-                        <span class="flex"></span>
-                        <span class="recipe-tags">
-                            [[format_recipe_tags(recipe.tags)]]
-                        </span>
-                    <!--</div>-->
-                </div>
-                <div>[[recipe.summary]]</div>
-
-                <div class="layout horizontal wrap">
-                    <div class="flex-4 item-col">
-                        <strong class="recipe-item-label">Ingredients</strong>
-                        <ul class="ingredients-list">
-                            <template is="dom-repeat"
-                                    items="[[recipe.ingredients]]"
-                                    as="i">
-                                <li>[[i]]</li>
-                            </template>
-                        </ul>
-                    </div>
-                    <div class="flex-4 item-col">
-                        <strong class="recipe-item-label">Directions</strong>
-                        <ol class="directions-list">
-                            <template is="dom-repeat"
-                                    items="[[recipe.directions]]"
-                                    as="d">
-                                <li>[[d]]</li>
-                            </template>
-                        </ol>
-                    </div>
-                    <!-- Info column. -->
-                    <div class="flex-4 item-col">
-                        <template is="dom-if" if="[[recipe.amount]]">
-                            <strong class="recipe-item-label">
-                                Amount
-                            </strong>
-                            <div>[[recipe.amount]]</div>
-                        </template>
-                        <template is="dom-if" if="[[recipe.time]]">
-                            <strong class="recipe-item-label">Time</strong>
-                            <div>[[recipe.time]]</div>
-                        </template>
-                        <template is="dom-if" if="[[recipe.oven]]">
-                            <Strong class="recipe-item-label">Oven</Strong>
-                            <div>[[recipe.oven]]</div>
-                        </template>
-                        <strong class="recipe-item-label">Author</strong>
-                        <div>[[recipe.author_name]]</div>
-                        <template is="dom-if" if="[[recipe.source]]">
-                            <strong class="recipe-item-label">Source</strong>
-                            <div>[[recipe.source]]</div>
-                        </template>
-                        <strong class="recipe-item-label">Revision</strong>
-                        <div>[[recipe.revision]]</div>
-                        <template is="dom-if" if="[[recipe.notes]]">
-                            <strong class="recipe-item-label">Notes</strong>
-                            <div>[[recipe.notes]]</div>
-                        </template>
-                        <template is="dom-if"
-                                    if="[[recipe.linked_recipes.length]]">
-                            <strong class="recipe-item-label">
-                                Linked Recipes
-                            </strong>
-                            <template is="dom-repeat"
-                                    items="[[recipe.linked_recipes]]">
-                                <a class="inherit-color"
-                                        href$="/recipes/[[item.id]]">
-                                    <paper-button raised>
-                                        <iron-icon icon="icons:link">
-                                        </iron-icon>
-                                        [[item.title]]
-                                    </paper-button>
-                                </a>
-                            </template>
-                        </template>
-                    </div>
-                </div>
-            </template>
-        </paper-material>
+            </paper-material>
+        </div>
 
         <paper-dialog id="delete_item_confirmation"
                 on-iron-overlay-closed="delete_item">
@@ -389,16 +213,6 @@
                 <paper-button raised dialog-confirm>Delete</paper-button>
             </div>
         </paper-dialog>
-
-        <paper-toast id="save_toast"
-                class="warn-toast"
-                duration="0"
-                horizontal-align="left"
-                horizontal-offset="20"
-                no-cancel-on-esc-key
-                on-click="save_recipe"
-                text="You have unsaved changes. Click here to save.">
-        </paper-toast>
     </template>
 
     <script>
@@ -410,6 +224,7 @@
                 properties: {
                     recipeId: {
                         type: String,
+                        observer: "recipe_changed",
                     },
                     // Holds the recipe we load in.
                     recipe: {
@@ -421,8 +236,6 @@
                             get_item:       false,
                             delete_item:    false,
                             put_item:       false,
-                            get_tags:       false,
-                            get_recipes:    false,
                         },
                     },
                     // True whenever we're loading XHR data.
@@ -430,14 +243,10 @@
                         type: Boolean,
                         computed: "compute_loading_data(loading.*)",
                     },
-                    // Whether to show inputs or just display.
-                    edit_mode: {
-                        type: Boolean,
-                        value: false,
-                    },
                 },
-                observers: [ "check_change(recipe.*)" ],
-                ready: function() {
+                // Make app-grid update properly.
+                attached: function() {
+                    window.addEventListener("resize", () => this.updateStyles());
                 },
                 /* Loading is true if any flags in it are true. */
                 compute_loading_data: function(loading) {
@@ -446,14 +255,71 @@
                         .forEach( v => ret = ret || this.loading[v] );
                     return ret;
                 },
+                // Clear these out to prevent showing old data.
+                recipe_changed: function() {
+                    // TODO this doesn't clear the selected fields.
+                    this.selected_tag = null;
+                    this.typed_tag = null;
+                    this.selected_recipe = null;
+                },
                 // Users may edit this recipe if they are an Admin,
-                // Modererator, or the User who owns it. Author id must be a
-                // param to make sure this updates on recipe load.
+                // Modererator, or the User who owns it.
                 allow_recipe_edit: function(role, user_id, author_id) {
                     return this.is_moderator(role) ||
                         (this.is_user(role) && Number(user_id) === author_id);
                 },
-                save_recipe: function() {
+                edit_recipe: function() {
+                    this.recipe_to_edit = JSON.parse(JSON.stringify(this.recipe));
+                    this.fire("iron-signal", { name: "open-form",
+                        data: {
+                            name:   "edit_recipe_form",
+                            recipe: this.recipe_to_edit,
+                            that:   this,
+                        },
+                    });
+                },
+                edit_ingredients: function() {
+                    this.recipe_to_edit = JSON.parse(JSON.stringify(this.recipe));
+                    this.fire("iron-signal", { name: "open-form",
+                        data: {
+                            name:   "edit_ingredients_form",
+                            recipe: this.recipe_to_edit,
+                            that:   this,
+                        },
+                    });
+                },
+                edit_directions: function() {
+                    this.recipe_to_edit = JSON.parse(JSON.stringify(this.recipe));
+                    this.fire("iron-signal", { name: "open-form",
+                        data: {
+                            name:   "edit_directions_form",
+                            recipe: this.recipe_to_edit,
+                            that:   this,
+                        },
+                    });
+                },
+                edit_info: function() {
+                    this.recipe_to_edit = JSON.parse(JSON.stringify(this.recipe));
+                    this.fire("iron-signal", { name: "open-form",
+                        data: {
+                            name:   "edit_recipe_info_form",
+                            recipe: this.recipe_to_edit,
+                            that:   this,
+                        },
+                    });
+                },
+                edit_linked: function() {
+                    this.recipe_to_edit = JSON.parse(JSON.stringify(this.recipe));
+                    this.fire("iron-signal", { name: "open-form",
+                        data: {
+                            name:   "edit_linked_recipe_form",
+                            recipe: this.recipe_to_edit,
+                            that:   this,
+                        },
+                    });
+                },
+                resolve_dialog: function(e, reason) {
+                    if (!reason.confirmed) return;
                     this.$.put_item_ajax.generateRequest();
                 },
                 open_delete_modal: function() {
@@ -469,24 +335,14 @@
                         name: "error-toast",
                         data: "Failed to save recipe :(",
                     });
-                    // This is something of a hack. The error toast will
-                    // dismiss the save button toast, so after 4 seconds,
-                    // show it again.
-                    var that = this;
-                    setTimeout(_ => that.check_change(), 4000);
-
                 },
                 put_item_successful: function() {
-                    // Load the response into new_recipe and copy it here to
+                    // Load the response into recipe_to_edit and copy it here to
                     // prevent blanking the screen on a failed request.
-                    // First make the backup.
-                    this.backup_recipe(this.new_recipe);
-                    // Then update our screen and let check_change fire.
-                    this.set('recipe', this.new_recipe);
-                    // Finally, show the success toast.
+                    this.set("recipe", this.recipe_to_edit);
                     this.fire("iron-signal", {
                         name: "success-toast",
-                        data: this.new_recipe.title + " saved",
+                        data: this.recipe.title + " saved",
                     });
                 },
                 delete_item_failed: function() {
@@ -504,133 +360,9 @@
                     window.history.pushState({}, null, "/");
                     window.dispatchEvent(new CustomEvent("location-changed"));
                 },
-                /* Backup on GET. */
-                recipe_received: function() {
-                    // Make sure we're not in edit mode after changing recipes.
-                    this.edit_mode = false;
-                    // Clear these out to prevent showing old data.
-                    // TODO this doesn't clear the selected fields.
-                    this.selected_tag = null;
-                    this.typed_tag = null;
-                    this.selected_recipe = null;
-                    this.backup_recipe(this.recipe);
-                    // This fires automatically before the backup happens, so
-                    // call it manually here to fix state. This means that on
-                    // a page load, it will think there's a change for a short
-                    // duration, but it doesn't seem to be long enough to
-                    // display anything.
-                    this.check_change();
-                },
-                /* Make a copy of the recipe so we can tell whether it changed. */
-                backup_recipe: function(r) {
-                    this.set('orig_recipe', JSON.parse(JSON.stringify(r)));
-                },
-                check_change: function() {
-                    if (!this.orig_recipe) return;
-                    var change = this.rdiff(this.orig_recipe, this.recipe);
-                    if (change) this.$.save_toast.open();
-                    else this.$.save_toast.close();
-                },
-                rdiff: function(a, b) {
-                    /* Because null and [] are objects. */
-                    if (a !== null && typeof a === "object") {
-                        /* If only a is an object they're different. */
-                        if (b === null || typeof b !== "object") return true;
-                        // Iterate over keys, making sure everything in a
-                        // exists in b. This stops recursing when we find a
-                        // difference.
-                        var diff = false;
-                        for (var e in a) {
-                            diff = diff || this.rdiff(a[e], b[e]);
-                        }
-                        // Now do the same for b in a.
-                        for (var e in b) {
-                            diff = diff || this.rdiff(a[e], b[e]);
-                        }
-                        return diff;
-                    }
-                    // Base case; a simple comparison between simple types.
-                    else return a !== b;
-                },
-                toggle_edit_mode: function() {
-                    this.edit_mode = !this.edit_mode;
-                },
-                add_ingredient: function() {
-                    this.push("recipe.ingredients", new String());
-                },
-                add_direction: function() {
-                    this.push("recipe.directions", new String());
-                },
-                delete_ingredient: function(e) {
-                    var index = Number(
-                            e.currentTarget.attributes['data-index'].value);
-                    this.splice('recipe.ingredients', index, 1);
-                },
-                delete_direction: function(e) {
-                    var index = Number(
-                            e.currentTarget.attributes['data-index'].value);
-                    this.splice('recipe.directions', index, 1);
-                },
-                move_ingredient_up: function(e) {
-                    var index = Number(
-                            e.currentTarget.attributes['data-index'].value);
-                    if (!index) return;
-                    var temp = this.splice('recipe.ingredients', index, 1)[0];
-                    this.splice('recipe.ingredients', index - 1, 0, temp);
-                },
-                move_direction_up: function(e) {
-                    var index = Number(
-                            e.currentTarget.attributes['data-index'].value);
-                    if (!index) return;
-                    var temp = this.splice('recipe.directions', index, 1)[0];
-                    this.splice('recipe.directions', index - 1, 0, temp);
-                },
-                remove_linked_recipe: function(e) {
-                    var index = Number(
-                            e.currentTarget.attributes['data-index'].value);
-                    this.splice('recipe.linked_recipes', index, 1);
-                },
-                remove_tag: function(e) {
-                    var index = Number(
-                            e.currentTarget.attributes['data-index'].value);
-                    this.splice('recipe.tags', index, 1);
-                },
                 format_recipe_tags: function(tags) {
                     if (!tags) return "";
                     return tags.join(", ");
-                },
-                // Call add_tag with the appropriate variable.
-                add_selected_tag: function() {
-                    this.add_tag(this.selected_tag);
-                    //TODO this doesn't clear the menu
-                    this.set('selected_tag', null);
-                },
-                add_selected_recipe: function() {
-                    // Don't link to self.
-                    // TODO this shouldn't be in the list at all
-                    if (this.recipe.id === this.selected_recipe.id) return;
-                    for (var i in this.recipe.linked_recipes)
-                        if (this.recipe.linked_recipes[i].id ===
-                                this.selected_recipe.id) return;
-                    this.push('recipe.linked_recipes', {
-                            id:     this.selected_recipe.id,
-                            title:  this.selected_recipe.title
-                    });
-                    //TODO this doesn't clear the menu
-                    this.set('selected_recipe', null);
-                },
-                add_typed_tag: function() {
-                    this.add_tag(this.typed_tag);
-                    this.set('typed_tag', null);
-                },
-                // Add a tag to the tag list, checking for duplicates first.
-                add_tag: function(tag) {
-                    for (var i in this.recipe.tags)
-                        if (this.recipe.tags[i] === tag) return;
-                    this.push('recipe.tags', tag);
-                },
-                add_one: function(val) {
-                    return val + 1;
                 },
             });
         })();

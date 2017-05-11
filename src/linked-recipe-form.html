@@ -1,0 +1,114 @@
+<!--
+    Copyright (c) 2016-2017, Randy Westlund. All rights reserved.
+    This code is under the BSD-2-Clause license.
+-->
+<!-- This module displays a linked recipe selection form. -->
+
+<link rel="import" href="../bc/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bc/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../bc/iron-icons/iron-icons.html">
+<link rel="import" href="../bc/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bc/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bc/paper-input/paper-input.html">
+<link rel="import" href="../bc/paper-item/paper-item.html">
+<link rel="import" href="../bc/paper-menu/paper-menu.html">
+<link rel="import" href="../bc/polymer-responsive-dialog/responsive-dialog.html">
+<link rel="import" href="../bc/polymer/polymer.html">
+
+<link rel="import" href="form-behavior.html">
+<link rel="import" href="global-behavior.html">
+<link rel="import" href="global-styles.html">
+
+<dom-module id="linked-recipe-form">
+    <template>
+        <style include="iron-flex iron-flex-alignment"></style>
+        <style include="global-styles"></style>
+        <responsive-dialog id="dialog"
+                title="Edit Linked Recipes"
+                dismiss-text="Cancel"
+                confirm-text="Save"
+                on-iron-overlay-closed="resolve_dialog">
+
+            <!-- Linked recipe list and typeahead. -->
+            <template is="dom-repeat" items="[[recipe.linked_recipes]]">
+                <div class="layout horizontal center justified">
+                    <span>[[item.title]]</span>
+                    <paper-icon-button icon="icons:cancel"
+                            data-index$="[[index]]"
+                            on-tap="remove_linked_recipe">
+                    </paper-icon-button>
+                </div>
+            </template>
+            <!-- Select a new recipe from a drop down. -->
+            <div class="layout vertical">
+                <paper-dropdown-menu
+                        label="Select New Linked Recipe"
+                        vertical-align="bottom"
+                        horizontal-align="right">
+                    <paper-menu class="dropdown-content"
+                            attr-for-selected="value"
+                            selected="{{selected_recipe}}"
+                            on-iron-select="add_selected_recipe">
+                        <template is="dom-repeat" items="[[recipes]]">
+                            <paper-item value="[[item]]">
+                                [[item.title]]
+                            </paper-item>
+                        </template>
+                    </paper-menu>
+                </paper-dropdown-menu>
+            </div>
+        </responsive-dialog>
+
+        <!-- All recipes for linked recipe typeahead. -->
+        <iron-ajax id="get_titles"
+                method="GET"
+                url="/api/recipes/titles"
+                handle-as="json"
+                last-response="{{recipes}}"
+                on-error="loading_data_failed">
+        </iron-ajax>
+    </template>
+
+    <script>
+        (function () {
+            "use strict";
+            Polymer({
+                is: "linked-recipe-form",
+                behaviors: [ recipe_behaviors.global_behavior,
+                            recipe_behaviors.form_behavior ],
+                properties: {
+                    // Must be provided by parent object.
+                    recipe: {
+                        type: Object,
+                    },
+                },
+                // Override open() from behavior to add an AJAX call.
+                open: function() {
+                    this.$.get_titles.generateRequest();
+                    this.$.dialog.open();
+                },
+                remove_linked_recipe: function(e) {
+                    var index = Number(
+                            e.currentTarget.attributes["data-index"].value);
+                    this.splice("recipe.linked_recipes", index, 1);
+                    this.size_changed();
+                },
+                add_selected_recipe: function() {
+                    // Don't link to self.
+                    // TODO this shouldn't be in the list at all
+                    if (this.recipe.id === this.selected_recipe.id) return;
+                    for (var i in this.recipe.linked_recipes)
+                        if (this.recipe.linked_recipes[i].id ===
+                                this.selected_recipe.id) return;
+                    this.push("recipe.linked_recipes", {
+                            id:     this.selected_recipe.id,
+                            title:  this.selected_recipe.title
+                    });
+                    //TODO this doesn't clear the menu
+                    this.set("selected_recipe", null);
+                    this.size_changed();
+                },
+            });
+        })();
+    </script>
+</dom-module>

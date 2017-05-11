@@ -1,0 +1,87 @@
+<!--
+    Copyright (c) 2016-2017, Randy Westlund. All rights reserved.
+    This code is under the BSD-2-Clause license.
+-->
+<!-- This module displays an ingredients editing form. -->
+
+<link rel="import" href="../bc/iron-icons/iron-icons.html">
+<link rel="import" href="../bc/iron-icon/iron-icon.html">
+<link rel="import" href="../bc/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bc/paper-button/paper-button.html">
+<link rel="import" href="../bc/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../bc/paper-input/paper-input.html">
+<link rel="import" href="../bc/polymer-responsive-dialog/responsive-dialog.html">
+<link rel="import" href="../bc/polymer/polymer.html">
+
+<link rel="import" href="form-behavior.html">
+<link rel="import" href="global-behavior.html">
+
+<dom-module id="ingredients-form">
+<template>
+    <style include="iron-flex iron-flex-alignment"></style>
+    <responsive-dialog id="dialog"
+               title="Edit Ingredients"
+               dismiss-text="Cancel"
+               confirm-text="Save"
+               on-iron-overlay-closed="resolve_dialog">
+
+        <template is="dom-repeat" items="{{recipe.ingredients}}">
+            <paper-input type="text"
+                    label="Item [[add_one(index)]]"
+                    value="{{item}}">
+                <paper-icon-button suffix
+                        icon="icons:cancel"
+                        data-index$="[[index]]"
+                        on-tap="delete_ingredient">
+                </paper-icon-button>
+                <paper-icon-button suffix
+                        icon="icons:arrow-upward"
+                        data-index$="[[index]]"
+                        disabled$="[[!index]]"
+                        on-tap="move_ingredient_up">
+                </paper-icon-button>
+            </paper-input>
+        </template>
+
+        <div class="layout horizontal center-justified">
+            <paper-button on-tap="add_ingredient">
+                <iron-icon icon="icons:add-circle"></iron-icon>
+                Add Item
+            </paper-button>
+        </div>
+
+    </responsive-dialog>
+</template>
+
+<script>
+    (function () {
+        "use strict";
+        Polymer({
+            is: "ingredients-form",
+            behaviors: [ recipe_behaviors.form_behavior ],
+            properties: {
+                // Must be provided by parent object.
+                recipe: {
+                    type: Object,
+                },
+            },
+            add_ingredient: function() {
+                this.push("recipe.ingredients", new String());
+                this.size_changed();
+            },
+            delete_ingredient: function(e) {
+                var index = Number(e.currentTarget.attributes["data-index"].value);
+                this.splice("recipe.ingredients", index, 1);
+                this.size_changed();
+            },
+            move_ingredient_up: function(e) {
+                var index = Number(e.currentTarget.attributes["data-index"].value);
+                if (!index) return;
+                var temp = this.splice("recipe.ingredients", index, 1)[0];
+                this.splice("recipe.ingredients", index - 1, 0, temp);
+            },
+            add_one: val => val + 1,
+        });
+    })();
+</script>
+</dom-module>

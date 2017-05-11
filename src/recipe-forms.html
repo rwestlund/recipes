@@ -13,15 +13,25 @@
 
 <link rel="import" href="global-behavior.html">
 <link rel="import" href="recipe-form.html">
+<link rel="import" href="linked-recipe-form.html">
+<link rel="import" href="ingredients-form.html">
+<link rel="import" href="directions-form.html">
 <link rel="import" href="user-form.html">
+<link rel="import" href="recipe-info-form.html">
 
 <dom-module id="recipe-forms">
     <template>
         <iron-signals on-iron-signal-open-form="open_form"></iron-signals>
 
-        <template is="dom-if" if="[[is_moderator(userRole)]]">
+        <template is="dom-if" if="[[is_user(userRole)]]">
             <recipe-form id="create_recipe_form" title="Create Recipe">
             </recipe-form>
+            <recipe-form id="edit_recipe_form"></recipe-form>
+            <ingredients-form id="edit_ingredients_form"></ingredients-form>
+            <directions-form id="edit_directions_form"></directions-form>
+            <recipe-info-form id="edit_recipe_info_form"></recipe-info-form>
+            <linked-recipe-form id="edit_linked_recipe_form">
+            </linked-recipe-form>
         </template>
 
         <template is="dom-if" if="[[is_admin(userRole)]]">

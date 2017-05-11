@@ -15,6 +15,11 @@ recipe_behaviors.form_behavior = {
     close: function() {
         this.$.dialog.close();
     },
+    // Call this when the dialog may have changed size, such as when a textarea
+    // is modified.
+    size_changed: function() {
+        if (this.$.dialog) this.$.dialog.notifyResize();
+    },
     resolve_dialog: function(e, reason) {
         this.fire('closed', reason);
     },

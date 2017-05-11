@@ -4,9 +4,14 @@
 -->
 <!-- This module displays a recipe creation form. -->
 
+<link rel="import" href="../bc/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bc/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../bc/iron-icons/iron-icons.html">
+<link rel="import" href="../bc/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../bc/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bc/paper-input/paper-input.html">
+<link rel="import" href="../bc/paper-item/paper-item.html">
+<link rel="import" href="../bc/paper-menu/paper-menu.html">
 <link rel="import" href="../bc/polymer-responsive-dialog/responsive-dialog.html">
 <link rel="import" href="../bc/polymer/polymer.html">
 
@@ -16,12 +21,13 @@
 
 <dom-module id="recipe-form">
     <template>
+        <style include="iron-flex iron-flex-alignment"></style>
         <style include="global-styles"></style>
         <responsive-dialog id="dialog"
-                   title="[[title]]"
-                   dismiss-text="Cancel"
-                   confirm-text="Save"
-                   on-iron-overlay-closed="resolve_dialog">
+                title="[[title]]"
+                dismiss-text="Cancel"
+                confirm-text="Save"
+                on-iron-overlay-closed="resolve_dialog">
 
             <paper-input
                     type="text"
@@ -45,7 +51,59 @@
                 </paper-icon-button>
             </paper-input>
 
+            <strong class="recipe-item-label">Tags</strong>
+            <template is="dom-repeat" items="[[recipe.tags]]">
+                <div class="layout horizontal center justified">
+                    <span>[[item]]</span>
+                    <paper-icon-button icon="icons:cancel"
+                            data-index$="[[index]]"
+                            on-tap="remove_tag">
+                    </paper-icon-button>
+                </div>
+            </template>
+            <!-- Select a new tag from a drop down. -->
+            <div class="layout vertical">
+                <paper-dropdown-menu label="Select New Tag"
+                        vertical-align="bottom"
+                        horizontal-align="right">
+                    <paper-menu class="dropdown-content"
+                            attr-for-selected="value"
+                            selected="{{selected_tag}}"
+                            on-iron-select="add_selected_tag">
+                        <template is="dom-repeat" items="[[tags]]">
+                            <paper-item value="[[item]]">
+                                [[item]]
+                            </paper-item>
+                        </template>
+                    </paper-menu>
+                </paper-dropdown-menu>
+            </div>
+            <!-- Type a new tag from typeahead. -->
+            <datalist id="tags">
+                <template is="dom-repeat" items="[[tags]]">
+                    <option value="[[item]]"></option>
+                </template>
+            </datalist>
+            <paper-input type="text"
+                    label="Type New Tag"
+                    value="{{typed_tag}}"
+                    list="tags">
+                <paper-icon-button suffix
+                        icon="icons:check-circle"
+                        data-index$="[[index]]"
+                        on-tap="add_typed_tag">
+                </paper-icon-button>
+            </paper-input>
         </responsive-dialog>
+
+        <!-- All tags for the add tag typeahead. -->
+        <iron-ajax id="get_tags"
+                method="GET"
+                url="/api/tags"
+                handle-as="json"
+                last-response="{{tags}}"
+                on-error="loading_data_failed">
+        </iron-ajax>
     </template>
 
     <script>
@@ -64,6 +122,34 @@
                         type: String,
                         value: "Edit Recipe",
                     },
+                },
+                // Override open() from behavior to add an AJAX call.
+                open: function() {
+                    this.$.get_tags.generateRequest();
+                    this.$.dialog.open();
+                },
+                remove_tag: function(e) {
+                    var index = Number(
+                            e.currentTarget.attributes["data-index"].value);
+                    this.splice("recipe.tags", index, 1);
+                    this.size_changed();
+                },
+                // Call add_tag with the appropriate variable.
+                add_selected_tag: function() {
+                    this.add_tag(this.selected_tag);
+                    //TODO this doesn't clear the menu
+                    this.set("selected_tag", null);
+                },
+                add_typed_tag: function() {
+                    this.add_tag(this.typed_tag);
+                    this.set("typed_tag", null);
+                },
+                // Add a tag to the tag list, checking for duplicates first.
+                add_tag: function(tag) {
+                    for (var i in this.recipe.tags)
+                        if (this.recipe.tags[i] === tag) return;
+                    this.push("recipe.tags", tag);
+                    this.size_changed();
                 },
             });
         })();
