@@ -33,6 +33,9 @@
             :host {
                 display: block;
             }
+            paper-button {
+                background-color: white;
+            }
         </style>
 
         <!-- AJAX requests. -->
@@ -117,291 +120,270 @@
         </div>
 
         <!-- The recipe card itself. --> 
-        <paper-material>
-            <div class="card-item">
-                <!-- Form version. -->
-                <template is="dom-if" if="[[edit_mode]]">
-                    <div class="layout horizontal wrap">
-                        <div class="flex-4 item-col">
-                            <paper-input type="text"
-                                    label="Title"
-                                    value="{{recipe.title}}">
-                            </paper-input>
-                            <paper-textarea type="text"
-                                    label="Summary"
-                                    value="{{recipe.summary}}">
-                            </paper-textarea>
-                            <strong class="recipe-item-label">Tags</strong>
-                            <template is="dom-repeat" items="[[recipe.tags]]">
-                                <div class="layout horizontal center justified">
-                                    <span>[[item]]</span>
-                                    <paper-icon-button icon="icons:cancel"
-                                            data-index$="[[index]]"
-                                            on-tap="remove_tag">
-                                    </paper-icon-button>
-                                </div>
-                            </template>
-                            <!-- Select a new tag from a drop down. -->
-                            <div class="layout vertical">
-                                <paper-dropdown-menu label="Select New Tag"
-                                        vertical-align="top"
-                                        horizontal-align="right">
-                                    <paper-menu class="dropdown-content"
-                                            attr-for-selected="value"
-                                            selected="{{selected_tag}}"
-                                            on-iron-select="add_selected_tag">
-                                        <template is="dom-repeat"
-                                                items="[[tags]]">
-                                            <paper-item value="[[item]]">
-                                                [[item]]
-                                            </paper-item>
-                                        </template>
-                                    </paper-menu>
-                                </paper-dropdown-menu>
+        <paper-material class="card-item">
+            <!-- Form version. -->
+            <template is="dom-if" if="[[edit_mode]]">
+                <div class="layout horizontal wrap">
+                    <div class="flex-4 item-col">
+                        <paper-input type="text"
+                                label="Title"
+                                value="{{recipe.title}}">
+                        </paper-input>
+                        <paper-textarea type="text"
+                                label="Summary"
+                                value="{{recipe.summary}}">
+                        </paper-textarea>
+                        <strong class="recipe-item-label">Tags</strong>
+                        <template is="dom-repeat" items="[[recipe.tags]]">
+                            <div class="layout horizontal center justified">
+                                <span>[[item]]</span>
+                                <paper-icon-button icon="icons:cancel"
+                                        data-index$="[[index]]"
+                                        on-tap="remove_tag">
+                                </paper-icon-button>
                             </div>
-                            <!-- Type a new tag from typeahead. -->
-                            <datalist id="tags">
-                                <template is="dom-repeat" items="[[tags]]">
-                                    <option value="[[item]]"></option>
-                                </template>
-                            </datalist>
-                            <paper-input type="text"
-                                    label="Type New Tag"
-                                    value="{{typed_tag}}"
-                                    list="tags">
-                                    <paper-icon-button suffix
-                                            icon="icons:check-circle"
-                                            data-index$="[[index]]"
-                                            on-tap="add_typed_tag">
-                                    </paper-icon-button>
-                            </paper-input>
-
-                            <!-- Ingredients inputs. -->
-                            <strong class="recipe-item-label">
-                                Ingredients
-                            </strong>
-                            <template is="dom-repeat"
-                                    items="{{recipe.ingredients}}">
-                                <paper-input type="text"
-                                        label="Item [[add_one(index)]]"
-                                        value="{{item}}">
-                                    <paper-icon-button suffix
-                                            icon="icons:cancel"
-                                            data-index$="[[index]]"
-                                            on-tap="delete_ingredient">
-                                    </paper-icon-button>
-                                    <paper-icon-button suffix
-                                            icon="icons:arrow-upward"
-                                            data-index$="[[index]]"
-                                            disabled$="[[!index]]"
-                                            on-tap="move_ingredient_up">
-                                    </paper-icon-button>
-                                </paper-input>
-                            </template>
-
-                            <div class="layout horizontal center-justified">
-                                <paper-button on-tap="add_ingredient">
-                                    <iron-icon icon="icons:add-circle">
-                                    </iron-icon>
-                                    Add item
-                                </paper-button>
-                            </div>
+                        </template>
+                        <!-- Select a new tag from a drop down. -->
+                        <div class="layout vertical">
+                            <paper-dropdown-menu label="Select New Tag"
+                                    vertical-align="top"
+                                    horizontal-align="right">
+                                <paper-menu class="dropdown-content"
+                                        attr-for-selected="value"
+                                        selected="{{selected_tag}}"
+                                        on-iron-select="add_selected_tag">
+                                    <template is="dom-repeat" items="[[tags]]">
+                                        <paper-item value="[[item]]">
+                                            [[item]]
+                                        </paper-item>
+                                    </template>
+                                </paper-menu>
+                            </paper-dropdown-menu>
                         </div>
-
-                        <div class="flex-4 item-col">
-                            <!-- Directions inputs. -->
-                            <strong class="recipe-item-label">
-                                Directions
-                            </strong>
-                            <template is="dom-repeat"
-                                    items="{{recipe.directions}}">
-                                <paper-textarea type="text"
-                                        label="Step [[add_one(index)]]"
-                                        value="{{item}}">
-                                </paper-textarea>
-                                <div class="layout horizontal end-justified">
-                                    <paper-button
-                                            data-index$="[[index]]"
-                                            on-tap="delete_direction">
-                                        <iron-icon icon="icons:cancel">
-                                        </iron-icon>
-                                        Remove Step [[add_one(index)]]
-                                    </paper-button>
-                                    <paper-icon-button
-                                            icon="icons:arrow-upward"
-                                            data-index$="[[index]]"
-                                            disabled$="[[!index]]"
-                                            on-tap="move_direction_up">
-                                    </paper-icon-button>
-                                </div>
+                        <!-- Type a new tag from typeahead. -->
+                        <datalist id="tags">
+                            <template is="dom-repeat" items="[[tags]]">
+                                <option value="[[item]]"></option>
                             </template>
-                            <div class="layout horizontal center-justified">
-                                <paper-button on-tap="add_direction">
-                                    <iron-icon icon="icons:add-circle">
-                                    </iron-icon>
-                                    Add item
-                                </paper-button>
-                            </div>
-                        </div>
-                        <div class="flex-4 item-col">
-                            <paper-input type="text"
-                                    label="Amount"
-                                    value="{{recipe.amount}}">
-                            </paper-input>
-                            <paper-input type="text"
-                                    label="Time"
-                                    value="{{recipe.time}}">
-                            </paper-input>
-                            <paper-input type="text"
-                                    label="Oven"
-                                    value="{{recipe.oven}}">
-                            </paper-input>
-                            <paper-input type="text"
-                                    label="Source"
-                                    value="{{recipe.source}}">
-                            </paper-input>
-                            <paper-textarea type="text"
-                                    label="Notes"
-                                    value="{{recipe.notes}}">
-                            </paper-textarea>
+                        </datalist>
+                        <paper-input type="text"
+                                label="Type New Tag"
+                                value="{{typed_tag}}"
+                                list="tags">
+                            <paper-icon-button suffix
+                                    icon="icons:check-circle"
+                                    data-index$="[[index]]"
+                                    on-tap="add_typed_tag">
+                            </paper-icon-button>
+                        </paper-input>
 
-                            <!-- Linked recipe list and typeahead. -->
+                        <!-- Ingredients inputs. -->
+                        <strong class="recipe-item-label">Ingredients</strong>
+                        <template is="dom-repeat"
+                                items="{{recipe.ingredients}}">
+                            <paper-input type="text"
+                                    label="Item [[add_one(index)]]"
+                                    value="{{item}}">
+                                <paper-icon-button suffix
+                                        icon="icons:cancel"
+                                        data-index$="[[index]]"
+                                        on-tap="delete_ingredient">
+                                </paper-icon-button>
+                                <paper-icon-button suffix
+                                        icon="icons:arrow-upward"
+                                        data-index$="[[index]]"
+                                        disabled$="[[!index]]"
+                                        on-tap="move_ingredient_up">
+                                </paper-icon-button>
+                            </paper-input>
+                        </template>
+
+                        <div class="layout horizontal center-justified">
+                            <paper-button on-tap="add_ingredient">
+                                <iron-icon icon="icons:add-circle"></iron-icon>
+                                Add item
+                            </paper-button>
+                        </div>
+                    </div>
+
+                    <div class="flex-4 item-col">
+                        <!-- Directions inputs. -->
+                        <strong class="recipe-item-label">Directions</strong>
+                        <template is="dom-repeat" items="{{recipe.directions}}">
+                            <paper-textarea type="text"
+                                    label="Step [[add_one(index)]]"
+                                    value="{{item}}">
+                            </paper-textarea>
+                            <div class="layout horizontal end-justified">
+                                <paper-button
+                                        data-index$="[[index]]"
+                                        on-tap="delete_direction">
+                                    <iron-icon icon="icons:cancel"></iron-icon>
+                                    Remove Step [[add_one(index)]]
+                                </paper-button>
+                                <paper-icon-button
+                                        icon="icons:arrow-upward"
+                                        data-index$="[[index]]"
+                                        disabled$="[[!index]]"
+                                        on-tap="move_direction_up">
+                                </paper-icon-button>
+                            </div>
+                        </template>
+                        <div class="layout horizontal center-justified">
+                            <paper-button on-tap="add_direction">
+                                <iron-icon icon="icons:add-circle"></iron-icon>
+                                Add item
+                            </paper-button>
+                        </div>
+                    </div>
+                    <div class="flex-4 item-col">
+                        <paper-input type="text"
+                                label="Amount"
+                                value="{{recipe.amount}}">
+                        </paper-input>
+                        <paper-input type="text"
+                                label="Time"
+                                value="{{recipe.time}}">
+                        </paper-input>
+                        <paper-input type="text"
+                                label="Oven"
+                                value="{{recipe.oven}}">
+                        </paper-input>
+                        <paper-input type="text"
+                                label="Source"
+                                value="{{recipe.source}}">
+                        </paper-input>
+                        <paper-textarea type="text"
+                                label="Notes"
+                                value="{{recipe.notes}}">
+                        </paper-textarea>
+
+                        <!-- Linked recipe list and typeahead. -->
+                        <strong class="recipe-item-label">
+                            Linked Recipes
+                        </strong>
+                        <template is="dom-repeat"
+                                items="[[recipe.linked_recipes]]">
+                            <div class="layout horizontal center justified">
+                                <span>[[item.title]]</span>
+                                <paper-icon-button icon="icons:cancel"
+                                        data-index$="[[index]]"
+                                        on-tap="remove_linked_recipe">
+                                </paper-icon-button>
+                            </div>
+                        </template>
+
+                        <!-- Select a new recipe from a drop down. -->
+                        <div class="layout vertical">
+                            <paper-dropdown-menu
+                                    label="Select New Linked Recipe"
+                                    vertical-align="bottom"
+                                    horizontal-align="right">
+                                <paper-menu class="dropdown-content"
+                                        attr-for-selected="value"
+                                        selected="{{selected_recipe}}"
+                                        on-iron-select="add_selected_recipe">
+                                    <template is="dom-repeat"
+                                            items="[[recipes]]">
+                                        <paper-item value="[[item]]">
+                                            [[item.title]]
+                                        </paper-item>
+                                    </template>
+                                </paper-menu>
+                            </paper-dropdown-menu>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+
+            <!-- Display version. -->
+            <template is="dom-if" if="[[!edit_mode]]">
+                <div class="layout horizontal end end-justified wrap">
+                    <h3 class="card-title">[[recipe.title]]</h3>
+                    <!--<div class="layout horizontal end-justified">-->
+                        <span class="flex"></span>
+                        <span class="recipe-tags">
+                            [[format_recipe_tags(recipe.tags)]]
+                        </span>
+                    <!--</div>-->
+                </div>
+                <div>[[recipe.summary]]</div>
+
+                <div class="layout horizontal wrap">
+                    <div class="flex-4 item-col">
+                        <strong class="recipe-item-label">Ingredients</strong>
+                        <ul class="ingredients-list">
+                            <template is="dom-repeat"
+                                    items="[[recipe.ingredients]]"
+                                    as="i">
+                                <li>[[i]]</li>
+                            </template>
+                        </ul>
+                    </div>
+                    <div class="flex-4 item-col">
+                        <strong class="recipe-item-label">Directions</strong>
+                        <ol class="directions-list">
+                            <template is="dom-repeat"
+                                    items="[[recipe.directions]]"
+                                    as="d">
+                                <li>[[d]]</li>
+                            </template>
+                        </ol>
+                    </div>
+                    <!-- Info column. -->
+                    <div class="flex-4 item-col">
+                        <template is="dom-if" if="[[recipe.amount]]">
+                            <strong class="recipe-item-label">
+                                Amount
+                            </strong>
+                            <div>[[recipe.amount]]</div>
+                        </template>
+                        <template is="dom-if" if="[[recipe.time]]">
+                            <strong class="recipe-item-label">Time</strong>
+                            <div>[[recipe.time]]</div>
+                        </template>
+                        <template is="dom-if" if="[[recipe.oven]]">
+                            <Strong class="recipe-item-label">Oven</Strong>
+                            <div>[[recipe.oven]]</div>
+                        </template>
+                        <strong class="recipe-item-label">Author</strong>
+                        <div>[[recipe.author_name]]</div>
+                        <template is="dom-if" if="[[recipe.source]]">
+                            <strong class="recipe-item-label">Source</strong>
+                            <div>[[recipe.source]]</div>
+                        </template>
+                        <strong class="recipe-item-label">Revision</strong>
+                        <div>[[recipe.revision]]</div>
+                        <template is="dom-if" if="[[recipe.notes]]">
+                            <strong class="recipe-item-label">Notes</strong>
+                            <div>[[recipe.notes]]</div>
+                        </template>
+                        <template is="dom-if"
+                                    if="[[recipe.linked_recipes.length]]">
                             <strong class="recipe-item-label">
                                 Linked Recipes
                             </strong>
                             <template is="dom-repeat"
                                     items="[[recipe.linked_recipes]]">
-                                <div class="layout horizontal center justified">
-                                    <span>[[item.title]]</span>
-                                    <paper-icon-button icon="icons:cancel"
-                                            data-index$="[[index]]"
-                                            on-tap="remove_linked_recipe">
-                                    </paper-icon-button>
-                                </div>
+                                <a class="inherit-color"
+                                        href$="/recipes/[[item.id]]">
+                                    <paper-button raised>
+                                        <iron-icon icon="icons:link">
+                                        </iron-icon>
+                                        [[item.title]]
+                                    </paper-button>
+                                </a>
                             </template>
-
-                            <!-- Select a new recipe from a drop down. -->
-                            <div class="layout vertical">
-                                <paper-dropdown-menu
-                                        label="Select New Linked Recipe"
-                                        vertical-align="bottom"
-                                        horizontal-align="right">
-                                    <paper-menu class="dropdown-content"
-                                            attr-for-selected="value"
-                                            selected="{{selected_recipe}}"
-                                            on-iron-select="add_selected_recipe">
-                                        <template is="dom-repeat"
-                                                items="[[recipes]]">
-                                            <paper-item value="[[item]]">
-                                                [[item.title]]
-                                            </paper-item>
-                                        </template>
-                                    </paper-menu>
-                                </paper-dropdown-menu>
-                            </div>
-                        </div>
+                        </template>
                     </div>
-                </template>
-
-
-                <!-- Display version. -->
-                <template is="dom-if" if="[[!edit_mode]]">
-                    <div class="layout horizontal end end-justified wrap">
-                        <h3 class="card-title">[[recipe.title]]</h3>
-                        <!--<div class="layout horizontal end-justified">-->
-                            <span class="flex"></span>
-                            <span class="recipe-tags">
-                                [[format_recipe_tags(recipe.tags)]]
-                            </span>
-                        <!--</div>-->
-                    </div>
-                    <div>[[recipe.summary]]</div>
-
-                    <div class="layout horizontal wrap">
-                        <div class="flex-4 item-col">
-                            <strong class="recipe-item-label">
-                                Ingredients
-                            </strong>
-                            <ul class="ingredients-list">
-                                <template is="dom-repeat"
-                                        items="[[recipe.ingredients]]"
-                                        as="i">
-                                    <li>[[i]]</li>
-                                </template>
-                            </ul>
-                        </div>
-                        <div class="flex-4 item-col">
-                            <strong class="recipe-item-label">
-                                Directions
-                            </strong>
-                            <ol class="directions-list">
-                                <template is="dom-repeat"
-                                        items="[[recipe.directions]]"
-                                        as="d">
-                                    <li>[[d]]</li>
-                                </template>
-                            </ol>
-                        </div>
-                        <!-- Info column. -->
-                        <div class="flex-4 item-col">
-                            <template is="dom-if" if="[[recipe.amount]]">
-                                <strong class="recipe-item-label">
-                                    Amount
-                                </strong>
-                                <div>[[recipe.amount]]</div>
-                            </template>
-                            <template is="dom-if" if="[[recipe.time]]">
-                                <strong class="recipe-item-label">Time</strong>
-                                <div>[[recipe.time]]</div>
-                            </template>
-                            <template is="dom-if" if="[[recipe.oven]]">
-                                <Strong class="recipe-item-label">Oven</Strong>
-                                <div>[[recipe.oven]]</div>
-                            </template>
-                            <strong class="recipe-item-label">Author</strong>
-                            <div>[[recipe.author_name]]</div>
-                            <template is="dom-if" if="[[recipe.source]]">
-                                <strong class="recipe-item-label">
-                                    Source
-                                </strong>
-                                <div>[[recipe.source]]</div>
-                            </template>
-                            <strong class="recipe-item-label">Revision</strong>
-                            <div>[[recipe.revision]]</div>
-                            <template is="dom-if" if="[[recipe.notes]]">
-                                <strong class="recipe-item-label">
-                                    Notes
-                                </strong>
-                                <div>[[recipe.notes]]</div>
-                            </template>
-                            <template is="dom-if"
-                                        if="[[recipe.linked_recipes.length]]">
-                                <strong class="recipe-item-label">
-                                    Linked Recipes
-                                </strong>
-                                <template is="dom-repeat"
-                                        items="[[recipe.linked_recipes]]">
-                                    <a class="inherit-color"
-                                            href$="/recipes/[[item.id]]">
-                                        <paper-button raised>
-                                            <iron-icon icon="icons:link">
-                                            </iron-icon>
-                                            [[item.title]]
-                                        </paper-button>
-                                    </a>
-                                </template>
-                            </template>
-                        </div>
-                    </div>
-                </template>
-            </div>
+                </div>
+            </template>
         </paper-material>
 
         <paper-dialog id="delete_item_confirmation"
                 on-iron-overlay-closed="delete_item">
-            <div>
-                Delete [[recipe.title]]?
-            </div>
+            <div>Delete [[recipe.title]]?</div>
             <div class="buttons">
                 <paper-button raised dialog-dismiss>Cancel</paper-button>
                 <paper-button raised dialog-confirm>Delete</paper-button>
