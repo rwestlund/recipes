@@ -47,6 +47,9 @@
                 font-size: large;
                 text-align: center;
             }
+            paper-button {
+                margin-bottom: var(--app-grid-gutter);
+            }
         </style>
 
         <!-- AJAX requests. -->
@@ -175,13 +178,6 @@
                     <div>[[recipe.notes]]</div>
                 </template>
 
-                <template is="dom-if"
-                        if="[[!allow_recipe_edit(user_role, user_id, recipe.author_id)]]">
-                    <paper-button raised on-tap="open_delete_modal">
-                        <iron-icon icon="icons:delete"></iron-icon>
-                        Delete Recipe
-                    </paper-button>
-                </template>
             </paper-material>
 
             <paper-material class="card-item">
@@ -193,15 +189,23 @@
                                 on-tap="edit_linked">
                         </paper-icon-button>
                     </template>
-                    <template is="dom-repeat" items="[[recipe.linked_recipes]]">
-                        <a class="inherit-color" href$="/recipes/[[item.id]]">
-                            <paper-button raised>
-                                <iron-icon icon="icons:link"></iron-icon>
-                                [[item.title]]
-                            </paper-button>
-                        </a>
-                    </template>
                 </div>
+                <template is="dom-repeat" items="[[recipe.linked_recipes]]">
+                    <a class="inherit-color" href$="/recipes/[[item.id]]">
+                        <paper-button raised>
+                            <iron-icon icon="icons:link"></iron-icon>
+                            [[item.title]]
+                        </paper-button>
+                    </a>
+                </template>
+                <template is="dom-if"
+                        if="[[allow_recipe_edit(user_role, user_id, recipe.author_id)]]">
+                    <h3>Actions</h3>
+                    <paper-button raised on-tap="open_delete_modal">
+                        <iron-icon icon="icons:delete"></iron-icon>
+                        Delete This Recipe
+                    </paper-button>
+                </template>
             </paper-material>
         </div>
 
