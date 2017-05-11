@@ -4,6 +4,7 @@
 -->
 <!-- This module shows a recipe card. -->
 
+<link rel="import" href="../bc/app-layout/app-grid/app-grid-style.html">
 <link rel="import" href="../bc/iron-collapse/iron-collapse.html">
 <link rel="import" href="../bc/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../bc/iron-icon/iron-icon.html">
@@ -18,10 +19,21 @@
 <dom-module id="recipe-display">
     <template>
         <style include="iron-flex iron-flex-alignment"></style>
+        <style include="app-grid-style"></style>
         <style include="global-styles"></style>
         <style>
             :host {
                 display: block;
+            }
+            @media (min-width:700px) {
+                :host {
+                    --app-grid-columns: 2;
+                }
+            }
+            @media (min-width:1000px) {
+                :host {
+                    --app-grid-columns: 3;
+                }
             }
         </style>
 
@@ -34,8 +46,8 @@
             <div>[[recipe.summary]]</div>
 
             <iron-collapse id="collapse" opened="{{recipe._expanded}}">
-                <div class="layout horizontal wrap">
-                    <div class="flex-4 item-col">
+                <div class="app-grid">
+                    <div>
                         <strong class="recipe-item-label">
                             Ingredients
                         </strong>
@@ -46,24 +58,21 @@
                             </template>
                         </ul>
                     </div>
-                    <div class="flex-4 item-col">
+                    <div>
                         <strong class="recipe-item-label">
                             Directions
                         </strong>
                         <ol class="directions-list">
                             <template is="dom-repeat"
-                                    items="[[recipe.directions]]"
-                                    as="d">
-                                <li>[[d]]</li>
+                                    items="[[recipe.directions]]">
+                                <li>[[item]]</li>
                             </template>
                         </ol>
                     </div>
                     <!-- Info column. -->
-                    <div class="flex-4 item-col">
+                    <div>
                         <template is="dom-if" if="[[recipe.amount]]">
-                            <strong class="recipe-item-label">
-                                Amount
-                            </strong>
+                            <strong class="recipe-item-label">Amount</strong>
                             <div>[[recipe.amount]]</div>
                         </template>
                         <template is="dom-if" if="[[recipe.time]]">
@@ -77,17 +86,13 @@
                         <strong class="recipe-item-label">Author</strong>
                         <div>[[recipe.author_name]]</div>
                         <template is="dom-if" if="[[recipe.source]]">
-                            <strong class="recipe-item-label">
-                                Source
-                            </strong>
+                            <strong class="recipe-item-label">Source</strong>
                             <div>[[recipe.source]]</div>
                         </template>
                         <strong class="recipe-item-label">Revision</strong>
                         <div>[[recipe.revision]]</div>
                         <template is="dom-if" if="[[recipe.notes]]">
-                            <strong class="recipe-item-label">
-                                Notes
-                            </strong>
+                            <strong class="recipe-item-label">Notes</strong>
                             <div>[[recipe.notes]]</div>
                         </template>
                         <template is="dom-if"
@@ -137,6 +142,10 @@
                     recipe: {
                         type: Object,
                     },
+                },
+                // Make app-grid update properly.
+                attached: function() {
+                    window.addEventListener("resize", () => this.updateStyles());
                 },
                 expand_recipe: function(event) {
                     this.set('recipe._expanded', !this.recipe._expanded);

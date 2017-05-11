@@ -6,6 +6,7 @@
 
 <link rel="import" href="../bc/app-layout/app-drawer-layout/app-drawer-layout.html">
 <link rel="import" href="../bc/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../bc/app-layout/app-grid/app-grid-style.html">
 <link rel="import" href="../bc/app-layout/app-header-layout/app-header-layout.html">
 <link rel="import" href="../bc/app-layout/app-header/app-header.html">
 <link rel="import" href="../bc/app-layout/app-scroll-effects/effects/waterfall.html">
@@ -31,6 +32,7 @@
 <dom-module id="recipes-app">
 <template>
     <style include="iron-flex iron-flex-alignment"></style>
+    <style include="app-grid-style"></style>
     <style include="global-styles"></style>
     <style>
         :host {
@@ -62,6 +64,11 @@
                 width: 500px;
             }
             --app-grid-gutter: 5px;
+        }
+        @media (min-width:700px) {
+            :host {
+                --app-grid-columns: 2;
+            }
         }
         div[main-title] {
             font-size: x-large;
@@ -180,10 +187,11 @@
                     </neon-animatable>
 
                     <neon-animatable name="about">
+                        <br >
                         <paper-material class="card-item">
                             <h3 class="card-title">About</h3>
-                            <div class="layout horizontal wrap">
-                                <div class="flex-6 item-col">
+                            <div class="app-grid">
+                                <div>
                                     <p>
                                         Welcome to our recipe database! This
                                         started as a project just for my wife
@@ -198,8 +206,8 @@
                                         here, and family and friends will have
                                         the ability to log in and add recipes.
                                     </p>
-                                    </div>
-                                    <div class="flex-6 item-col">
+                                </div>
+                                <div>
                                     <p>
                                         If you don't have an account and would
                                         like to add recipes, I'll add you if
@@ -287,6 +295,10 @@
         Polymer({
             is: "recipes-app",
             behaviors: [ recipe_behaviors.global_behavior ],
+            // Make app-grid update properly.
+            attached: function() {
+                window.addEventListener("resize", () => this.updateStyles());
+            },
             drawer_toggle: function() {
                 if (this.$.drawer_layout.narrow) this.$.drawer.toggle();
             },
