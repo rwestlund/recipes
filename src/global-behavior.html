@@ -47,6 +47,7 @@ recipe_behaviors.global_behavior = {
     },
     stop_propagation: e => e.stopPropagation(),
     long_date: function(d) {
+        if (!d) return "";
         var date = new Date(d);
         return date.toDateString() + ' ' + date.toLocaleTimeString();
     },

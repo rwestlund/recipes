@@ -23,6 +23,16 @@
             :host {
                 display: block;
             }
+            td.td-label {
+                vertical-align: top;
+                text-align:     right;
+                padding-right:  0.8em;
+                width:          6em;
+            }
+            td.td-field {
+                overflow:   hidden;
+                word-wrap:  break-word;
+            }
         </style>
 
         <iron-ajax method="PUT"
@@ -68,15 +78,11 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="td-label">Role</td>
-                        <td class="td-field">[[user.role]]</td>
-                    </tr>
-                    <tr>
                         <td class="td-label">Recipes</td>
                         <td class="td-field">[[user.recipes_authored]]</td>
                     </tr>
                     <tr>
-                        <td class="td-label">Last Activity</td>
+                        <td class="td-label">Last Seen</td>
                         <td class="td-field">[[long_date(user.lastlog)]]</td>
                     </tr>
                     <tr>
