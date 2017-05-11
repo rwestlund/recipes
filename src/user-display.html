@@ -180,7 +180,6 @@
                     if (reason.confirmed)
                         this.$.delete_item_ajax.generateRequest();
                 },
-                //TODO this isn't capitalized...
                 delete_item_successful: function() {
                     this.fire("iron-signal", {
                         name: "success-toast",
@@ -192,7 +191,6 @@
                     // removed.
                     this.fire('delete-item', this.user);
                 },
-                //TODO should these have more details?
                 delete_item_failed: function() {
                     this.fire("iron-signal", {
                         name: "error-toast",
@@ -208,7 +206,6 @@
                 // Copy response from PUT to update the display. The rationale
                 // for not loading the PUT response directly into user is
                 // to prevent a failed return status from clearing the display.
-                //TODO this isn't capitalized...
                 put_item_successful: function() {
                     this.set('user', this.item_to_edit);
                     this.fire("iron-signal", {
