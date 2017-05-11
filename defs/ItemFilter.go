@@ -11,7 +11,7 @@ type ItemFilter struct {
 	// Use SQL ILIKE to filter title by this, with % on both ends.
 	Query string
 	// Limit to this many results.
-	Count uint32
+	Count int
 	// Skip this many pages of results.
-	Skip uint32
+	Skip int
 }

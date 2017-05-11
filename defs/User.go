@@ -13,12 +13,12 @@ import (
 
 // User represents a User from the database.
 type User struct {
-	ID           uint32    `json:"id"`
+	ID           int       `json:"id"`
 	Email        string    `json:"email"`
 	Name         string    `json:"name"`
 	Role         string    `json:"role"`
 	Lastlog      null.Time `json:"lastlog"`
 	CreationDate time.Time `json:"creation_date"`
 	// Fields from other tables.
-	RecipesAuthored uint32 `json:"recipes_authored"`
+	RecipesAuthored int `json:"recipes_authored"`
 }

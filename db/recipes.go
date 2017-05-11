@@ -155,7 +155,7 @@ func FetchRecipeTitles() ([]byte, error) {
 }
 
 // FetchRecipe returns one Recipe by ID.
-func FetchRecipe(id uint32) (*defs.Recipe, error) {
+func FetchRecipe(id int) (*defs.Recipe, error) {
 	var rows, err = DB.Query(queryRows+
 		" WHERE recipes.id = $1 GROUP BY recipes.id, users.name", id)
 	if err != nil {
@@ -184,7 +184,7 @@ func CreateRecipe(recipe *defs.Recipe) (*defs.Recipe, error) {
 	if !rows.Next() {
 		return nil, sql.ErrNoRows
 	}
-	var id uint32
+	var id int
 	err = rows.Scan(&id)
 	if err != nil {
 		return nil, err
@@ -199,7 +199,7 @@ func CreateRecipe(recipe *defs.Recipe) (*defs.Recipe, error) {
 //
 // We must do the validation here to prevent a malicious user from setting the
 // AuthorID of the Recipe they're trying to save to their own.
-func SaveRecipe(recipe *defs.Recipe, userID uint32, force bool) (*defs.Recipe, error) {
+func SaveRecipe(recipe *defs.Recipe, userID int, force bool) (*defs.Recipe, error) {
 	//TODO some input validation on would be nice
 	/* Build JSON from complex fields. */
 	var directions, err = json.Marshal(recipe.Directions)
@@ -274,7 +274,7 @@ func SaveRecipe(recipe *defs.Recipe, userID uint32, force bool) (*defs.Recipe, e
 	if !rows.Next() {
 		return nil, sql.ErrNoRows
 	}
-	var id uint32
+	var id int
 	err = rows.Scan(&id)
 	if err != nil {
 		return nil, err
@@ -295,7 +295,7 @@ func SaveRecipe(recipe *defs.Recipe, userID uint32, force bool) (*defs.Recipe, e
 //
 // We must do the validation here to prevent a malicious user from setting the
 // author_id of the Recipe they're trying to save to their own.
-func DeleteRecipe(recipeID uint32, userID uint32, force bool) error {
+func DeleteRecipe(recipeID int, userID int, force bool) error {
 	// Hold the dynamically generated portion of our SQL.
 	var queryText = "DELETE FROM recipes WHERE id = $1 "
 	// Hold all the parameters for our query.

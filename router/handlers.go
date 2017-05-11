@@ -23,13 +23,13 @@ import (
 // buildItemFilter takes a url.URL object (from req.URL) and fills an ItemFilter.
 func buildItemFilter(url *url.URL) defs.ItemFilter {
 	// We can ignore the error because count=0 means disabled.
-	var bigcount, _ = strconv.ParseUint(url.Query().Get("count"), 10, 32)
-	var bigskip, _ = strconv.ParseUint(url.Query().Get("skip"), 10, 32)
+	var count, _ = strconv.Atoi(url.Query().Get("count"))
+	var skip, _ = strconv.Atoi(url.Query().Get("skip"))
 	// Build ItemFilter from query params.
 	var filter = defs.ItemFilter{
 		Query: url.Query().Get("query"),
-		Count: uint32(bigcount),
-		Skip:  uint32(bigskip),
+		Count: count,
+		Skip:  skip,
 	}
 	return filter
 }
@@ -126,7 +126,7 @@ func handleRecipe(res http.ResponseWriter, req *http.Request) {
 
 	// Get id parameter.
 	var params = mux.Vars(req)
-	var id, err = strconv.ParseUint(params["id"], 10, 32)
+	var id, err = strconv.Atoi(params["id"])
 	if err != nil {
 		log.Println(err)
 		res.WriteHeader(400)
@@ -134,7 +134,7 @@ func handleRecipe(res http.ResponseWriter, req *http.Request) {
 	}
 
 	var recipe *defs.Recipe
-	recipe, err = db.FetchRecipe(uint32(id))
+	recipe, err = db.FetchRecipe(id)
 	if err == sql.ErrNoRows {
 		res.WriteHeader(404)
 		return
@@ -175,7 +175,7 @@ func handleDeleteRecipe(res http.ResponseWriter, req *http.Request) {
 
 	// Get id parameter.
 	var params = mux.Vars(req)
-	id, err := strconv.ParseUint(params["id"], 10, 32)
+	id, err := strconv.Atoi(params["id"])
 	if err != nil {
 		log.Println(err)
 		res.WriteHeader(400)
@@ -184,7 +184,7 @@ func handleDeleteRecipe(res http.ResponseWriter, req *http.Request) {
 
 	// Bypass the author check if the user has sufficient privileges.
 	var force = usr.Role == "Admin" || usr.Role == "Moderator"
-	err = db.DeleteRecipe(uint32(id), usr.ID, force)
+	err = db.DeleteRecipe(id, usr.ID, force)
 	if err == sql.ErrNoRows {
 		res.WriteHeader(403)
 		return
@@ -268,14 +268,14 @@ func handlePutOrPostUser(res http.ResponseWriter, req *http.Request) {
 	if req.Method == "PUT" {
 		// Get id parameter.
 		var params = mux.Vars(req)
-		id, err := strconv.ParseUint(params["id"], 10, 32)
+		id, err := strconv.Atoi(params["id"])
 		if err != nil {
 			log.Println(err)
 			res.WriteHeader(400)
 			return
 		}
 
-		newUser, err = db.UpdateUser(uint32(id), &user)
+		newUser, err = db.UpdateUser(id, &user)
 	} else {
 		// Create a new user in the DB.
 		newUser, err = db.CreateUser(&user)
@@ -318,13 +318,13 @@ func handleDeleteUser(res http.ResponseWriter, req *http.Request) {
 
 	// Get id parameter.
 	var params = mux.Vars(req)
-	id, err := strconv.ParseUint(params["id"], 10, 32)
+	id, err := strconv.Atoi(params["id"])
 	if err != nil {
 		log.Println(err)
 		res.WriteHeader(400)
 		return
 	}
-	err = db.DeleteUser(uint32(id))
+	err = db.DeleteUser(id)
 	if err != nil {
 		log.Println(err)
 		res.WriteHeader(400)

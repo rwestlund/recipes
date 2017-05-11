@@ -115,7 +115,7 @@ func CreateUser(user *defs.User) (*defs.User, error) {
 
 // UpdateUser updates a User in the database. Only User.Id, User.Email, and
 // User.Role are read.
-func UpdateUser(id uint32, user *defs.User) (*defs.User, error) {
+func UpdateUser(id int, user *defs.User) (*defs.User, error) {
 	//TODO some input validation on would be nice
 	// Run one query to update the value.
 	var rows, err = DB.Query(`UPDATE users SET (email, role) = ($1, $2)
@@ -139,7 +139,7 @@ func UpdateUser(id uint32, user *defs.User) (*defs.User, error) {
 }
 
 // DeleteUser deletes a User by ID.
-func DeleteUser(id uint32) error {
+func DeleteUser(id int) error {
 	var _, err = DB.Exec(`DELETE FROM users WHERE id = $1`, id)
 	return err
 }

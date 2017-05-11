@@ -7,10 +7,10 @@ package defs
 
 // Recipe represents a recipe from the DB.
 type Recipe struct {
-	ID          uint32   `json:"id"`
-	Revision    uint32   `json:"revision"`
+	ID          int      `json:"id"`
+	Revision    int      `json:"revision"`
 	Amount      string   `json:"amount"`
-	AuthorID    uint32   `json:"author_id"`
+	AuthorID    int      `json:"author_id"`
 	Directions  []string `json:"directions"`
 	Ingredients []string `json:"ingredients"`
 	Notes       string   `json:"notes"`
@@ -27,6 +27,6 @@ type Recipe struct {
 
 // LinkedRecipe is a reference from one recipe to another.
 type LinkedRecipe struct {
-	ID    uint32 `json:"id"`
+	ID    int    `json:"id"`
 	Title string `json:"title"`
 }

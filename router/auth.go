@@ -130,7 +130,7 @@ func handleOauthCallback(res http.ResponseWriter, req *http.Request) {
 	// The client will this for visibility control.
 	var userIDCookie = http.Cookie{
 		Name:   "user_id",
-		Value:  strconv.FormatUint(uint64(user.ID), 10),
+		Value:  strconv.Itoa(user.ID),
 		Path:   "/",
 		Secure: true,
 	}
