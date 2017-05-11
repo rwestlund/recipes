@@ -501,7 +501,8 @@
                         name: "success-toast",
                         data: this.recipe.title + " deleted",
                     });
-                    page.show('/');
+                    window.history.pushState({}, null, "/");
+                    window.dispatchEvent(new CustomEvent("location-changed"));
                 },
                 loading_data_failed: function() {
                     this.fire("iron-signal", {
