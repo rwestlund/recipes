@@ -10,8 +10,6 @@
 <link rel="import" href="../bc/app-layout/app-header-layout/app-header-layout.html">
 <link rel="import" href="../bc/app-layout/app-header/app-header.html">
 <link rel="import" href="../bc/app-layout/app-scroll-effects/effects/waterfall.html">
-<link rel="import" href="../bc/app-layout/app-scrollpos-control/app-scrollpos-control.html">
-<link rel="import" href="../bc/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../bc/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../bc/app-route/app-location.html">
 <link rel="import" href="../bc/app-route/app-route.html">
@@ -262,8 +260,6 @@
 
     <app-route route="{{route}}" pattern="/:page" data="{{route_data}}">
     </app-route>
-    <app-scrollpos-control selected="[[route_data.page]]">
-    </app-scrollpos-control>
     <!-- If every page used the same subrouter, they'd all be bound to the same
          id (i.e. loading /recipes/2 would also try to load /users/2). Instead,
          use a separate subrouter for each path so that a non-active path will
@@ -274,8 +270,6 @@
             pattern="/recipes/:id"
             data="{{recipes_route_data}}">
     </app-route>
-    <app-scrollpos-control selected="[[recipes_route_data.id]]">
-    </app-scrollpos-control>
 
     <!-- All the application's forms are contained in here and triggered with
          signals. This is a workaround for:
@@ -293,12 +287,50 @@
         Polymer({
             is: "recipes-app",
             behaviors: [ recipe_behaviors.global_behavior ],
+            properties: {
+                route_data: {
+                    type: Object,
+                    observer: "page_changed",
+                },
+                // This holds the saved scroll position for each main page.
+                scrollpos_map: {
+                    type: Object,
+                    value: () => ({}),
+                },
+                // Using this delays setting the page long enough to save the
+                // old position.
+                current_page: {
+                    type: String,
+                    value: "",
+                },
+            },
             // Make app-grid update properly.
             attached: function() {
                 window.addEventListener("resize", () => this.updateStyles());
             },
             drawer_toggle: function() {
                 if (this.$.drawer_layout.narrow) this.$.drawer.toggle();
+            },
+            // Preserve the scroll position on each page, like
+            // app-scrollpos-control used to.
+            page_changed: function(new_data, old_data) {
+                // Save the old position.
+                if (old_data != null && old_data.page != null) {
+                    this.scrollpos_map[old_data.page] = window.pageYOffset;
+                }
+                // Go to the new page.
+                this.current_page = new_data.page;
+                // Return to previous position on this page, if any.
+                if (this.scrollpos_map[new_data.page] != null) {
+                    Polymer.AppLayout.scroll({
+                        top:        this.scrollpos_map[new_data.page],
+                        behavior:   "silent"
+                    });
+                }
+                // Otherwise, just go to the top.
+                else if (this.isAttached) {
+                    Polymer.AppLayout.scroll({ top: 0, behavior: "silent" });
+                }
             },
         })
     })();
