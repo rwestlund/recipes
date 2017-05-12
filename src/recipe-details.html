@@ -8,7 +8,6 @@
 <link rel="import" href="../bc/iron-ajax/iron-ajax.html">
 <link rel="import" href="../bc/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../bc/iron-icon/iron-icon.html">
-<link rel="import" href="../bc/iron-signals/iron-signals.html">
 <link rel="import" href="../bc/iron-icons/iron-icons.html">
 <link rel="import" href="../bc/paper-button/paper-button.html">
 <link rel="import" href="../bc/paper-dialog/paper-dialog.html">
@@ -274,53 +273,53 @@
                 },
                 edit_recipe: function() {
                     this.recipe_to_edit = JSON.parse(JSON.stringify(this.recipe));
-                    this.fire("iron-signal", { name: "open-form",
-                        data: {
+                    window.dispatchEvent(new CustomEvent("open-form", {
+                        detail: {
                             name:   "edit_recipe_form",
                             recipe: this.recipe_to_edit,
                             that:   this,
-                        },
-                    });
+                        }
+                    }));
                 },
                 edit_ingredients: function() {
                     this.recipe_to_edit = JSON.parse(JSON.stringify(this.recipe));
-                    this.fire("iron-signal", { name: "open-form",
-                        data: {
+                    window.dispatchEvent(new CustomEvent("open-form", {
+                        detail: {
                             name:   "edit_ingredients_form",
                             recipe: this.recipe_to_edit,
                             that:   this,
-                        },
-                    });
+                        }
+                    }));
                 },
                 edit_directions: function() {
                     this.recipe_to_edit = JSON.parse(JSON.stringify(this.recipe));
-                    this.fire("iron-signal", { name: "open-form",
-                        data: {
+                    window.dispatchEvent(new CustomEvent("open-form", {
+                        detail: {
                             name:   "edit_directions_form",
                             recipe: this.recipe_to_edit,
                             that:   this,
-                        },
-                    });
+                        }
+                    }));
                 },
                 edit_info: function() {
                     this.recipe_to_edit = JSON.parse(JSON.stringify(this.recipe));
-                    this.fire("iron-signal", { name: "open-form",
-                        data: {
+                    window.dispatchEvent(new CustomEvent("open-form", {
+                        detail: {
                             name:   "edit_recipe_info_form",
                             recipe: this.recipe_to_edit,
                             that:   this,
-                        },
-                    });
+                        }
+                    }));
                 },
                 edit_linked: function() {
                     this.recipe_to_edit = JSON.parse(JSON.stringify(this.recipe));
-                    this.fire("iron-signal", { name: "open-form",
-                        data: {
+                    window.dispatchEvent(new CustomEvent("open-form", {
+                        detail: {
                             name:   "edit_linked_recipe_form",
                             recipe: this.recipe_to_edit,
                             that:   this,
-                        },
-                    });
+                        }
+                    }));
                 },
                 resolve_dialog: function(e, reason) {
                     if (!reason.confirmed) return;
@@ -335,36 +334,32 @@
                         this.$.delete_item_ajax.generateRequest();
                 },
                 put_item_failed: function() {
-                    this.fire("iron-signal", {
-                        name: "error-toast",
-                        data: "Failed to save recipe :(",
-                    });
+                    window.dispatchEvent(new CustomEvent("error-toast", {
+                        detail: "Failed to save recipe :("
+                    }));
                 },
                 put_item_successful: function() {
                     // Load the response into recipe_to_edit and copy it here to
                     // prevent blanking the screen on a failed request.
                     this.set("recipe", this.recipe_to_edit);
-                    this.fire("iron-signal", {
-                        name: "success-toast",
-                        data: this.recipe.title + " saved",
-                    });
+                    window.dispatchEvent(new CustomEvent("success-toast", {
+                        detail: this.recipe.title + " saved"
+                    }));
                 },
                 delete_item_failed: function() {
-                    this.fire("iron-signal", {
-                        name: "error-toast",
-                        data: "Failed to delete " + this.recipe.title + " :(",
-                    });
+                    window.dispatchEvent(new CustomEvent("error-toast", {
+                        detail: "Failed to delete " + this.recipe.title + " :("
+                    }));
                 },
                 // Let the user know, then go back to the list of recipes.
                 delete_item_successful: function() {
-                    this.fire("iron-signal", {
-                        name: "success-toast",
-                        data: this.recipe.title + " deleted",
-                    });
+                    window.dispatchEvent(new CustomEvent("success-toast", {
+                        detail: this.recipe.title + " deleted"
+                    }));
                     // Let the parent know that it should refresh its list.
-                    this.fire("iron-signal", { name: "item-collection-refresh",
-                        data: "recipes"
-                    });
+                    window.dispatchEvent(new CustomEvent("item-collection-refresh", {
+                        detail: "recipes"
+                    }));
                     // Go back to the list.
                     window.history.pushState({}, null, "/");
                     window.dispatchEvent(new CustomEvent("location-changed"));

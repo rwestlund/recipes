@@ -47,10 +47,9 @@ recipe_behaviors.global_behavior = {
     },
     // A generic AJAX error handler.
     loading_data_failed: function() {
-        this.fire("iron-signal", {
-            name: "error-toast",
-            data: "Failed to communicate with server :(",
-        });
+        window.dispatchEvent(new CustomEvent("error-toast", {
+            detail: "Failed to communicate with server :("
+        }));
     },
     stop_propagation: e => e.stopPropagation(),
     long_date: function(d) {

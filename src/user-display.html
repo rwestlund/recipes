@@ -9,7 +9,6 @@
 <link rel="import" href="../bc/iron-icon/iron-icon.html">
 <link rel="import" href="../bc/iron-icons/iron-icons.html">
 <link rel="import" href="../bc/iron-icons/social-icons.html">
-<link rel="import" href="../bc/iron-signals/iron-signals.html">
 <link rel="import" href="../bc/paper-button/paper-button.html">
 <link rel="import" href="../bc/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bc/paper-icon-button/paper-icon-button.html">
@@ -171,14 +170,14 @@
                     // display until the save is successful.
                     this.item_to_edit = JSON.parse(JSON.stringify(this.user));
                     // Ask for the form to be opened.
-                    this.fire("iron-signal", { name: "open-form",
-                        data: {
+                    window.dispatchEvent(new CustomEvent("open-form", {
+                        detail: {
                             name:     "edit_user_form",
                             user:     this.item_to_edit,
                             that:     this,
                             callback: "resolve_edit_item_dialog",
-                        },
-                    });
+                        }
+                    }));
                 },
                 // Handle response from dialog. Reason is either confirmed or
                 // canceled.
@@ -194,36 +193,33 @@
                         this.$.delete_item_ajax.generateRequest();
                 },
                 delete_item_successful: function() {
-                    this.fire("iron-signal", {
-                        name: "success-toast",
-                        data: this.user.role + " " + this.first_defined(
-                                this.user.name, this.user.email) + " deleted",
-                    });
+                    window.dispatchEvent(new CustomEvent("success-toast", {
+                        detail: this.user.role + " " + this.first_defined(
+                                this.user.name, this.user.email) + " deleted"
+                    }));
                     // Let the parent know that this was deleted.
-                    this.fire("item-deleted");
+                    this.dispatchEvent(new CustomEvent("item-deleted",
+                            { bubbles: true, composed: true }));
                 },
                 delete_item_failed: function() {
-                    this.fire("iron-signal", {
-                        name: "error-toast",
-                        data: "Failed to delete user :(",
-                    });
+                    window.dispatchEvent(new CustomEvent("error-toast", {
+                        detail: "Failed to delete user :(",
+                    }));
                 },
                 // Copy response from PUT to update the display. The rationale
                 // for not loading the PUT response directly into user is
                 // to prevent a failed return status from clearing the display.
                 put_item_successful: function() {
                     this.set('user', this.item_to_edit);
-                    this.fire("iron-signal", {
-                        name: "success-toast",
-                        data: this.user.role + " " + this.first_defined(
-                                this.user.name, this.user.email) + " saved",
-                    });
+                    window.dispatchEvent(new CustomEvent("success-toast", {
+                        detail: this.user.role + " " + this.first_defined(
+                                this.user.name, this.user.email) + " saved"
+                    }));
                 },
                 put_item_failed: function() {
-                    this.fire("iron-signal", {
-                        name: "error-toast",
-                        data: "Failed to save user :(",
-                    });
+                    window.dispatchEvent(new CustomEvent("error-toast", {
+                        detail: "Failed to save user :("
+                    }));
                 },
             });
         })();

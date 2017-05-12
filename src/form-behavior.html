@@ -21,7 +21,8 @@ recipe_behaviors.form_behavior = {
         if (this.$.dialog) this.$.dialog.notifyResize();
     },
     resolve_dialog: function(e, reason) {
-        this.fire('closed', reason);
+        this.dispatchEvent(new CustomEvent("closed",
+                { bubbles: true, composed: true, detail: reason }));
     },
     // Handle click on the X suffix for a paper-input. This crawls up the DOM
     // until it finds a paper-input and clears it.

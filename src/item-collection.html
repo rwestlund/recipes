@@ -13,7 +13,6 @@
 <link rel="import" href="../bc/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../bc/iron-icon/iron-icon.html">
 <link rel="import" href="../bc/iron-icons/iron-icons.html">
-<link rel="import" href="../bc/iron-signals/iron-signals.html">
 <link rel="import" href="../bc/paper-button/paper-button.html">
 <link rel="import" href="../bc/paper-fab/paper-fab.html">
 <link rel="import" href="../bc/paper-icon-button/paper-icon-button.html">
@@ -134,11 +133,6 @@
                     hidden$="[[!enableFab]]">
         </paper-fab>
 
-        <!-- Recipes have their delete mechanish outside the context of this
-             element. In orde to refresh this list when they are deleted, they
-             send this signal. -->
-        <iron-signals on-iron-signal-item-collection-refresh="refresh_signal">
-        </iron-signals>
     </template>
 
     <script>
@@ -222,13 +216,27 @@
                 compute_page_number: function(skip) {
                     return skip + 1;
                 },
+
+                attached: function() {
+                    // Recipes have their delete mechanish outside the context
+                    // of this element. In orde to refresh this list when they
+                    // are deleted, they send this signal.
+                    this._listener = this.refresh_signal.bind(this);
+                    window.addEventListener("item-collection-refresh",
+                            this._listener);
+                },
+                // Remove listeners to avoid memory leaks.
+                detached: function() {
+                    window.removeEventListener("item-collection-refresh",
+                            this._listener);
+                },
+                refresh_signal: function(e) {
+                    // Only refresh the one that was changed.
+                    if (this.itemName == e.datail) this.refresh();
+                },
                 // Reload the collection of items.
                 refresh: function() {
                     this.$.get_items_ajax.generateRequest();
-                },
-                refresh_signal: function(e, itemName) {
-                    // Only refresh the one that was changed.
-                    if (this.itemName == itemName) this.refresh();
                 },
                 // Open the appropriate form after a click on the FAB.
                 create_item: function() {
@@ -243,7 +251,7 @@
                         data.recipe = this.new_item;
                     }
                     // Ask for the form to be opened.
-                    this.fire("iron-signal", { name: "open-form", data: data });
+                    window.dispatchEvent(new CustomEvent("open-form", { detail: data }));
                 },
                 // Handle response from dialog. Reason is either confirmed or
                 // canceled.
@@ -255,12 +263,11 @@
                     // This isn't in shorter form like the one below because
                     // some pages need to change the route.
                     if(this.itemName === "users") {
-                        this.fire("iron-signal", {
-                            name: "success-toast",
-                            data: this.new_item.role + " " +
+                        window.dispatchEvent(new CustomEvent("success-toast", {
+                            detail: this.new_item.role + " " +
                                     (this.new_item.name || this.new_item.email)
-                                    + " created",
-                        });
+                                    + " created"
+                        }));
                         this.push("items", this.new_item);
                     }
                     else if (this.itemName === "recipes") {
@@ -268,10 +275,9 @@
                                 "/recipes/"+this.new_item.id+"/");
                         window.dispatchEvent(new CustomEvent("location-changed"));
 
-                        this.fire("iron-signal", {
-                            name: "success-toast",
-                            data: this.new_item.title + " created",
-                        });
+                        window.dispatchEvent(new CustomEvent("success-toast", {
+                            detail: this.new_item.title + " created"
+                        }));
                     }
                 },
                 creating_item_failed: function() {
@@ -281,10 +287,9 @@
                     else if(this.itemName === "recipes")
                         data = "Failed to create recipe :("
                     
-                    this.fire("iron-signal", {
-                        name: "error-toast",
-                        data: data,
-                    });
+                    window.dispatchEvent(new CustomEvent("error-toast", {
+                        detail: data,
+                    }));
                 },
                 previous: function() {
                     if (this.skip) this.skip--;
