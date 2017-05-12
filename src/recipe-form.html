@@ -11,7 +11,7 @@
 <link rel="import" href="../bc/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bc/paper-input/paper-input.html">
 <link rel="import" href="../bc/paper-item/paper-item.html">
-<link rel="import" href="../bc/paper-menu/paper-menu.html">
+<link rel="import" href="../bc/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bc/polymer-responsive-dialog/responsive-dialog.html">
 <link rel="import" href="../bc/polymer/polymer.html">
 
@@ -66,7 +66,7 @@
                 <paper-dropdown-menu label="Select New Tag"
                         vertical-align="bottom"
                         horizontal-align="right">
-                    <paper-menu class="dropdown-content"
+                    <paper-listbox slot="dropdown-content"
                             attr-for-selected="value"
                             selected="{{selected_tag}}"
                             on-iron-select="add_selected_tag">
@@ -75,7 +75,7 @@
                                 [[item]]
                             </paper-item>
                         </template>
-                    </paper-menu>
+                    </paper-listbox>
                 </paper-dropdown-menu>
             </div>
             <!-- Type a new tag from typeahead. -->

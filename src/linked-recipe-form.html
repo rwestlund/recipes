@@ -10,7 +10,7 @@
 <link rel="import" href="../bc/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../bc/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bc/paper-item/paper-item.html">
-<link rel="import" href="../bc/paper-menu/paper-menu.html">
+<link rel="import" href="../bc/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bc/polymer-responsive-dialog/responsive-dialog.html">
 <link rel="import" href="../bc/polymer/polymer.html">
 
@@ -43,7 +43,7 @@
                         label="Select New Linked Recipe"
                         vertical-align="bottom"
                         horizontal-align="right">
-                    <paper-menu class="dropdown-content"
+                    <paper-listbox slot="dropdown-content"
                             attr-for-selected="value"
                             selected="{{selected_recipe}}"
                             on-iron-select="add_selected_recipe">
@@ -52,7 +52,7 @@
                                 [[item.title]]
                             </paper-item>
                         </template>
-                    </paper-menu>
+                    </paper-listbox>
                 </paper-dropdown-menu>
             </div>
         </responsive-dialog>

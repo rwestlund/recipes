@@ -15,6 +15,7 @@
 <link rel="import" href="../bc/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../bc/app-route/app-location.html">
 <link rel="import" href="../bc/app-route/app-route.html">
+<link rel="import" href="../bc/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bc/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../bc/iron-icons/maps-icons.html">
 <link rel="import" href="../bc/iron-icons/social-icons.html">
@@ -49,9 +50,6 @@
             --disabled-text-color: #bdbdbd;
             --divider-color: #B6B6B6;
 
-            /* paper-menu */
-            /*--paper-menu-background-color: #fff; */
-
             /* paper-fab */
             --paper-fab-background: var(--default-primary-color);
 
@@ -82,11 +80,11 @@
             background-color: var(--dark-primary-color);
             font-size: medium;
         }
-        paper-menu a {
+        paper-listbox a {
             text-decoration: none;
             color: #111111;
         }
-        paper-menu .iron-selected paper-item {
+        paper-listbox .iron-selected paper-item {
             color: var(--dark-primary-color);
             background-color: var(--dark-background-color);
             font-weight: bold;
@@ -99,7 +97,7 @@
     <app-drawer-layout id="drawer_layout" fullbleed responsive-width="900px">
         <app-drawer id="drawer" swipe-open>
             <app-toolbar></app-toolbar>
-            <paper-menu selected="[[route_data.page]]"
+            <paper-listbox selected="[[route_data.page]]"
                     attr-for-selected="name"
                     on-tap="drawer_toggle">
                 <!-- Note: because of how app-route matches, all routes must
@@ -140,7 +138,7 @@
                         </paper-item>
                     </a>
                 </template>
-            </paper-menu>
+            </paper-listbox>
         </app-drawer>
 
         <app-header-layout fullbleed>
