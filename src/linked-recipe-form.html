@@ -45,8 +45,7 @@
                         horizontal-align="right">
                     <paper-listbox slot="dropdown-content"
                             attr-for-selected="value"
-                            selected="{{selected_recipe}}"
-                            on-iron-select="add_selected_recipe">
+                            selected="{{selected_recipe}}">
                         <template is="dom-repeat" items="[[recipes]]">
                             <paper-item value="[[item]]">
                                 [[item.title]]
@@ -79,6 +78,10 @@
                     recipe: {
                         type: Object,
                     },
+                    selected_recipe: {
+                        type: Object,
+                        observer: "add_recipe",
+                    },
                 },
                 // Override open() from behavior to add an AJAX call.
                 open: function() {
@@ -89,19 +92,21 @@
                     this.splice("recipe.linked_recipes", e.model.index, 1);
                     this.size_changed();
                 },
-                add_selected_recipe: function() {
+                add_recipe: function(n) {
+                    if (!n || !n.id) return;
+                    // Clear the menu. This won't affect n in the current
+                    // context, and we want to do it no matter when we return.
+                    this.selected_recipe = null;
                     // Don't link to self.
                     // TODO this shouldn't be in the list at all
-                    if (this.recipe.id === this.selected_recipe.id) return;
-                    for (var i in this.recipe.linked_recipes)
-                        if (this.recipe.linked_recipes[i].id ===
-                                this.selected_recipe.id) return;
-                    this.push("recipe.linked_recipes", {
-                            id:     this.selected_recipe.id,
-                            title:  this.selected_recipe.title
-                    });
-                    //TODO this doesn't clear the menu
-                    this.set("selected_recipe", null);
+                    if (this.recipe.id === n.id) return;
+                    // Make sure it isn't already there.
+                    for (var i = 0; i < this.recipe.linked_recipes.length; i++) {
+                        if (this.recipe.linked_recipes[i].id === n.id)
+                            return;
+                    }
+                    this.push("recipe.linked_recipes",
+                            { id: n.id, title: n.title });
                     this.size_changed();
                 },
             });

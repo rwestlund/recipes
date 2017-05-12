@@ -68,8 +68,7 @@
                         horizontal-align="right">
                     <paper-listbox slot="dropdown-content"
                             attr-for-selected="value"
-                            selected="{{selected_tag}}"
-                            on-iron-select="add_selected_tag">
+                            selected="{{selected_tag}}">
                         <template is="dom-repeat" items="[[tags]]">
                             <paper-item value="[[item]]">
                                 [[item]]
@@ -122,6 +121,10 @@
                         type: String,
                         value: "Edit Recipe",
                     },
+                    selected_tag: {
+                        type: String,
+                        observer: "add_selected_tag",
+                    },
                 },
                 // Override open() from behavior to add an AJAX call.
                 open: function() {
@@ -133,10 +136,10 @@
                     this.size_changed();
                 },
                 // Call add_tag with the appropriate variable.
-                add_selected_tag: function() {
-                    this.add_tag(this.selected_tag);
-                    //TODO this doesn't clear the menu
-                    this.set("selected_tag", null);
+                add_selected_tag: function(n) {
+                    if (!n) return;
+                    this.add_tag(n);
+                    this.selected_tag = null;
                 },
                 add_typed_tag: function() {
                     this.add_tag(this.typed_tag);
