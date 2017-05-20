@@ -12,8 +12,8 @@
 <link rel="import" href="../bc/paper-button/paper-button.html">
 <link rel="import" href="../bc/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bc/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bc/paper-material/paper-material.html">
 <link rel="import" href="../bc/paper-spinner/paper-spinner.html">
+<link rel="import" href="../bc/paper-styles/element-styles/paper-material-styles.html">
 <link rel="import" href="../bc/polymer/polymer.html">
 
 <link rel="import" href="cookie-display.html">
@@ -24,6 +24,7 @@
     <template>
         <style include="iron-flex iron-flex-alignment"></style>
         <style include="app-grid-style"></style>
+        <style include="paper-material-styles"></style>
         <style include="global-styles"></style>
         <style>
             :host {
@@ -108,7 +109,7 @@
         </div>
 
         <div class="app-grid">
-            <paper-material class="card-item">
+            <div class="paper-material card-item" elevation="1">
                 <div class="layout horizontal justified">
                     <h3 class="card-title">Ingredients</h3>
                     <template is="dom-if"
@@ -123,9 +124,9 @@
                         <li>[[item]]</li>
                     </template>
                 </ul>
-            </paper-material>
+            </div>
 
-            <paper-material class="card-item">
+            <div class="paper-material card-item" elevation="1">
                 <div class="layout horizontal justified">
                 <h3 class="card-title">Directions</h3>
                     <template is="dom-if"
@@ -140,9 +141,9 @@
                         <li>[[item]]</li>
                     </template>
                 </ol>
-            </paper-material>
+            </div>
 
-            <paper-material class="card-item">
+            <div class="paper-material card-item" elevation="1">
                 <div class="layout horizontal justified">
                 <h3 class="card-title">Info</h3>
                     <template is="dom-if"
@@ -176,10 +177,9 @@
                     <strong class="recipe-item-label">Notes</strong>
                     <div>[[recipe.notes]]</div>
                 </template>
+            </div>
 
-            </paper-material>
-
-            <paper-material class="card-item">
+            <div class="paper-material card-item" elevation="1">
                 <div class="layout horizontal justified">
                 <h3 class="card-title">Linked Recipes</h3>
                     <template is="dom-if"
@@ -205,7 +205,7 @@
                         Delete This Recipe
                     </paper-button>
                 </template>
-            </paper-material>
+            </div>
         </div>
 
         <paper-dialog id="delete_item_confirmation"

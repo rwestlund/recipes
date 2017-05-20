@@ -12,8 +12,8 @@
 <link rel="import" href="../bc/paper-button/paper-button.html">
 <link rel="import" href="../bc/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bc/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bc/paper-material/paper-material.html">
 <link rel="import" href="../bc/paper-spinner/paper-spinner.html">
+<link rel="import" href="../bc/paper-styles/element-styles/paper-material-styles.html">
 <link rel="import" href="../bc/polymer/polymer.html">
 
 <link rel="import" href="global-behavior.html">
@@ -22,6 +22,7 @@
 <dom-module id="user-display">
     <template>
         <style include="iron-flex iron-flex-alignment"></style>
+        <style include="paper-material-styles"></style>
         <style include="global-styles"></style>
         <style>
             :host {
@@ -59,7 +60,7 @@
                 loading="{{loading.delete_item}}">
         </iron-ajax>
 
-        <paper-material class="card-item">
+        <div class="paper-material card-item" elevation="1">
             <!-- Summary header. -->
             <div class="layout horizontal end-justified wrap">
                 <h3 class="card-title">
@@ -115,7 +116,7 @@
                     </template>
                 </div>
             </div>
-        </paper-material>
+        </div>
 
         <paper-dialog id="delete_item_confirmation"
                 on-iron-overlay-closed="delete_item">

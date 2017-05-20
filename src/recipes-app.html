@@ -19,6 +19,7 @@
 <link rel="import" href="../bc/iron-icons/social-icons.html">
 <link rel="import" href="../bc/neon-animation/neon-animatable.html">
 <link rel="import" href="../bc/neon-animation/neon-animated-pages.html">
+<link rel="import" href="../bc/paper-styles/element-styles/paper-material-styles.html">
 
 <link rel="import" href="cookie-display.html">
 <link rel="import" href="global-behavior.html">
@@ -32,6 +33,7 @@
 <template>
     <style include="iron-flex iron-flex-alignment"></style>
     <style include="app-grid-style"></style>
+    <style include="paper-material-styles"></style>
     <style include="global-styles"></style>
     <style>
         :host {
@@ -184,7 +186,7 @@
 
                     <neon-animatable name="about">
                         <br >
-                        <paper-material class="card-item">
+                        <div class="paper-material card-item" elevation="1">
                             <h3 class="card-title">About</h3>
                             <div class="app-grid">
                                 <div>
@@ -228,7 +230,7 @@
                             <br>
                             <div>Version 2.0.1</div>
                             <div>Released 2016-07-13</div>
-                        </paper-material>
+                        </div>
                     </neon-animatable>
 
                     <template is="dom-if" if="[[is_admin(user_role)]]">
