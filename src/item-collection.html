@@ -201,7 +201,7 @@
                 compute_loading_data: function(loading) {
                     var ret = false;
                     Object.keys(this.loading)
-                        .forEach( v => ret = ret || this.loading[v] );
+                        .forEach(k => ret = ret || this.loading[k]);
                     return ret;
                 },
                 compute_search_filter: function(count, skip, search_text) {
