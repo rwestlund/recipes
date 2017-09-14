@@ -146,34 +146,17 @@
                 behaviors: [ recipe_behaviors.global_behavior, ],
                 properties: {
                     // The parent provides 'recipes' or 'users' here.
-                    itemName: {
-                        type: String,
-                    },
+                    itemName: { type: String, },
                     // Whether to enable the FAB.
-                    enableFab: {
-                        type: Boolean,
-                        value: false,
-                    },
-                    items: {
-                        type: Array,
-                        value: [],
-                    },
-                    count: {
-                        type: Number,
-                        value: 20
-                    },
-                    skip: {
-                        type: Number,
-                        value: 0
-                    },
+                    enableFab: { type: Boolean, value: false, },
+                    items: { type: Array, value: () => [], },
+                    count: { type: Number, value: 20 },
+                    skip: { type: Number, value: 0 },
                     page_number: {
                         type: Number,
                         computed: "compute_page_number(skip)"
                     },
-                    search_text: {
-                        type: String,
-                        value: ''
-                    },
+                    search_text: { type: String, value: '' },
                     search_filter: {
                         type: Object,
                         computed: "compute_search_filter(count, skip, search_text)"
@@ -216,10 +199,7 @@
                         val = this.items.length < this.count;
                     return val;
                 },
-                compute_page_number: function(skip) {
-                    return skip + 1;
-                },
-
+                compute_page_number: skip => skip + 1,
                 attached: function() {
                     // Recipes have their delete mechanish outside the context
                     // of this element. In orde to refresh this list when they
