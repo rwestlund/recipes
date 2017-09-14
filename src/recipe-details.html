@@ -112,12 +112,14 @@
             <div class="paper-material card-item" elevation="1">
                 <div class="layout horizontal justified">
                     <h3 class="card-title">Ingredients</h3>
-                    <template is="dom-if"
-                            if="[[allow_recipe_edit(user_role, user_id, recipe.author_id)]]">
-                        <paper-icon-button icon="icons:create"
-                                on-tap="edit_ingredients">
-                        </paper-icon-button>
-                    </template>
+                    <div>
+                        <template is="dom-if"
+                                if="[[allow_recipe_edit(user_role, user_id, recipe.author_id)]]">
+                            <paper-icon-button icon="icons:create"
+                                    on-tap="edit_ingredients">
+                            </paper-icon-button>
+                        </template>
+                    </div>
                 </div>
                 <ul class="ingredients-list">
                     <template is="dom-repeat" items="[[recipe.ingredients]]">
@@ -128,13 +130,15 @@
 
             <div class="paper-material card-item" elevation="1">
                 <div class="layout horizontal justified">
-                <h3 class="card-title">Directions</h3>
-                    <template is="dom-if"
-                            if="[[allow_recipe_edit(user_role, user_id, recipe.author_id)]]">
-                        <paper-icon-button icon="icons:create"
-                                on-tap="edit_directions">
-                        </paper-icon-button>
-                    </template>
+                    <h3 class="card-title">Directions</h3>
+                    <div>
+                        <template is="dom-if"
+                                if="[[allow_recipe_edit(user_role, user_id, recipe.author_id)]]">
+                            <paper-icon-button icon="icons:create"
+                                    on-tap="edit_directions">
+                            </paper-icon-button>
+                        </template>
+                    </div>
                 </div>
                 <ol class="directions-list">
                     <template is="dom-repeat" items="[[recipe.directions]]">
@@ -145,13 +149,15 @@
 
             <div class="paper-material card-item" elevation="1">
                 <div class="layout horizontal justified">
-                <h3 class="card-title">Info</h3>
-                    <template is="dom-if"
-                            if="[[allow_recipe_edit(user_role, user_id, recipe.author_id)]]">
-                        <paper-icon-button icon="icons:create"
-                                on-tap="edit_info">
-                        </paper-icon-button>
-                    </template>
+                    <h3 class="card-title">Info</h3>
+                    <div>
+                        <template is="dom-if"
+                                if="[[allow_recipe_edit(user_role, user_id, recipe.author_id)]]">
+                            <paper-icon-button icon="icons:create"
+                                    on-tap="edit_info">
+                            </paper-icon-button>
+                        </template>
+                    </div>
                 </div>
                 <template is="dom-if" if="[[recipe.amount]]">
                     <strong class="recipe-item-label">Amount</strong>
@@ -181,13 +187,15 @@
 
             <div class="paper-material card-item" elevation="1">
                 <div class="layout horizontal justified">
-                <h3 class="card-title">Linked Recipes</h3>
-                    <template is="dom-if"
-                            if="[[allow_recipe_edit(user_role, user_id, recipe.author_id)]]">
-                        <paper-icon-button icon="icons:create"
-                                on-tap="edit_linked">
-                        </paper-icon-button>
-                    </template>
+                    <h3 class="card-title">Linked Recipes</h3>
+                    <div>
+                        <template is="dom-if"
+                                if="[[allow_recipe_edit(user_role, user_id, recipe.author_id)]]">
+                            <paper-icon-button icon="icons:create"
+                                    on-tap="edit_linked">
+                            </paper-icon-button>
+                        </template>
+                    </div>
                 </div>
                 <template is="dom-repeat" items="[[recipe.linked_recipes]]">
                     <a class="inherit-color" href$="/recipes/[[item.id]]">
