@@ -8,13 +8,12 @@
 <link rel="import" href="../bc/iron-ajax/iron-ajax.html">
 <link rel="import" href="../bc/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../bc/iron-icon/iron-icon.html">
-<link rel="import" href="../bc/iron-signals/iron-signals.html">
 <link rel="import" href="../bc/iron-icons/iron-icons.html">
 <link rel="import" href="../bc/paper-button/paper-button.html">
 <link rel="import" href="../bc/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bc/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bc/paper-material/paper-material.html">
 <link rel="import" href="../bc/paper-spinner/paper-spinner.html">
+<link rel="import" href="../bc/paper-styles/element-styles/paper-material-styles.html">
 <link rel="import" href="../bc/polymer/polymer.html">
 
 <link rel="import" href="cookie-display.html">
@@ -25,6 +24,7 @@
     <template>
         <style include="iron-flex iron-flex-alignment"></style>
         <style include="app-grid-style"></style>
+        <style include="paper-material-styles"></style>
         <style include="global-styles"></style>
         <style>
             :host {
@@ -109,49 +109,55 @@
         </div>
 
         <div class="app-grid">
-            <paper-material class="card-item">
+            <div class="paper-material card-item" elevation="1">
                 <div class="layout horizontal justified">
                     <h3 class="card-title">Ingredients</h3>
-                    <template is="dom-if"
-                            if="[[allow_recipe_edit(user_role, user_id, recipe.author_id)]]">
-                        <paper-icon-button icon="icons:create"
-                                on-tap="edit_ingredients">
-                        </paper-icon-button>
-                    </template>
+                    <div>
+                        <template is="dom-if"
+                                if="[[allow_recipe_edit(user_role, user_id, recipe.author_id)]]">
+                            <paper-icon-button icon="icons:create"
+                                    on-tap="edit_ingredients">
+                            </paper-icon-button>
+                        </template>
+                    </div>
                 </div>
                 <ul class="ingredients-list">
                     <template is="dom-repeat" items="[[recipe.ingredients]]">
                         <li>[[item]]</li>
                     </template>
                 </ul>
-            </paper-material>
+            </div>
 
-            <paper-material class="card-item">
+            <div class="paper-material card-item" elevation="1">
                 <div class="layout horizontal justified">
-                <h3 class="card-title">Directions</h3>
-                    <template is="dom-if"
-                            if="[[allow_recipe_edit(user_role, user_id, recipe.author_id)]]">
-                        <paper-icon-button icon="icons:create"
-                                on-tap="edit_directions">
-                        </paper-icon-button>
-                    </template>
+                    <h3 class="card-title">Directions</h3>
+                    <div>
+                        <template is="dom-if"
+                                if="[[allow_recipe_edit(user_role, user_id, recipe.author_id)]]">
+                            <paper-icon-button icon="icons:create"
+                                    on-tap="edit_directions">
+                            </paper-icon-button>
+                        </template>
+                    </div>
                 </div>
                 <ol class="directions-list">
                     <template is="dom-repeat" items="[[recipe.directions]]">
                         <li>[[item]]</li>
                     </template>
                 </ol>
-            </paper-material>
+            </div>
 
-            <paper-material class="card-item">
+            <div class="paper-material card-item" elevation="1">
                 <div class="layout horizontal justified">
-                <h3 class="card-title">Info</h3>
-                    <template is="dom-if"
-                            if="[[allow_recipe_edit(user_role, user_id, recipe.author_id)]]">
-                        <paper-icon-button icon="icons:create"
-                                on-tap="edit_info">
-                        </paper-icon-button>
-                    </template>
+                    <h3 class="card-title">Info</h3>
+                    <div>
+                        <template is="dom-if"
+                                if="[[allow_recipe_edit(user_role, user_id, recipe.author_id)]]">
+                            <paper-icon-button icon="icons:create"
+                                    on-tap="edit_info">
+                            </paper-icon-button>
+                        </template>
+                    </div>
                 </div>
                 <template is="dom-if" if="[[recipe.amount]]">
                     <strong class="recipe-item-label">Amount</strong>
@@ -177,18 +183,19 @@
                     <strong class="recipe-item-label">Notes</strong>
                     <div>[[recipe.notes]]</div>
                 </template>
+            </div>
 
-            </paper-material>
-
-            <paper-material class="card-item">
+            <div class="paper-material card-item" elevation="1">
                 <div class="layout horizontal justified">
-                <h3 class="card-title">Linked Recipes</h3>
-                    <template is="dom-if"
-                            if="[[allow_recipe_edit(user_role, user_id, recipe.author_id)]]">
-                        <paper-icon-button icon="icons:create"
-                                on-tap="edit_linked">
-                        </paper-icon-button>
-                    </template>
+                    <h3 class="card-title">Linked Recipes</h3>
+                    <div>
+                        <template is="dom-if"
+                                if="[[allow_recipe_edit(user_role, user_id, recipe.author_id)]]">
+                            <paper-icon-button icon="icons:create"
+                                    on-tap="edit_linked">
+                            </paper-icon-button>
+                        </template>
+                    </div>
                 </div>
                 <template is="dom-repeat" items="[[recipe.linked_recipes]]">
                     <a class="inherit-color" href$="/recipes/[[item.id]]">
@@ -206,7 +213,7 @@
                         Delete This Recipe
                     </paper-button>
                 </template>
-            </paper-material>
+            </div>
         </div>
 
         <paper-dialog id="delete_item_confirmation"
@@ -274,53 +281,53 @@
                 },
                 edit_recipe: function() {
                     this.recipe_to_edit = JSON.parse(JSON.stringify(this.recipe));
-                    this.fire("iron-signal", { name: "open-form",
-                        data: {
+                    window.dispatchEvent(new CustomEvent("open-form", {
+                        detail: {
                             name:   "edit_recipe_form",
                             recipe: this.recipe_to_edit,
                             that:   this,
-                        },
-                    });
+                        }
+                    }));
                 },
                 edit_ingredients: function() {
                     this.recipe_to_edit = JSON.parse(JSON.stringify(this.recipe));
-                    this.fire("iron-signal", { name: "open-form",
-                        data: {
+                    window.dispatchEvent(new CustomEvent("open-form", {
+                        detail: {
                             name:   "edit_ingredients_form",
                             recipe: this.recipe_to_edit,
                             that:   this,
-                        },
-                    });
+                        }
+                    }));
                 },
                 edit_directions: function() {
                     this.recipe_to_edit = JSON.parse(JSON.stringify(this.recipe));
-                    this.fire("iron-signal", { name: "open-form",
-                        data: {
+                    window.dispatchEvent(new CustomEvent("open-form", {
+                        detail: {
                             name:   "edit_directions_form",
                             recipe: this.recipe_to_edit,
                             that:   this,
-                        },
-                    });
+                        }
+                    }));
                 },
                 edit_info: function() {
                     this.recipe_to_edit = JSON.parse(JSON.stringify(this.recipe));
-                    this.fire("iron-signal", { name: "open-form",
-                        data: {
+                    window.dispatchEvent(new CustomEvent("open-form", {
+                        detail: {
                             name:   "edit_recipe_info_form",
                             recipe: this.recipe_to_edit,
                             that:   this,
-                        },
-                    });
+                        }
+                    }));
                 },
                 edit_linked: function() {
                     this.recipe_to_edit = JSON.parse(JSON.stringify(this.recipe));
-                    this.fire("iron-signal", { name: "open-form",
-                        data: {
+                    window.dispatchEvent(new CustomEvent("open-form", {
+                        detail: {
                             name:   "edit_linked_recipe_form",
                             recipe: this.recipe_to_edit,
                             that:   this,
-                        },
-                    });
+                        }
+                    }));
                 },
                 resolve_dialog: function(e, reason) {
                     if (!reason.confirmed) return;
@@ -335,36 +342,32 @@
                         this.$.delete_item_ajax.generateRequest();
                 },
                 put_item_failed: function() {
-                    this.fire("iron-signal", {
-                        name: "error-toast",
-                        data: "Failed to save recipe :(",
-                    });
+                    window.dispatchEvent(new CustomEvent("error-toast", {
+                        detail: "Failed to save recipe :("
+                    }));
                 },
                 put_item_successful: function() {
                     // Load the response into recipe_to_edit and copy it here to
                     // prevent blanking the screen on a failed request.
                     this.set("recipe", this.recipe_to_edit);
-                    this.fire("iron-signal", {
-                        name: "success-toast",
-                        data: this.recipe.title + " saved",
-                    });
+                    window.dispatchEvent(new CustomEvent("success-toast", {
+                        detail: this.recipe.title + " saved"
+                    }));
                 },
                 delete_item_failed: function() {
-                    this.fire("iron-signal", {
-                        name: "error-toast",
-                        data: "Failed to delete " + this.recipe.title + " :(",
-                    });
+                    window.dispatchEvent(new CustomEvent("error-toast", {
+                        detail: "Failed to delete " + this.recipe.title + " :("
+                    }));
                 },
                 // Let the user know, then go back to the list of recipes.
                 delete_item_successful: function() {
-                    this.fire("iron-signal", {
-                        name: "success-toast",
-                        data: this.recipe.title + " deleted",
-                    });
+                    window.dispatchEvent(new CustomEvent("success-toast", {
+                        detail: this.recipe.title + " deleted"
+                    }));
                     // Let the parent know that it should refresh its list.
-                    this.fire("iron-signal", { name: "item-collection-refresh",
-                        data: "recipes"
-                    });
+                    window.dispatchEvent(new CustomEvent("item-collection-refresh", {
+                        detail: "recipes"
+                    }));
                     // Go back to the list.
                     window.history.pushState({}, null, "/");
                     window.dispatchEvent(new CustomEvent("location-changed"));

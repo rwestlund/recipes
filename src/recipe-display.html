@@ -10,7 +10,7 @@
 <link rel="import" href="../bc/iron-icon/iron-icon.html">
 <link rel="import" href="../bc/iron-icons/iron-icons.html">
 <link rel="import" href="../bc/paper-button/paper-button.html">
-<link rel="import" href="../bc/paper-material/paper-material.html">
+<link rel="import" href="../bc/paper-styles/element-styles/paper-material-styles.html">
 <link rel="import" href="../bc/polymer/polymer.html">
 
 <link rel="import" href="global-behavior.html">
@@ -19,6 +19,7 @@
 <dom-module id="recipe-display">
     <template>
         <style include="iron-flex iron-flex-alignment"></style>
+        <style include="paper-material-styles"></style>
         <style include="app-grid-style"></style>
         <style include="global-styles"></style>
         <style>
@@ -37,7 +38,7 @@
             }
         </style>
 
-        <paper-material class="card-item" on-tap="expand_recipe">
+        <div class="paper-material card-item" elevation="1" on-tap="expand_recipe">
             <div class="layout horizontal end end-justified wrap">
                 <h3 class="card-title">[[recipe.title]]</h3>
                 <span class="flex"></span>
@@ -48,9 +49,7 @@
             <iron-collapse id="collapse" opened="{{recipe._expanded}}">
                 <div class="app-grid">
                     <div>
-                        <strong class="recipe-item-label">
-                            Ingredients
-                        </strong>
+                        <strong class="recipe-item-label">Ingredients</strong>
                         <ul class="ingredients-list">
                             <template is="dom-repeat"
                                       items="[[recipe.ingredients]]">
@@ -128,7 +127,7 @@
                     </div>
                 </div>
             </iron-collapse>
-        </paper-material>
+        </div>
     </template>
 
     <script>

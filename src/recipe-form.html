@@ -11,7 +11,7 @@
 <link rel="import" href="../bc/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bc/paper-input/paper-input.html">
 <link rel="import" href="../bc/paper-item/paper-item.html">
-<link rel="import" href="../bc/paper-menu/paper-menu.html">
+<link rel="import" href="../bc/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bc/polymer-responsive-dialog/responsive-dialog.html">
 <link rel="import" href="../bc/polymer/polymer.html">
 
@@ -66,16 +66,15 @@
                 <paper-dropdown-menu label="Select New Tag"
                         vertical-align="bottom"
                         horizontal-align="right">
-                    <paper-menu class="dropdown-content"
+                    <paper-listbox slot="dropdown-content"
                             attr-for-selected="value"
-                            selected="{{selected_tag}}"
-                            on-iron-select="add_selected_tag">
+                            selected="{{selected_tag}}">
                         <template is="dom-repeat" items="[[tags]]">
                             <paper-item value="[[item]]">
                                 [[item]]
                             </paper-item>
                         </template>
-                    </paper-menu>
+                    </paper-listbox>
                 </paper-dropdown-menu>
             </div>
             <!-- Type a new tag from typeahead. -->
@@ -122,6 +121,10 @@
                         type: String,
                         value: "Edit Recipe",
                     },
+                    selected_tag: {
+                        type: String,
+                        observer: "add_selected_tag",
+                    },
                 },
                 // Override open() from behavior to add an AJAX call.
                 open: function() {
@@ -133,10 +136,10 @@
                     this.size_changed();
                 },
                 // Call add_tag with the appropriate variable.
-                add_selected_tag: function() {
-                    this.add_tag(this.selected_tag);
-                    //TODO this doesn't clear the menu
-                    this.set("selected_tag", null);
+                add_selected_tag: function(n) {
+                    if (!n) return;
+                    this.add_tag(n);
+                    this.selected_tag = null;
                 },
                 add_typed_tag: function() {
                     this.add_tag(this.typed_tag);

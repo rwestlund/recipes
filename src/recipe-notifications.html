@@ -5,7 +5,6 @@
 <!-- This module listens to toast signals and displays them so that not every
      element needs a paper-toast. -->
 
-<link rel="import" href="../bc/iron-signals/iron-signals.html">
 <link rel="import" href="../bc/paper-toast/paper-toast.html">
 <link rel="import" href="../bc/polymer/polymer.html">
 
@@ -34,8 +33,6 @@
                 no-cancel-on-esc-key
                 duration="4000">
         </paper-toast>
-        <iron-signals on-iron-signal-success-toast="show_success_toast"
-                      on-iron-signal-error-toast="show_error_toast">
     </template>
 
     <script>
@@ -43,12 +40,27 @@
             'use strict';
             Polymer({
                 is: 'recipe-notifications',
-                show_success_toast: function(e, data) {
-                    this.$.success_toast.text = data;
+                attached: function() {
+                    this._success_listener = this.show_success_toast.bind(this);
+                    this._error_listener = this.show_error_toast.bind(this);
+                    window.addEventListener("success-toast",
+                            this._success_listener);
+                    window.addEventListener("error-toast",
+                            this._error_listener);
+                },
+                // Remove listeners to avoid memory leaks.
+                detached: function() {
+                    window.removeEventListener("success-toast",
+                            this._success_listener);
+                    window.removeEventListener("error-toast",
+                            this._error_listener);
+                },
+                show_success_toast: function(e) {
+                    this.$.success_toast.text = e.detail;
                     this.$.success_toast.show();
                 },
-                show_error_toast: function(e, data) {
-                    this.$.error_toast.text = data;
+                show_error_toast: function(e) {
+                    this.$.error_toast.text = e.detail;
                     this.$.error_toast.show();
                 },
             });
