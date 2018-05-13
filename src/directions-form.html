@@ -13,6 +13,7 @@
 <link rel="import" href="../bc/polymer-responsive-dialog/responsive-dialog.html">
 <link rel="import" href="../bc/polymer/lib/elements/dom-repeat.html">
 <link rel="import" href="../bc/polymer/polymer-element.html">
+<link rel="import" href="../bc/polymer/lib/mixins/gesture-event-listeners.html">
 
 <link rel="import" href="form-mixin.html">
 
@@ -55,7 +56,8 @@
 </template>
 
 <script>
-class DirectionsForm extends Recipes.FormMixin(Polymer.Element) {
+class DirectionsForm extends Polymer.GestureEventListeners(
+        Recipes.FormMixin(Polymer.Element)) {
     static get is() { return  "directions-form"; }
     static get properties() {
         return {
