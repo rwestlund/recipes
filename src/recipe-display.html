@@ -1,5 +1,5 @@
 <!--
-    Copyright (c) 2016-2017, Randy Westlund. All rights reserved.
+    Copyright (c) 2016-2018, Randy Westlund. All rights reserved.
     This code is under the BSD-2-Clause license.
 -->
 <!-- This module shows a recipe card. -->
@@ -11,9 +11,11 @@
 <link rel="import" href="../bc/iron-icons/iron-icons.html">
 <link rel="import" href="../bc/paper-button/paper-button.html">
 <link rel="import" href="../bc/paper-styles/element-styles/paper-material-styles.html">
-<link rel="import" href="../bc/polymer/polymer.html">
+<link rel="import" href="../bc/polymer/lib/elements/dom-if.html">
+<link rel="import" href="../bc/polymer/lib/elements/dom-repeat.html">
+<link rel="import" href="../bc/polymer/lib/mixins/gesture-event-listeners.html">
 
-<link rel="import" href="global-behavior.html">
+<link rel="import" href="recipes-element.html">
 <link rel="import" href="global-styles.html">
 
 <dom-module id="recipe-display">
@@ -130,33 +132,27 @@
         </div>
     </template>
 
-    <script>
-        (function () {
-            'use strict';
-            Polymer({
-                is: 'recipe-display',
-                behaviors: [ recipe_behaviors.global_behavior, ],
-                properties: {
-                    // Must be provided by parent object.
-                    recipe: {
-                        type: Object,
-                    },
-                },
-                // Make app-grid update properly.
-                attached: function() {
-                    this._listener = this.updateStyles.bind(this);
-                    window.addEventListener("resize", this._listener);
-                },
-                detached: function() {
-                    window.removeEventListener("resize", this._listener);
-                },
-                expand_recipe: function(event) {
-                    this.set('recipe._expanded', !this.recipe._expanded);
-                },
-                fmt_tags: function(tags) {
-                    return tags.join(", ");
-                },
-            });
-        })();
-    </script>
+<script>
+class RecipeDisplay extends Polymer.GestureEventListeners(Recipes.Element) {
+    static get is() { return "recipe-display"; }
+    static get properties() {
+        return {
+            recipe: { type: Object },
+        };
+    }
+    // Make app-grid update properly.
+    attached() {
+        this._listener = this.updateStyles.bind(this);
+        window.addEventListener("resize", this._listener);
+    }
+    detached() {
+        window.removeEventListener("resize", this._listener);
+    }
+    expand_recipe(event) {
+        this.set('recipe._expanded', !this.recipe._expanded);
+    }
+    fmt_tags(tags) { return tags.join(", "); }
+}
+customElements.define(RecipeDisplay.is, RecipeDisplay);
+</script>
 </dom-module>
