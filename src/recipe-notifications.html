@@ -18,6 +18,12 @@
             :host {
                 display: block;
             }
+            /* Printing settings. */
+            @media print {
+                paper-toast {
+                    display: none;
+                }
+            }
         </style>
 
         <paper-toast id="success_toast"
