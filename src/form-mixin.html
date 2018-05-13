@@ -11,6 +11,9 @@
 Recipes.FormMixin = Polymer.dedupingMixin(superClass =>
     class FormMixin extends superClass {
         open() {
+            // Call an open hook function if it is defined. A dialog may use
+            // this to do setup or trigger AJAX calls.
+            if (this.open_hook) this.open_hook();
             this.$.dialog.open();
         }
         close() { this.$.dialog.close(); }
