@@ -312,7 +312,11 @@
             },
             // Make app-grid update properly.
             attached: function() {
-                window.addEventListener("resize", () => this.updateStyles());
+                this._listener = this.updateStyles.bind(this);
+                window.addEventListener("resize", this._listener);
+            },
+            detached: function() {
+                window.removeEventListener("resize", this._listener);
             },
             drawer_toggle: function() {
                 if (this.$.drawer_layout.narrow) this.$.drawer.toggle();

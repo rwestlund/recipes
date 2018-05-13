@@ -144,7 +144,11 @@
                 },
                 // Make app-grid update properly.
                 attached: function() {
-                    window.addEventListener("resize", () => this.updateStyles());
+                    this._listener = this.updateStyles.bind(this);
+                    window.addEventListener("resize", this._listener);
+                },
+                detached: function() {
+                    window.removeEventListener("resize", this._listener);
                 },
                 expand_recipe: function(event) {
                     this.set('recipe._expanded', !this.recipe._expanded);

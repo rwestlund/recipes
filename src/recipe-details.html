@@ -253,7 +253,11 @@ class RecipeDetails extends Polymer.GestureEventListeners(Recipes.Element) {
     }
     // Make app-grid update properly.
     attached() {
-        window.addEventListener("resize", () => this.updateStyles());
+        this._listener = this.updateStyles.bind(this);
+        window.addEventListener("resize", this._listener);
+    }
+    detached() {
+        window.removeEventListener("resize", this._listener);
     }
     // Loading is true if any flags in it are true.
     compute_loading_data(loading) {
