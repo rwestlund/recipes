@@ -1,5 +1,5 @@
 <!--
-    Copyright (c) 2016-2017, Randy Westlund. All rights reserved.
+    Copyright (c) 2016-2018, Randy Westlund. All rights reserved.
     This code is under the BSD-2-Clause license.
 -->
 <!-- This module shows a list of items, with server-side pagination and
@@ -18,11 +18,13 @@
 <link rel="import" href="../bc/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bc/paper-input/paper-input.html">
 <link rel="import" href="../bc/paper-spinner/paper-spinner.html">
-<link rel="import" href="../bc/polymer/polymer.html">
+<link rel="import" href="../bc/polymer/lib/elements/dom-if.html">
+<link rel="import" href="../bc/polymer/lib/elements/dom-repeat.html">
+<link rel="import" href="../bc/polymer/lib/mixins/gesture-event-listeners.html">
 
-<link rel="import" href="global-behavior.html">
-<link rel="import" href="recipe-display.html">
 <link rel="import" href="global-styles.html">
+<link rel="import" href="recipe-display.html">
+<link rel="import" href="recipes-element.html">
 <link rel="import" href="user-display.html">
 
 <dom-module id="item-collection">
@@ -138,164 +140,143 @@
 
     </template>
 
-    <script>
-        (function () {
-            'use strict';
-            Polymer({
-                is: 'item-collection',
-                behaviors: [ recipe_behaviors.global_behavior, ],
-                properties: {
-                    // The parent provides 'recipes' or 'users' here.
-                    itemName: { type: String, },
-                    // Whether to enable the FAB.
-                    enableFab: { type: Boolean, value: false, },
-                    items: { type: Array, value: () => [], },
-                    count: { type: Number, value: 20 },
-                    skip: { type: Number, value: 0 },
-                    page_number: {
-                        type: Number,
-                        computed: "compute_page_number(skip)"
-                    },
-                    search_text: { type: String, value: '' },
-                    search_filter: {
-                        type: Object,
-                        computed: "compute_search_filter(count, skip, search_text)"
-                    },
-                    disable_next: {
-                        type: Boolean,
-                        computed: "compute_disable_next(items, count)"
-                    },
-                    loading: {
-                        type: Object,
-                        value: {
-                            post_item: false,
-                            get_items: false,
-                        },
-                    },
-                    // True whenever we're loading XHR data.
-                    loading_data: {
-                        type: Boolean,
-                        computed: "compute_loading_data(loading.*)",
-                    },
+<script>
+class ItemCollection extends Polymer.GestureEventListeners(Recipes.Element) {
+    static get is() { return "item-collection"; }
+    static get properties() {
+        return {
+            // The parent provides 'recipes' or 'users' here.
+            itemName: { type: String },
+            // Whether to enable the FAB.
+            enableFab: { type: Boolean, value: false },
+            items: { type: Array, value: () => [] },
+            count: { type: Number, value: 20 },
+            skip: { type: Number, value: 0 },
+            page_number: { type: Number, computed: "compute_page_number(skip)" },
+            search_text: { type: String, value: '' },
+            search_filter: {
+                type: Object,
+                computed: "compute_search_filter(count, skip, search_text)"
+            },
+            disable_next: {
+                type: Boolean,
+                computed: "compute_disable_next(items, count)"
+            },
+            loading: {
+                type: Object,
+                value: {
+                    post_item: false,
+                    get_items: false,
                 },
-                // When a child is deleted, refresh the list.
-                listeners: { "item-deleted": "refresh" },
-                // Loading is true if any flags in it are true.
-                compute_loading_data: function(loading) {
-                    var ret = false;
-                    Object.keys(this.loading)
-                        .forEach(k => ret = ret || this.loading[k]);
-                    return ret;
-                },
-                compute_search_filter: function(count, skip, search_text) {
-                    var o = { count: count };
-                    if (skip) o.skip = skip;
-                    if (search_text) o.query = search_text;
-                    return o;
-                },
-                compute_disable_next: function(items, count) {
-                    var val = true;
-                    if (this.items)
-                        val = this.items.length < this.count;
-                    return val;
-                },
-                compute_page_number: skip => skip + 1,
-                attached: function() {
-                    // Recipes have their delete mechanish outside the context
-                    // of this element. In orde to refresh this list when they
-                    // are deleted, they send this signal.
-                    this._listener = this.refresh_signal.bind(this);
-                    window.addEventListener("item-collection-refresh",
-                            this._listener);
-                },
-                // Remove listeners to avoid memory leaks.
-                detached: function() {
-                    window.removeEventListener("item-collection-refresh",
-                            this._listener);
-                },
-                refresh_signal: function(e) {
-                    // Only refresh the one that was changed.
-                    if (this.itemName == e.detail) this.refresh();
-                },
-                // Reload the collection of items.
-                refresh: function() {
-                    this.$.get_items_ajax.generateRequest();
-                },
-                // Open the appropriate form after a click on the FAB.
-                create_item: function() {
-                    this.set('new_item', {});
-                    var data = { that: this, callback: "resolve_create_item" };
-                    if (this.itemName === "users") {
-                        data.name = "create_user_form";
-                        data.user = this.new_item;
-                    }
-                    else if (this.itemName === "recipes") {
-                        this.new_item.tags = [];
-                        data.name = "create_recipe_form";
-                        data.recipe = this.new_item;
-                    }
-                    // Ask for the form to be opened.
-                    window.dispatchEvent(new CustomEvent("open-form", { detail: data }));
-                },
-                // Handle response from dialog. Reason is either confirmed or
-                // canceled.
-                resolve_create_item: function(e, reason) {
-                    if (reason.confirmed)
-                        this.$.create_item_ajax.generateRequest();
-                },
-                creating_item_succeeded: function() {
-                    // This isn't in shorter form like the one below because
-                    // some pages need to change the route.
-                    if(this.itemName === "users") {
-                        window.dispatchEvent(new CustomEvent("success-toast", {
-                            detail: this.new_item.role + " " +
-                                    (this.new_item.name || this.new_item.email)
-                                    + " created"
-                        }));
-                        this.push("items", this.new_item);
-                    }
-                    else if (this.itemName === "recipes") {
-                        window.history.pushState({}, null,
-                                "/recipes/"+this.new_item.id+"/");
-                        window.dispatchEvent(new CustomEvent("location-changed"));
+            },
+            // True whenever we're loading XHR data.
+            loading_data: {
+                type: Boolean,
+                computed: "compute_loading_data(loading.*)",
+            },
+        };
+    }
+    // Loading is true if any flags in it are true.
+    compute_loading_data(loading) {
+        var ret = false;
+        Object.keys(this.loading).forEach(k => ret = ret || this.loading[k]);
+        return ret;
+    }
+    compute_search_filter(count, skip, search_text) {
+        var o = { count: count };
+        if (skip) o.skip = skip;
+        if (search_text) o.query = search_text;
+        return o;
+    }
+    compute_disable_next(items, count) {
+        var val = true;
+        if (this.items)
+            val = this.items.length < this.count;
+        return val;
+    }
+    compute_page_number(skip) { return skip + 1; }
+    attached() {
+        // Recipes have their delete mechanish outside the context
+        // of this element. In order to refresh this list when they
+        // are deleted, they send this signal.
+        this._listener = this.refresh_signal.bind(this);
+        window.addEventListener("item-collection-refresh", this._listener);
+        // When a child is deleted, refresh the list.
+        this._listener2 = this.refresh.bind(this);
+        this.addEventListener("item-deleted", this._listener2);
+    }
+    // Remove listeners to avoid memory leaks.
+    detached() {
+        window.removeEventListener("item-collection-refresh",
+                this._listener);
+        this.removeEventListener("item-deleted", this._listener2);
+    }
+    refresh_signal(e) {
+        // Only refresh the one that was changed.
+        if (this.itemName == e.detail) this.refresh();
+    }
+    // Reload the collection of items.
+    refresh() { this.$.get_items_ajax.generateRequest(); }
+    // Open the appropriate form after a click on the FAB.
+    create_item() {
+        this.set("new_item", {});
+        var data = { that: this, callback: "resolve_create_item" };
+        if (this.itemName === "users") {
+            data.name = "create_user_form";
+            data.user = this.new_item;
+        }
+        else if (this.itemName === "recipes") {
+            this.new_item.tags = [];
+            data.name = "create_recipe_form";
+            data.recipe = this.new_item;
+        }
+        // Ask for the form to be opened.
+        window.dispatchEvent(new CustomEvent("open-form", { detail: data }));
+    }
+    // Handle response from dialog. Reason is either confirmed or canceled.
+    resolve_create_item(e, reason) {
+        if (reason.confirmed) this.$.create_item_ajax.generateRequest();
+    }
+    creating_item_succeeded() {
+        // This isn't in shorter form like the one below because
+        // some pages need to change the route.
+        if(this.itemName === "users") {
+            window.dispatchEvent(new CustomEvent("success-toast", {
+                detail: this.new_item.role + " " +
+                        (this.new_item.name || this.new_item.email) + " created"
+            }));
+            this.push("items", this.new_item);
+        }
+        else if (this.itemName === "recipes") {
+            window.history.pushState({}, null, "/recipes/"+this.new_item.id+"/");
+            window.dispatchEvent(new CustomEvent("location-changed"));
 
-                        window.dispatchEvent(new CustomEvent("success-toast", {
-                            detail: this.new_item.title + " created"
-                        }));
-                    }
-                },
-                creating_item_failed: function() {
-                    var data;
-                    if (this.itemName === "users")
-                        data = "Failed to create user :(";
-                    else if(this.itemName === "recipes")
-                        data = "Failed to create recipe :("
-                    
-                    window.dispatchEvent(new CustomEvent("error-toast", {
-                        detail: data,
-                    }));
-                },
-                previous: function() {
-                    if (this.skip) this.skip--;
-                },
-                next: function() {
-                    this.skip++;
-                },
-                clear_filter: function() {
-                    this.search_text = "";
-                },
-                // Only show bottom nav buttons if there are several items.
-                show_bottom_buttons: function(items) {
-                    if (!items) return false;
-                    return items.length > 5;
-                },
-                // When new items are received, back up a page if the
-                // current one is blank.
-                new_items_received: function() {
-                    if (this.items && !this.items.length && this.skip)
-                        this.skip--;
-                },
-            });
-        })();
-    </script>
+            window.dispatchEvent(new CustomEvent("success-toast", {
+                detail: this.new_item.title + " created"
+            }));
+        }
+    }
+    creating_item_failed() {
+        var data;
+        if (this.itemName === "users") data = "Failed to create user :(";
+        else if(this.itemName === "recipes") data = "Failed to create recipe :("
+
+        window.dispatchEvent(new CustomEvent("error-toast", { detail: data }));
+    }
+    previous() { if (this.skip) this.skip--; }
+    next() { this.skip++; }
+    clear_filter() { this.search_text = ""; }
+    // Only show bottom nav buttons if there are several items.
+    show_bottom_buttons(items) {
+        if (!items) return false;
+        return items.length > 5;
+    }
+    // When new items are received, back up a page if the
+    // current one is blank.
+    new_items_received() {
+        if (this.items && !this.items.length && this.skip) this.skip--;
+    }
+}
+customElements.define(ItemCollection.is, ItemCollection);
+</script>
 </dom-module>
