@@ -1,5 +1,5 @@
 <!--
-    Copyright (c) 2016-2017, Randy Westlund. All rights reserved.
+    Copyright (c) 2016-2018, Randy Westlund. All rights reserved.
     This code is under the BSD-2-Clause license.
 -->
 <!-- This is the main application. -->
@@ -20,16 +20,18 @@
 <link rel="import" href="../bc/neon-animation/neon-animated-pages.html">
 <link rel="import" href="../bc/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bc/paper-styles/element-styles/paper-material-styles.html">
+<link rel="import" href="../bc/polymer/lib/elements/dom-if.html">
+<link rel="import" href="../bc/polymer/lib/mixins/gesture-event-listeners.html">
 <!-- Include the neon-animation 2.0 polyfil, needed for paper-dropdown-menu. -->
 <link rel="import" href="../bc/neon-animation/web-animations.html">
 
 <link rel="import" href="cookie-display.html">
-<link rel="import" href="global-behavior.html">
+<link rel="import" href="global-styles.html">
 <link rel="import" href="item-collection.html">
 <link rel="import" href="recipe-details.html">
 <link rel="import" href="recipe-forms.html">
 <link rel="import" href="recipe-notifications.html">
-<link rel="import" href="global-styles.html">
+<link rel="import" href="recipes-element.html">
 
 <dom-module id="recipes-app">
 <template>
@@ -288,60 +290,50 @@
 </template>
 
 <script>
-    (function () {
-        "use strict";
-        Polymer({
-            is: "recipes-app",
-            behaviors: [ recipe_behaviors.global_behavior ],
-            properties: {
-                route_data: {
-                    type: Object,
-                    observer: "page_changed",
-                },
-                // This holds the saved scroll position for each main page.
-                scrollpos_map: {
-                    type: Object,
-                    value: () => ({}),
-                },
-                // Using this delays setting the page long enough to save the
-                // old position.
-                current_page: {
-                    type: String,
-                    value: "",
-                },
-            },
-            // Make app-grid update properly.
-            attached: function() {
-                this._listener = this.updateStyles.bind(this);
-                window.addEventListener("resize", this._listener);
-            },
-            detached: function() {
-                window.removeEventListener("resize", this._listener);
-            },
-            drawer_toggle: function() {
-                if (this.$.drawer_layout.narrow) this.$.drawer.toggle();
-            },
-            // Preserve the scroll position on each page, like
-            // app-scrollpos-control used to.
-            page_changed: function(new_data, old_data) {
-                // Save the old position.
-                if (old_data != null && old_data.page != null) {
-                    this.scrollpos_map[old_data.page] = window.pageYOffset;
-                }
-                // Go to the new page.
-                this.current_page = new_data.page;
-                // Return to previous position on this page, if any.
-                if (this.scrollpos_map[new_data.page] != null) {
-                    Polymer.AppLayout.scroll({
-                        top:        this.scrollpos_map[new_data.page],
-                        behavior:   "silent"
-                    });
-                }
-                // Otherwise, just go to the top.
-                else if (this.isAttached) {
-                    Polymer.AppLayout.scroll({ top: 0, behavior: "silent" });
-                }
-            },
-        })
-    })();
+class RecipesApp extends Polymer.GestureEventListeners(Recipes.Element) {
+    static get is() { return "recipes-app"; }
+    static get properties() {
+        return {
+            route_data: { type: Object, observer: "page_changed" },
+            // This holds the saved scroll position for each main page.
+            scrollpos_map: { type: Object, value: () => ({}) },
+            // Using this delays setting the page long enough to save the
+            // old position.
+            current_page: { type: String, value: "" },
+        };
+    }
+    // Make app-grid update properly.
+    attached() {
+        this._listener = this.updateStyles.bind(this);
+        window.addEventListener("resize", this._listener);
+    }
+    detached() {
+        window.removeEventListener("resize", this._listener);
+    }
+    drawer_toggle() {
+        if (this.$.drawer_layout.narrow) this.$.drawer.toggle();
+    }
+    // Preserve the scroll position on each page, like
+    // app-scrollpos-control used to.
+    page_changed(new_data, old_data) {
+        // Save the old position.
+        if (old_data != null && old_data.page != null) {
+            this.scrollpos_map[old_data.page] = window.pageYOffset;
+        }
+        // Go to the new page.
+        this.current_page = new_data.page;
+        // Return to previous position on this page, if any.
+        if (this.scrollpos_map[new_data.page] != null) {
+            Polymer.AppLayout.scroll({
+                top:        this.scrollpos_map[new_data.page],
+                behavior:   "silent"
+            });
+        }
+        // Otherwise, just go to the top.
+        else if (this.isAttached) {
+            Polymer.AppLayout.scroll({ top: 0, behavior: "silent" });
+        }
+    }
+}
+customElements.define(RecipesApp.is, RecipesApp);
 </script>
