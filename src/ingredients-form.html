@@ -1,20 +1,20 @@
 <!--
-    Copyright (c) 2016-2017, Randy Westlund. All rights reserved.
+    Copyright (c) 2016-2018, Randy Westlund. All rights reserved.
     This code is under the BSD-2-Clause license.
 -->
 <!-- This module displays an ingredients editing form. -->
 
-<link rel="import" href="../bc/iron-icons/iron-icons.html">
-<link rel="import" href="../bc/iron-icon/iron-icon.html">
-<link rel="import" href="../bc/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bc/paper-button/paper-button.html">
 <link rel="import" href="../bc/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../bc/iron-icon/iron-icon.html">
+<link rel="import" href="../bc/iron-icons/iron-icons.html">
+<link rel="import" href="../bc/paper-button/paper-button.html">
+<link rel="import" href="../bc/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bc/paper-input/paper-input.html">
 <link rel="import" href="../bc/polymer-responsive-dialog/responsive-dialog.html">
-<link rel="import" href="../bc/polymer/polymer.html">
+<link rel="import" href="../bc/polymer/lib/elements/dom-repeat.html">
+<link rel="import" href="../bc/polymer/polymer-element.html">
 
-<link rel="import" href="form-behavior.html">
-<link rel="import" href="global-behavior.html">
+<link rel="import" href="form-mixin.html">
 
 <dom-module id="ingredients-form">
 <template>
@@ -48,36 +48,31 @@
                 Add Item
             </paper-button>
         </div>
-
     </responsive-dialog>
 </template>
 
 <script>
-    (function () {
-        "use strict";
-        Polymer({
-            is: "ingredients-form",
-            behaviors: [ recipe_behaviors.form_behavior ],
-            properties: {
-                // Must be provided by parent object.
-                recipe: {
-                    type: Object,
-                },
-            },
-            add_ingredient: function() {
-                this.push("recipe.ingredients", new String());
-                this.size_changed();
-            },
-            delete_ingredient: function(e) {
-                this.splice("recipe.ingredients", e.model.index, 1);
-                this.size_changed();
-            },
-            move_ingredient_up: function(e) {
-                var temp = this.splice("recipe.ingredients", e.model.index, 1)[0];
-                this.splice("recipe.ingredients", e.model.index - 1, 0, temp);
-            },
-            add_one: val => val + 1,
-        });
-    })();
+class IngredientsForm extends Recipes.FormMixin(Polymer.Element) {
+    static get is() { return "ingredients-form"; }
+    static get properties() {
+        return {
+            recipe: { type: Object },
+        };
+    }
+    add_ingredient() {
+        this.push("recipe.ingredients", new String());
+        this.size_changed();
+    }
+    delete_ingredient(e) {
+        this.splice("recipe.ingredients", e.model.index, 1);
+        this.size_changed();
+    }
+    move_ingredient_up(e) {
+        var temp = this.splice("recipe.ingredients", e.model.index, 1)[0];
+        this.splice("recipe.ingredients", e.model.index - 1, 0, temp);
+    }
+    add_one(val) { return val + 1; }
+}
+customElements.define(IngredientsForm.is, IngredientsForm);
 </script>
 </dom-module>
