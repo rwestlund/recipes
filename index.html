@@ -23,7 +23,7 @@
     <meta name="apple-mobile-web-app-title" content="Recipes">
     <link rel="apple-touch-icon" href="s/src/images/touch/apple-touch-icon.png">
 
-    <script src="/s/bc/webcomponentsjs/webcomponents-lite.js"></script>
+    <script async src="/s/bc/webcomponentsjs/webcomponents-lite.js"></script>
 
     <!-- Google Font: Montserrat -->
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700'
@@ -32,7 +32,7 @@
     <link href='https://fonts.googleapis.com/css?family=Open+Sans'
         rel='stylesheet' type='text/css'>
 
-    <link rel="import" href="/s/src/recipes-app.html">
+    <link rel="import" async href="/s/src/recipes-app.html">
 <style>
     body {
         margin: 0;
@@ -43,5 +43,8 @@
 
 <body unresolved class="fullbleed layout vertical">
     <recipes-app></recipes-app>
+    <script>
+        var Recipes = {};
+    </script>
 </body>
 </html>
