@@ -1,5 +1,5 @@
 <!--
-    Copyright (c) 2016-2017, Randy Westlund. All rights reserved.
+    Copyright (c) 2016-2018, Randy Westlund. All rights reserved.
     This code is under the BSD-2-Clause license.
 -->
 <!-- This module displays a linked recipe selection form. -->
@@ -12,11 +12,12 @@
 <link rel="import" href="../bc/paper-item/paper-item.html">
 <link rel="import" href="../bc/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bc/polymer-responsive-dialog/responsive-dialog.html">
-<link rel="import" href="../bc/polymer/polymer.html">
+<link rel="import" href="../bc/polymer/lib/elements/dom-repeat.html">
+<link rel="import" href="../bc/polymer/lib/mixins/gesture-event-listeners.html">
 
-<link rel="import" href="form-behavior.html">
-<link rel="import" href="global-behavior.html">
+<link rel="import" href="form-mixin.html">
 <link rel="import" href="global-styles.html">
+<link rel="import" href="recipes-element.html">
 
 <dom-module id="linked-recipe-form">
     <template>
@@ -66,50 +67,37 @@
         </iron-ajax>
     </template>
 
-    <script>
-        (function () {
-            "use strict";
-            Polymer({
-                is: "linked-recipe-form",
-                behaviors: [ recipe_behaviors.global_behavior,
-                            recipe_behaviors.form_behavior ],
-                properties: {
-                    // Must be provided by parent object.
-                    recipe: {
-                        type: Object,
-                    },
-                    selected_recipe: {
-                        type: Object,
-                        observer: "add_recipe",
-                    },
-                },
-                // Override open() from behavior to add an AJAX call.
-                open: function() {
-                    this.$.get_titles.generateRequest();
-                    this.$.dialog.open();
-                },
-                remove_linked_recipe: function(e) {
-                    this.splice("recipe.linked_recipes", e.model.index, 1);
-                    this.size_changed();
-                },
-                add_recipe: function(n) {
-                    if (!n || !n.id) return;
-                    // Clear the menu. This won't affect n in the current
-                    // context, and we want to do it no matter when we return.
-                    this.selected_recipe = null;
-                    // Don't link to self.
-                    // TODO this shouldn't be in the list at all
-                    if (this.recipe.id === n.id) return;
-                    // Make sure it isn't already there.
-                    for (var i = 0; i < this.recipe.linked_recipes.length; i++) {
-                        if (this.recipe.linked_recipes[i].id === n.id)
-                            return;
-                    }
-                    this.push("recipe.linked_recipes",
-                            { id: n.id, title: n.title });
-                    this.size_changed();
-                },
-            });
-        })();
-    </script>
+<script>
+class LinkedRecipeForm extends Polymer.GestureEventListeners(Recipes.Element) {
+    static get is() { return "linked-recipe-form"; }
+    static get properties() {
+        return {
+            recipe: { type: Object },
+            selected_recipe: { type: Object, observer: "add_recipe" },
+        };
+    }
+    open_hook() { this.$.get_titles.generateRequest(); }
+    remove_linked_recipe(e) {
+        this.splice("recipe.linked_recipes", e.model.index, 1);
+        this.size_changed();
+    }
+    add_recipe(n) {
+        if (!n || !n.id) return;
+        // Clear the menu. This won't affect n in the current
+        // context, and we want to do it no matter when we return.
+        this.selected_recipe = null;
+        // Don't link to self.
+        // TODO this shouldn't be in the list at all
+        if (this.recipe.id === n.id) return;
+        // Make sure it isn't already there.
+        for (var i = 0; i < this.recipe.linked_recipes.length; i++) {
+            if (this.recipe.linked_recipes[i].id === n.id)
+                return;
+        }
+        this.push("recipe.linked_recipes", { id: n.id, title: n.title });
+        this.size_changed();
+    }
+}
+customElements.define(LinkedRecipeForm.is, LinkedRecipeForm);
+</script>
 </dom-module>
