@@ -1,5 +1,5 @@
 <!--
-    Copyright (c) 2016-2017, Randy Westlund. All rights reserved.
+    Copyright (c) 2016-2018, Randy Westlund. All rights reserved.
     This code is under the BSD-2-Clause license.
 -->
 <!-- This module displays a recipe info editing form. -->
@@ -12,10 +12,9 @@
 <link rel="import" href="../bc/paper-input/paper-input.html">
 <link rel="import" href="../bc/paper-input/paper-textarea.html">
 <link rel="import" href="../bc/polymer-responsive-dialog/responsive-dialog.html">
-<link rel="import" href="../bc/polymer/polymer.html">
+<link rel="import" href="../bc/polymer/polymer-element.html">
 
-<link rel="import" href="form-behavior.html">
-<link rel="import" href="global-behavior.html">
+<link rel="import" href="form-mixin.html">
 
 <dom-module id="recipe-info-form">
 <template>
@@ -52,24 +51,21 @@
                 autocapitalize="sentences"
                 char-counter maxlength="300">
         </paper-textarea>
-
     </responsive-dialog>
 </template>
 
 <script>
-    (function () {
-        "use strict";
-        Polymer({
-            is: "recipe-info-form",
-            behaviors: [ recipe_behaviors.form_behavior ],
-            properties: {
-                // Must be provided by parent object.
-                recipe: {
-                    type: Object,
-                },
-            },
-            observers: [ "size_changed(recipe.notes)" ],
-        });
-    })();
+class RecipeInfoForm extends Recipes.FormMixin(Polymer.Element) {
+    static get is() { return "recipe-info-form"; }
+    static get properties() {
+        return {
+            recipe: { type: Object },
+        };
+    }
+    static get observers() {
+        return [ "size_changed(recipe.notes)" ];
+    }
+}
+customElements.define(RecipeInfoForm.is, RecipeInfoForm);
 </script>
 </dom-module>
