@@ -1,5 +1,5 @@
 <!--
-    Copyright (c) 2016-2017, Randy Westlund. All rights reserved.
+    Copyright (c) 2016-2018, Randy Westlund. All rights reserved.
     This code is under the BSD-2-Clause license.
 -->
 <!-- This module displays a user editing form. -->
@@ -11,10 +11,11 @@
 <link rel="import" href="../bc/paper-item/paper-item.html">
 <link rel="import" href="../bc/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bc/polymer-responsive-dialog/responsive-dialog.html">
-<link rel="import" href="../bc/polymer/polymer.html">
+<link rel="import" href="../bc/polymer/lib/elements/dom-repeat.html">
+<link rel="import" href="../bc/polymer/lib/mixins/gesture-event-listeners.html">
 
-<link rel="import" href="form-behavior.html">
-<link rel="import" href="global-behavior.html">
+<link rel="import" href="form-mixin.html">
+<link rel="import" href="recipes-element.html">
 <link rel="import" href="global-styles.html">
 
 <dom-module id="user-form">
@@ -54,24 +55,17 @@
         </responsive-dialog>
     </template>
 
-    <script>
-        (function () {
-            'use strict';
-            Polymer({
-                is: 'user-form',
-                behaviors: [ recipe_behaviors.global_behavior,
-                            recipe_behaviors.form_behavior ],
-                properties: {
-                    // Must be provided by parent object.
-                    user: {
-                        type: Object,
-                    },
-                    title: {
-                        type: String,
-                        value: "Edit User",
-                    },
-                },
-            });
-        })();
-    </script>
+<script>
+class UserForm extends Polymer.GestureEventListeners(
+        Recipes.FormMixin(Recipes.Element)) {
+    static get is() { return "user-form"; }
+    static get properties() {
+        return {
+            user: { type: Object },
+            title: { type: String, value: "Edit User" },
+        }
+    }
+}
+customElements.define(UserForm.is, UserForm);
+</script>
 </dom-module>
