@@ -303,11 +303,13 @@ class RecipesApp extends Polymer.GestureEventListeners(Recipes.Element) {
         };
     }
     // Make app-grid update properly.
-    attached() {
+    connectedCallback() {
+        super.connectedCallback();
         this._listener = this.updateStyles.bind(this);
         window.addEventListener("resize", this._listener);
     }
-    detached() {
+    disconnectedCallback() {
+        super.disconnectedCallback();
         window.removeEventListener("resize", this._listener);
     }
     drawer_toggle() {
