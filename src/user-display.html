@@ -1,5 +1,5 @@
 <!--
-    Copyright (c) 2016-2017, Randy Westlund. All rights reserved.
+    Copyright (c) 2016-2018, Randy Westlund. All rights reserved.
     This code is under the BSD-2-Clause license.
 -->
 <!-- This module shows a user card. -->
@@ -14,9 +14,10 @@
 <link rel="import" href="../bc/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bc/paper-spinner/paper-spinner.html">
 <link rel="import" href="../bc/paper-styles/element-styles/paper-material-styles.html">
-<link rel="import" href="../bc/polymer/polymer.html">
+<link rel="import" href="../bc/polymer/lib/elements/dom-if.html">
+<link rel="import" href="../bc/polymer/lib/mixins/gesture-event-listeners.html">
 
-<link rel="import" href="global-behavior.html">
+<link rel="import" href="recipes-element.html">
 <link rel="import" href="global-styles.html">
 
 <dom-module id="user-display">
@@ -130,98 +131,87 @@
         </paper-dialog>
     </template>
 
-    <script>
-        (function () {
-            'use strict';
-            Polymer({
-                is: 'user-display',
-                behaviors: [ recipe_behaviors.global_behavior, ],
-                properties: {
-                    // Must be provided by parent object.
-                    user: {
-                        type: Object,
-                    },
-                    allowEdit: {
-                        type: Boolean,
-                        value: false,
-                    },
-                    loading: {
-                        type: Object,
-                        value: {
-                            put_item: false,
-                            delete_item: false,
-                        },
-                    },
-                    // True whenever we're loading XHR data.
-                    loading_data: {
-                        type: Boolean,
-                        computed: "compute_loading_data(loading.*)",
-                    },
+<script>
+class UserDisplay extends Polymer.GestureEventListeners(Recipes.Element) {
+    static get is() { return "user-display"; }
+    static get properties() {
+        return {
+            user: { type: Object },
+            allowEdit: { type: Boolean, value: false },
+            loading: {
+                type: Object,
+                value: {
+                    put_item: false,
+                    delete_item: false,
                 },
-                // Loading is true if any flags in it are true.
-                compute_loading_data: function(loading) {
-                    var ret = false;
-                    Object.keys(this.loading)
-                        .forEach( v => ret = ret || this.loading[v] );
-                    return ret;
-                },
-                // Opens the edit modal.
-                edit_item: function() {
-                    // Deep copy the object so we don't change the card's
-                    // display until the save is successful.
-                    this.item_to_edit = JSON.parse(JSON.stringify(this.user));
-                    // Ask for the form to be opened.
-                    window.dispatchEvent(new CustomEvent("open-form", {
-                        detail: {
-                            name:     "edit_user_form",
-                            user:     this.item_to_edit,
-                            that:     this,
-                            callback: "resolve_edit_item_dialog",
-                        }
-                    }));
-                },
-                // Handle response from dialog.
-                resolve_edit_item_dialog: function(e) {
-                    if (e.detail.confirmed) this.$.put_ajax.generateRequest();
-                },
-                open_delete_item_confirmation: function() {
-                    this.$.delete_item_confirmation.open();
-                },
-                // Handle result of delete modal.
-                delete_item: function(e) {
-                    if (e.detail.confirmed)
-                        this.$.delete_item_ajax.generateRequest();
-                },
-                delete_item_successful: function() {
-                    window.dispatchEvent(new CustomEvent("success-toast", {
-                        detail: this.user.role + " " + this.first_defined(
-                                this.user.name, this.user.email) + " deleted"
-                    }));
-                    // Let the parent know that this was deleted.
-                    this.dispatchEvent(new CustomEvent("item-deleted",
-                            { bubbles: true, composed: true }));
-                },
-                delete_item_failed: function() {
-                    window.dispatchEvent(new CustomEvent("error-toast", {
-                        detail: "Failed to delete user :(",
-                    }));
-                },
-                // Copy response from PUT to update the display. The rationale
-                // for not loading the PUT response directly into user is
-                // to prevent a failed return status from clearing the display.
-                put_item_successful: function() {
-                    this.set('user', this.item_to_edit);
-                    window.dispatchEvent(new CustomEvent("success-toast", {
-                        detail: this.user.role + " " + this.first_defined(
-                                this.user.name, this.user.email) + " saved"
-                    }));
-                },
-                put_item_failed: function() {
-                    window.dispatchEvent(new CustomEvent("error-toast", {
-                        detail: "Failed to save user :("
-                    }));
-                },
-            });
-        })();
-    </script>
+            },
+            // True whenever we're loading XHR data.
+            loading_data: {
+                type: Boolean,
+                computed: "compute_loading_data(loading.*)",
+            },
+        };
+    }
+    // Loading is true if any flags in it are true.
+    compute_loading_data(loading) {
+        var ret = false;
+        Object.keys(this.loading).forEach( v => ret = ret || this.loading[v] );
+        return ret;
+    }
+    // Opens the edit modal.
+    edit_item() {
+        // Deep copy the object so we don't change the card's
+        // display until the save is successful.
+        this.item_to_edit = JSON.parse(JSON.stringify(this.user));
+        // Ask for the form to be opened.
+        window.dispatchEvent(new CustomEvent("open-form", {
+            detail: {
+                name:     "edit_user_form",
+                user:     this.item_to_edit,
+                that:     this,
+                callback: "resolve_edit_item_dialog",
+            }
+        }));
+    }
+    // Handle response from dialog.
+    resolve_edit_item_dialog(e) {
+        if (e.detail.confirmed) this.$.put_ajax.generateRequest();
+    }
+    open_delete_item_confirmation() { this.$.delete_item_confirmation.open(); }
+    // Handle result of delete modal.
+    delete_item(e) {
+        if (e.detail.confirmed) this.$.delete_item_ajax.generateRequest();
+    }
+    delete_item_successful() {
+        window.dispatchEvent(new CustomEvent("success-toast", {
+            detail: this.user.role + " " + this.first_defined(
+                    this.user.name, this.user.email) + " deleted"
+        }));
+        // Let the parent know that this was deleted.
+        this.dispatchEvent(new CustomEvent("item-deleted",
+                { bubbles: true, composed: true }));
+    }
+    delete_item_failed() {
+        window.dispatchEvent(new CustomEvent("error-toast", {
+            detail: "Failed to delete user :(",
+        }));
+    }
+    // Copy response from PUT to update the display. The rationale
+    // for not loading the PUT response directly into user is
+    // to prevent a failed return status from clearing the display.
+    put_item_successful() {
+        this.set('user', this.item_to_edit);
+        window.dispatchEvent(new CustomEvent("success-toast", {
+            detail: this.user.role + " " + this.first_defined(
+                    this.user.name, this.user.email) + " saved"
+        }));
+    }
+    put_item_failed() {
+        window.dispatchEvent(new CustomEvent("error-toast", {
+            detail: "Failed to save user :("
+        }));
+    }
+}
+customElements.define(UserDisplay.is, UserDisplay);
+</script>
 </dom-module>
