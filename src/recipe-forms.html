@@ -1,5 +1,5 @@
 <!--
-    Copyright (c) 2017, Randy Westlund. All rights reserved.
+    Copyright (c) 2017-2018, Randy Westlund. All rights reserved.
     This code is under the BSD-2-Clause license.
 -->
 <!--
@@ -8,15 +8,15 @@
      https://github.com/PolymerElements/iron-overlay-behavior/issues/208#issuecomment-234024428
 -->
 
-<link rel="import" href="../bc/polymer/polymer.html">
+<link rel="import" href="../bc/polymer/lib/elements/dom-if.html">
 
-<link rel="import" href="global-behavior.html">
-<link rel="import" href="recipe-form.html">
-<link rel="import" href="linked-recipe-form.html">
-<link rel="import" href="ingredients-form.html">
 <link rel="import" href="directions-form.html">
-<link rel="import" href="user-form.html">
+<link rel="import" href="ingredients-form.html">
+<link rel="import" href="linked-recipe-form.html">
+<link rel="import" href="recipe-form.html">
 <link rel="import" href="recipe-info-form.html">
+<link rel="import" href="recipes-element.html">
+<link rel="import" href="user-form.html">
 
 <dom-module id="recipe-forms">
     <template>
@@ -37,68 +37,61 @@
         </template>
     </template>
 
-    <script>
-        (function() {
-            'use strict';
-            Polymer({
-                is: "recipe-forms",
-                behaviors: [ recipe_behaviors.global_behavior ],
-                properties: {
-                    // Passed in by the parent to conditionally render forms.
-                    userRole: {
-                        type: String,
-                    },
-                    // A reference to the element that asked to open a form.
-                    dialog_parent: {
-                        type: Object,
-                        value: null,
-                    },
-                    // The name of the callback function on the requesting
-                    // element.
-                    dialog_callback: {
-                        type: String,
-                    },
-                },
-                listeners: {
-                    // Every form fires a "closed" event. Rather than binding
-                    // a listener to each one, let it bubble up and catch them
-                    // all here.
-                    "closed": "dialog_closed",
-                },
-                attached: function() {
-                    // Listen for requests to open forms.
-                    this._listener = this.open_form.bind(this);
-                    window.addEventListener("open-form", this._listener);
-                },
-                // Remove listeners to avoid memory leaks.
-                detached: function() {
-                    window.removeEventListener("open-form", this._listener);
-                },
-                // On close, notify the element that asked for the form.
-                dialog_closed: function(e, reason) {
-                    if (this.dialog_parent)
-                        this.dialog_parent[this.dialog_callback](e, reason);
-                },
-                // Open whichever form was requested by the signal.
-                open_form: function(e) {
-                    // Save a reference to the element that sent the request so
-                    // we can tell it when the form closes.
-                    this.dialog_parent = e.detail.that;
-                    // If the sender requests a special callback, use it.
-                    // Otherwise, use "resolve_dialog".
-                    this.dialog_callback = e.detail.callback ? e.detail.callback :
-                            "resolve_dialog";
-                    // If any of these properties are given from the signal,
-                    // assign them to the form. This prevents needing a large
-                    // switch to set up each form.
-                    var props = [ "recipe", "user" ];
-                    props.forEach(p => {
-                        if (e.detail[p])
-                            this.$$("#" + [e.detail.name])[p] = e.detail[p];
-                    });
-                    this.$$("#" + [e.detail.name]).open();
-                },
-            });
-        })();
-    </script>
+<script>
+class RecipeForms extends Recipes.Element {
+    static get is() { return "recipe-forms"; }
+    static get properties() {
+        return {
+            // Passed in by the parent to conditionally render forms.
+            userRole: { type: String },
+            // A reference to the element that asked to open a form.
+            dialog_parent: { type: Object, value: null },
+            // The name of the callback function on the requesting element.
+            dialog_callback: { type: String },
+        };
+    }
+    connectedCallback() {
+        super.connectedCallback();
+        // Listen for requests to open forms.
+        this._listener = this.open_form.bind(this);
+        window.addEventListener("open-form", this._listener);
+        // Every form fires a "closed" event. Rather than binding
+        // a listener to each one, let it bubble up and catch them all here.
+        this._listener2 = this.dialog_closed.bind(this);
+        this.addEventListener("closed", this._listener2);
+    }
+    // Remove listeners to avoid memory leaks.
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        window.removeEventListener("open-form", this._listener);
+        this.removeEventListener("closed", this._listener2);
+    }
+    // On close, notify the element that asked for the form.
+    dialog_closed(e) {
+        if (this.dialog_parent)
+            this.dialog_parent[this.dialog_callback](e, e.detail);
+    }
+    // Open whichever form was requested by the signal.
+    open_form(e) {
+        // Save a reference to the element that sent the request so
+        // we can tell it when the form closes.
+        this.dialog_parent = e.detail.that;
+        // If the sender requests a special callback, use it.
+        // Otherwise, use "resolve_dialog".
+        this.dialog_callback = e.detail.callback ? e.detail.callback :
+                "resolve_dialog";
+        // If any of these properties are given from the signal,
+        // assign them to the form. This prevents needing a large
+        // switch to set up each form.
+        var props = [ "recipe", "user" ];
+        props.forEach(p => {
+            if (e.detail[p])
+                this.shadowRoot.querySelector("#" + [e.detail.name])[p]
+                    = e.detail[p];
+        });
+        this.shadowRoot.querySelector("#" + [e.detail.name]).open();
+    }
+}
+customElements.define(RecipeForms.is, RecipeForms);
+</script>
 </dom-module>
