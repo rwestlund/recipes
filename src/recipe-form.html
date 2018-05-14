@@ -1,5 +1,5 @@
 <!--
-    Copyright (c) 2016-2017, Randy Westlund. All rights reserved.
+    Copyright (c) 2016-2018, Randy Westlund. All rights reserved.
     This code is under the BSD-2-Clause license.
 -->
 <!-- This module displays a recipe creation form. -->
@@ -13,11 +13,11 @@
 <link rel="import" href="../bc/paper-item/paper-item.html">
 <link rel="import" href="../bc/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bc/polymer-responsive-dialog/responsive-dialog.html">
-<link rel="import" href="../bc/polymer/polymer.html">
+<link rel="import" href="../bc/polymer/lib/elements/dom-repeat.html">
 
-<link rel="import" href="form-behavior.html">
-<link rel="import" href="global-behavior.html">
+<link rel="import" href="form-mixin.html">
 <link rel="import" href="global-styles.html">
+<link rel="import" href="recipes-element.html">
 
 <dom-module id="recipe-form">
     <template>
@@ -105,54 +105,39 @@
         </iron-ajax>
     </template>
 
-    <script>
-        (function () {
-            'use strict';
-            Polymer({
-                is: 'recipe-form',
-                behaviors: [ recipe_behaviors.global_behavior,
-                            recipe_behaviors.form_behavior ],
-                properties: {
-                    // Must be provided by parent object.
-                    recipe: {
-                        type: Object,
-                    },
-                    title: {
-                        type: String,
-                        value: "Edit Recipe",
-                    },
-                    selected_tag: {
-                        type: String,
-                        observer: "add_selected_tag",
-                    },
-                },
-                // Override open() from behavior to add an AJAX call.
-                open: function() {
-                    this.$.get_tags.generateRequest();
-                    this.$.dialog.open();
-                },
-                remove_tag: function(e) {
-                    this.splice("recipe.tags", e.model.index, 1);
-                    this.size_changed();
-                },
-                // Call add_tag with the appropriate variable.
-                add_selected_tag: function(n) {
-                    if (!n) return;
-                    this.add_tag(n);
-                    this.selected_tag = null;
-                },
-                add_typed_tag: function() {
-                    this.add_tag(this.typed_tag);
-                    this.set("typed_tag", null);
-                },
-                // Add a tag to the tag list, checking for duplicates first.
-                add_tag: function(tag) {
-                    for (var i in this.recipe.tags)
-                        if (this.recipe.tags[i] === tag) return;
-                    this.push("recipe.tags", tag);
-                    this.size_changed();
-                },
-            });
-        })();
-    </script>
+<script>
+class RecipeForm extends Polymer.GestureEventListeners(Recipes.FormMixin(Recipes.Element)) {
+    static get is() { return "recipe-form"; }
+    static get properties() {
+        return {
+            recipe: { type: Object },
+            title: { type: String, value: "Edit Recipe" },
+            selected_tag: { type: String, observer: "add_selected_tag" },
+        };
+    }
+    open_hook() { this.$.get_tags.generateRequest(); }
+    remove_tag(e) {
+        this.splice("recipe.tags", e.model.index, 1);
+        this.size_changed();
+    }
+    // Call add_tag with the appropriate variable.
+    add_selected_tag(n) {
+        if (!n) return;
+        this.add_tag(n);
+        this.selected_tag = null;
+    }
+    add_typed_tag() {
+        this.add_tag(this.typed_tag);
+        this.set("typed_tag", null);
+    }
+    // Add a tag to the tag list, checking for duplicates first.
+    add_tag(tag) {
+        for (var i in this.recipe.tags)
+            if (this.recipe.tags[i] === tag) return;
+        this.push("recipe.tags", tag);
+        this.size_changed();
+    }
+}
+customElements.define(RecipeForm.is, RecipeForm);
+</script>
 </dom-module>
