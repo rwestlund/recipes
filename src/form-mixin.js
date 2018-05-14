@@ -1,14 +1,11 @@
-<!--
+/*
     Copyright (c) 2016-2018, Randy Westlund. All rights reserved.
     This code is under the BSD-2-Clause license.
--->
-<link rel="import" href="../bc/polymer/lib/utils/mixin.html">
-
-<script>
-"use strict";
+*/
+import { dedupingMixin } from '@polymer/polymer/lib/utils/mixin.js';
 
 // @polymerMixin
-Recipes.FormMixin = Polymer.dedupingMixin(superClass =>
+Recipes.FormMixin = dedupingMixin(superClass =>
     class FormMixin extends superClass {
         open() {
             // Call an open hook function if it is defined. A dialog may use
@@ -47,4 +44,3 @@ Recipes.FormMixin = Polymer.dedupingMixin(superClass =>
         }
     }
 );
-</script>

@@ -1,11 +1,12 @@
 {
     "entrypoint": "index.html",
-    "shell": "src/recipes-app.html",
+    "shell": "src/recipes-app.js",
     "sources": [
         "src/**/*"
     ],
     "extraDependencies": [
-        "bc/webcomponentsjs/webcomponents-lite.js"
+        "node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js",
+        "node_modules/web-animations-js/web-animations-next-lite.min.js"
     ],
     "lint": {
         "rules": ["polymer-2"]
@@ -13,8 +14,10 @@
     "builds": [{
         "addServiceWorker": false,
         "swPrecacheConfig": "sw-precache-config.js",
+        "addPushManifest": false,
         "html": { "minify": true },
         "css": { "minify": true },
-        "js": { "minify": false, "does true break polymer?": "yes :(" }
+        "js": { "minify": false, "compile": false },
+        "bundle": false
     }]
 }

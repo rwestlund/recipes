@@ -1,10 +1,13 @@
-<!--
-    Copyright (c) 2016-2017, Randy Westlund. All rights reserved.
+/*
+    Copyright (c) 2016-2018, Randy Westlund. All rights reserved.
     This code is under the BSD-2-Clause license.
--->
-<!-- This defines CSS that is imported by every element. -->
+*/
+/* This defines CSS that is imported by every element. */
 
-<dom-module id="global-styles">
+const $_documentContainer = document.createElement('div');
+$_documentContainer.setAttribute('style', 'display: none;');
+
+$_documentContainer.innerHTML = `<dom-module id="global-styles">
     <template>
         <style>
             * {
@@ -88,4 +91,6 @@
             }
         </style>
     </template>
-</dom-module>
+</dom-module>`;
+
+document.head.appendChild($_documentContainer);

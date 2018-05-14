@@ -1,12 +1,4 @@
-<!--
-    Copyright (c) 2016-2018, Randy Westlund. All rights reserved.
-    This code is under the BSD-2-Clause license.
--->
-<link rel="import" href="../bc/polymer/polymer-element.html">
-
-<dom-module id="recipes-element">
-<script>
-(function() {
+import { PolymerElement } from '@polymer/polymer/polymer-element.js';
 var constants = {};
 
 constants.user_role_enum = {
@@ -27,7 +19,7 @@ var to_array = function(obj) {
 constants.user_roles = to_array(constants.user_role_enum);
 
 // Finally, the actual element begins.
-Recipes.Element = class RecipesElement extends Polymer.Element {
+Recipes.Element = class RecipesElement extends PolymerElement {
     static get is() { return "recipes-element"; }
     static get properties() {
         return {
@@ -62,4 +54,3 @@ Recipes.Element = class RecipesElement extends Polymer.Element {
     first_defined(a, b) { return a || b; }
 }
 customElements.define(Recipes.Element.is, Recipes.Element);
-})();

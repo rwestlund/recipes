@@ -1,22 +1,21 @@
-<!--
+/*
     Copyright (c) 2016-2018, Randy Westlund. All rights reserved.
     This code is under the BSD-2-Clause license.
--->
-<!-- This module shows the current value of a cookie. --> 
-<link rel="import" href="../bc/polymer/polymer-element.html">
+*/
+/* This module shows the current value of a cookie. */
+import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 
-<dom-module id="cookie-display">
-    <template>
-        <style>
-            :host {
-                display: none;
-            }
-        </style>
-    </template>
+class CookieDisplay extends PolymerElement {
+    static get template() {
+        return html`
+<style>
+    :host {
+        display: none;
+    }
+</style>
+`;
+    }
 
-<script>
-"use strict";
-class CookieDisplay extends Polymer.Element {
     static get is() { return "cookie-display"; }
     static get properties() {
         return {
@@ -41,5 +40,3 @@ class CookieDisplay extends Polymer.Element {
     }
 }
 customElements.define(CookieDisplay.is, CookieDisplay);
-</script>
-</dom-module>

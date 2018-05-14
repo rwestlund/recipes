@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-    Copyright (c) 2016-2017, Randy Westlund. All rights reserved.
+    Copyright (c) 2016-2018, Randy Westlund. All rights reserved.
     This code is under the BSD-2-Clause license.
 -->
 <html lang="en-US">
@@ -23,7 +23,9 @@
     <meta name="apple-mobile-web-app-title" content="Recipes">
     <link rel="apple-touch-icon" href="s/src/images/touch/apple-touch-icon.png">
 
-    <script async src="/s/bc/webcomponentsjs/webcomponents-lite.js"></script>
+    <!-- Polyfills. -->
+    <script async src="/s/node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>
+    <script async src="/s/node_modules/web-animations-js/web-animations-next-lite.min.js"></script>
 
     <!-- Google Font: Montserrat -->
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700'
@@ -32,7 +34,7 @@
     <link href='https://fonts.googleapis.com/css?family=Open+Sans'
         rel='stylesheet' type='text/css'>
 
-    <link rel="import" async href="/s/src/recipes-app.html">
+    <script type="module" async src="/s/src/recipes-app.js"></script>
 <style>
     body {
         margin: 0;

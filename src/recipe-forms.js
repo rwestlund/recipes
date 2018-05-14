@@ -1,44 +1,42 @@
-<!--
+/*
     Copyright (c) 2017-2018, Randy Westlund. All rights reserved.
     This code is under the BSD-2-Clause license.
--->
-<!--
+*/
+/*
     This module contains all the application's forms. They are triggered
-     with signals. This is a workaround for:
-     https://github.com/PolymerElements/iron-overlay-behavior/issues/208#issuecomment-234024428
--->
+    with signals. This is a workaround for:
+    https://github.com/PolymerElements/iron-overlay-behavior/issues/208#issuecomment-234024428
+*/
+import '@polymer/polymer/lib/elements/dom-if.js';
+import { html } from '@polymer/polymer/polymer-element.js';
 
-<link rel="import" href="../bc/polymer/lib/elements/dom-if.html">
+import './directions-form.js';
+import './ingredients-form.js';
+import './linked-recipe-form.js';
+import './recipe-form.js';
+import './recipe-info-form.js';
+import './recipes-element.js';
+import './user-form.js';
 
-<link rel="import" href="directions-form.html">
-<link rel="import" href="ingredients-form.html">
-<link rel="import" href="linked-recipe-form.html">
-<link rel="import" href="recipe-form.html">
-<link rel="import" href="recipe-info-form.html">
-<link rel="import" href="recipes-element.html">
-<link rel="import" href="user-form.html">
-
-<dom-module id="recipe-forms">
-    <template>
-        <template is="dom-if" if="[[is_user(userRole)]]">
-            <recipe-form id="create_recipe_form" title="Create Recipe">
-            </recipe-form>
-            <recipe-form id="edit_recipe_form"></recipe-form>
-            <ingredients-form id="edit_ingredients_form"></ingredients-form>
-            <directions-form id="edit_directions_form"></directions-form>
-            <recipe-info-form id="edit_recipe_info_form"></recipe-info-form>
-            <linked-recipe-form id="edit_linked_recipe_form">
-            </linked-recipe-form>
-        </template>
-
-        <template is="dom-if" if="[[is_admin(userRole)]]">
-            <user-form id="create_user_form" title="Create User"></user-form>
-            <user-form id="edit_user_form"></user-form>
-        </template>
-    </template>
-
-<script>
 class RecipeForms extends Recipes.Element {
+    static get template() {
+        return html`
+<template is="dom-if" if="[[is_user(userRole)]]">
+    <recipe-form id="create_recipe_form" title="Create Recipe"></recipe-form>
+    <recipe-form id="edit_recipe_form"></recipe-form>
+    <ingredients-form id="edit_ingredients_form"></ingredients-form>
+    <directions-form id="edit_directions_form"></directions-form>
+    <recipe-info-form id="edit_recipe_info_form"></recipe-info-form>
+    <linked-recipe-form id="edit_linked_recipe_form"></linked-recipe-form>
+</template>
+
+<template is="dom-if" if="[[is_admin(userRole)]]">
+    <user-form id="create_user_form" title="Create User"></user-form>
+    <user-form id="edit_user_form"></user-form>
+</template>
+`;
+    }
+
     static get is() { return "recipe-forms"; }
     static get properties() {
         return {
@@ -79,7 +77,7 @@ class RecipeForms extends Recipes.Element {
         // If the sender requests a special callback, use it.
         // Otherwise, use "resolve_dialog".
         this.dialog_callback = e.detail.callback ? e.detail.callback :
-                "resolve_dialog";
+            "resolve_dialog";
         // If any of these properties are given from the signal,
         // assign them to the form. This prevents needing a large
         // switch to set up each form.
@@ -93,5 +91,3 @@ class RecipeForms extends Recipes.Element {
     }
 }
 customElements.define(RecipeForms.is, RecipeForms);
-</script>
-</dom-module>

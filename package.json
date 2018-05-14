@@ -1,7 +1,32 @@
 {
+    "name": "@rwestlund/recipes",
     "private": true,
     "devDependencies": {
-        "bower": "1.8.2",
         "polymer-cli": "1.7.1"
-    }
+    },
+    "dependencies": {
+        "@polymer/app-layout": "^3.0.0-pre.1",
+        "@polymer/app-route": "^3.0.0-pre.1",
+        "@polymer/iron-ajax": "^3.0.0-pre.1",
+        "@polymer/iron-collapse": "^3.0.0-pre.1",
+        "@polymer/iron-flex-layout": "^3.0.0-pre.1",
+        "@polymer/iron-icon": "^3.0.0-pre.1",
+        "@polymer/iron-icons": "^3.0.0-pre.1",
+        "@polymer/iron-pages": "^3.0.0-pre.1",
+        "@polymer/paper-button": "^3.0.0-pre.1",
+        "@polymer/paper-dialog": "^3.0.0-pre.1",
+        "@polymer/paper-dropdown-menu": "^3.0.0-pre.1",
+        "@polymer/paper-fab": "^3.0.0-pre.1",
+        "@polymer/paper-icon-button": "^3.0.0-pre.1",
+        "@polymer/paper-input": "^3.0.0-pre.1",
+        "@polymer/paper-item": "^3.0.0-pre.1",
+        "@polymer/paper-listbox": "^3.0.0-pre.1",
+        "@polymer/paper-spinner": "^3.0.0-pre.1",
+        "@polymer/paper-styles": "^3.0.0-pre.1",
+        "@polymer/paper-toast": "^3.0.0-pre.1",
+        "@polymer/polymer": "^3.0.0-pre.1",
+        "@rwestlund/responsive-dialog": "3.0.2",
+        "web-animations-js": "2.3.1",
+        "@webcomponents/webcomponentsjs": "2.0.0"
+  }
 }
