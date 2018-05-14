@@ -233,9 +233,9 @@ class ItemCollection extends Polymer.GestureEventListeners(Recipes.Element) {
         // Ask for the form to be opened.
         window.dispatchEvent(new CustomEvent("open-form", { detail: data }));
     }
-    // Handle response from dialog. Reason is either confirmed or canceled.
-    resolve_create_item(e, reason) {
-        if (reason.confirmed) this.$.create_item_ajax.generateRequest();
+    // Handle response from dialog.
+    resolve_create_item(e) {
+        if (e.detail.confirmed) this.$.create_item_ajax.generateRequest();
     }
     creating_item_succeeded() {
         // This isn't in shorter form like the one below because

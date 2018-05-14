@@ -180,17 +180,16 @@
                         }
                     }));
                 },
-                // Handle response from dialog. Reason is either confirmed or
-                // canceled.
-                resolve_edit_item_dialog: function(e, reason) {
-                    if (reason.confirmed) this.$.put_ajax.generateRequest();
+                // Handle response from dialog.
+                resolve_edit_item_dialog: function(e) {
+                    if (e.detail.confirmed) this.$.put_ajax.generateRequest();
                 },
                 open_delete_item_confirmation: function() {
                     this.$.delete_item_confirmation.open();
                 },
                 // Handle result of delete modal.
-                delete_item: function(e, reason) {
-                    if (reason.confirmed)
+                delete_item: function(e) {
+                    if (e.detail.confirmed)
                         this.$.delete_item_ajax.generateRequest();
                 },
                 delete_item_successful: function() {

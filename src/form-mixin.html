@@ -20,14 +20,14 @@ Recipes.FormMixin = Polymer.dedupingMixin(superClass =>
         // Call this when the dialog content may have changed size, such as
         // when a textarea is modified.
         size_changed() { if (this.$.dialog) this.$.dialog.notifyResize(); }
-        resolve_dialog(e, reason) {
+        resolve_dialog(e) {
             // Call a close hook function if it is defined. A dialog may use this
             // to put temporary values into the object it's editing.
             if (this.before_close_hook) this.before_close_hook();
             this.dispatchEvent(new CustomEvent("closed", {
                 bubbles:    true,
                 composed:   true,
-                detail:     reason,
+                detail:     e.detail,
             }));
         }
         // Handle click on the X suffix for a paper-input. This crawls up the DOM

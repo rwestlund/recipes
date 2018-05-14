@@ -69,7 +69,7 @@ class RecipeForms extends Recipes.Element {
     // On close, notify the element that asked for the form.
     dialog_closed(e) {
         if (this.dialog_parent)
-            this.dialog_parent[this.dialog_callback](e, e.detail);
+            this.dialog_parent[this.dialog_callback](e);
     }
     // Open whichever form was requested by the signal.
     open_form(e) {

@@ -329,16 +329,16 @@ class RecipeDetails extends Polymer.GestureEventListeners(Recipes.Element) {
             }
         }));
     }
-    resolve_dialog(e, reason) {
-        if (!reason.confirmed) return;
+    resolve_dialog(e) {
+        if (!e.detail.confirmed) return;
         this.$.put_item_ajax.generateRequest();
     }
     open_delete_modal() {
         this.$.delete_item_confirmation.open();
     }
     // Actually do it.
-    delete_item(e, reason) {
-        if (reason.confirmed) this.$.delete_item_ajax.generateRequest();
+    delete_item(e) {
+        if (e.detail.confirmed) this.$.delete_item_ajax.generateRequest();
     }
     put_item_failed() {
         window.dispatchEvent(new CustomEvent("error-toast", {
