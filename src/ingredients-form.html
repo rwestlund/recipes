@@ -31,11 +31,11 @@
                     label="Item [[add_one(index)]]"
                     value="{{item}}"
                     char-counter maxlength="40">
-                <paper-icon-button suffix
+                <paper-icon-button slot="suffix"
                         icon="icons:cancel"
                         on-tap="delete_ingredient">
                 </paper-icon-button>
-                <paper-icon-button suffix
+                <paper-icon-button slot="suffix"
                         icon="icons:arrow-upward"
                         disabled$="[[!index]]"
                         on-tap="move_ingredient_up">
