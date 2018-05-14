@@ -32,10 +32,12 @@
                     value="{{item}}"
                     char-counter maxlength="40">
                 <paper-icon-button slot="suffix"
+                        tabindex="-1"
                         icon="icons:cancel"
                         on-tap="delete_ingredient">
                 </paper-icon-button>
                 <paper-icon-button slot="suffix"
+                        tabindex="-1"
                         icon="icons:arrow-upward"
                         disabled$="[[!index]]"
                         on-tap="move_ingredient_up">
