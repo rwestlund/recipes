@@ -68,7 +68,8 @@
     </template>
 
 <script>
-class LinkedRecipeForm extends Polymer.GestureEventListeners(Recipes.Element) {
+class LinkedRecipeForm extends Polymer.GestureEventListeners(
+        Recipes.FormMixin(Recipes.Element)) {
     static get is() { return "linked-recipe-form"; }
     static get properties() {
         return {
