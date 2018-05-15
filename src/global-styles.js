@@ -16,7 +16,6 @@ $_documentContainer.innerHTML = `<dom-module id="global-styles">
                         box-sizing: border-box;
 
                 font-family: 'Open Sans', sans-serif;
-                /*font-family: 'Montserrat', sans-serif;*/
             }
             iron-icon.large-icon {
                 --iron-icon-width:      4em;

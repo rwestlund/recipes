@@ -27,13 +27,6 @@
     <script src="/s/node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
     <script async src="/s/node_modules/web-animations-js/web-animations-next-lite.min.js"></script>
 
-    <!-- Google Font: Montserrat -->
-    <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700'
-        rel='stylesheet' type='text/css'>
-    <!-- Google Font: Open Sans -->
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans'
-        rel='stylesheet' type='text/css'>
-
     <script type="module" async src="/s/src/recipes-app.js"></script>
 <style>
     body {
@@ -45,5 +38,14 @@
 
 <body unresolved class="fullbleed layout vertical">
     <recipes-app></recipes-app>
+    <script>
+        // Asyncronously load the Google Open Sans font.
+        var font = document.createElement('link');
+        font.rel = 'stylesheet';
+        font.href = 'https://fonts.googleapis.com/css?family=Open+Sans';
+        font.type = 'text/css';
+        var before = document.getElementsByTagName('link')[0];
+        before.parentNode.insertBefore(font, before);
+    </script>
 </body>
 </html>
