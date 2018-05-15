@@ -18,7 +18,7 @@
         "addPushManifest": false,
         "html": { "minify": true },
         "css": { "minify": true },
-        "js": { "minify": false, "compile": false },
+        "js": { "minify": true, "compile": false },
         "bundle": false
     }]
 }
