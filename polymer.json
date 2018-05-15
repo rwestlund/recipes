@@ -5,7 +5,8 @@
         "src/**/*"
     ],
     "extraDependencies": [
-        "node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js",
+        "node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js",
+        "node_modules/@webcomponents/webcomponentsjs/bundles/**",
         "node_modules/web-animations-js/web-animations-next-lite.min.js"
     ],
     "lint": {
