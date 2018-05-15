@@ -24,10 +24,10 @@ import { GestureEventListeners } from '@polymer/polymer/lib/mixins/gesture-event
 
 import './global-styles.js';
 import './recipe-display.js';
-import './recipes-element.js';
+import { RecipesElement } from './recipes-element.js';
 import './user-display.js';
 
-class ItemCollection extends GestureEventListeners(Recipes.Element) {
+class ItemCollection extends GestureEventListeners(RecipesElement) {
     static get template() {
         return html`
 <style include="iron-flex iron-flex-alignment"></style>

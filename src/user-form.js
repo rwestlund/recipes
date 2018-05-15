@@ -16,12 +16,11 @@ import { GestureEventListeners } from '@polymer/polymer/lib/mixins/gesture-event
 
 import '@rwestlund/responsive-dialog/responsive-dialog.js';
 
-import './form-mixin.js';
-import './recipes-element.js';
+import { FormMixin } from './form-mixin.js';
+import { RecipesElement } from './recipes-element.js';
 import './global-styles.js';
 
-class UserForm extends GestureEventListeners(
-        Recipes.FormMixin(Recipes.Element)) {
+class UserForm extends GestureEventListeners(FormMixin(RecipesElement)) {
     static get template() {
         return html`
 <style include="global-styles"></style>

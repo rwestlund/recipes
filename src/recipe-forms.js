@@ -15,10 +15,10 @@ import './ingredients-form.js';
 import './linked-recipe-form.js';
 import './recipe-form.js';
 import './recipe-info-form.js';
-import './recipes-element.js';
+import { RecipesElement } from './recipes-element.js';
 import './user-form.js';
 
-class RecipeForms extends Recipes.Element {
+class RecipeForms extends RecipesElement {
     static get template() {
         return html`
 <template is="dom-if" if="[[is_user(userRole)]]">

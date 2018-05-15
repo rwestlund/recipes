@@ -16,10 +16,9 @@ import { GestureEventListeners } from '@polymer/polymer/lib/mixins/gesture-event
 
 import '@rwestlund/responsive-dialog/responsive-dialog.js';
 
-import './form-mixin.js';
+import { FormMixin } from './form-mixin.js';
 
-class IngredientsForm extends GestureEventListeners(
-        Recipes.FormMixin(PolymerElement)) {
+class IngredientsForm extends GestureEventListeners(FormMixin(PolymerElement)) {
     static get template() {
         return html`
 <style include="iron-flex iron-flex-alignment"></style>

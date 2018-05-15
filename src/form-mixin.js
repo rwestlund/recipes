@@ -5,7 +5,7 @@
 import { dedupingMixin } from '@polymer/polymer/lib/utils/mixin.js';
 
 // @polymerMixin
-Recipes.FormMixin = dedupingMixin(superClass =>
+export const FormMixin = dedupingMixin(superClass =>
     class FormMixin extends superClass {
         open() {
             // Call an open hook function if it is defined. A dialog may use

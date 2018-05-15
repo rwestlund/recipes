@@ -18,10 +18,10 @@ import '@polymer/polymer/lib/elements/dom-if.js';
 import { html } from '@polymer/polymer/polymer-element.js';
 import { GestureEventListeners } from '@polymer/polymer/lib/mixins/gesture-event-listeners.js';
 
-import './recipes-element.js';
+import { RecipesElement } from './recipes-element.js';
 import './global-styles.js';
 
-class UserDisplay extends GestureEventListeners(Recipes.Element) {
+class UserDisplay extends GestureEventListeners(RecipesElement) {
     static get template() {
         return html`
 <style include="iron-flex iron-flex-alignment"></style>

@@ -30,9 +30,9 @@ import './item-collection.js';
 import './recipe-details.js';
 import './recipe-forms.js';
 import './recipe-notifications.js';
-import './recipes-element.js';
+import { RecipesElement } from './recipes-element.js';
 
-class RecipesApp extends GestureEventListeners(Recipes.Element) {
+class RecipesApp extends GestureEventListeners(RecipesElement) {
     static get template() {
     return html`
 <style include="iron-flex iron-flex-alignment"></style>

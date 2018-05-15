@@ -1,5 +1,5 @@
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
-var constants = {};
+let constants = {};
 
 constants.user_role_enum = {
     admin:      'Admin',
@@ -19,7 +19,7 @@ var to_array = function(obj) {
 constants.user_roles = to_array(constants.user_role_enum);
 
 // Finally, the actual element begins.
-Recipes.Element = class RecipesElement extends PolymerElement {
+export const RecipesElement = class RecipesElement extends PolymerElement {
     static get is() { return "recipes-element"; }
     static get properties() {
         return {
@@ -53,4 +53,4 @@ Recipes.Element = class RecipesElement extends PolymerElement {
     equal(a, b) { return a === b; }
     first_defined(a, b) { return a || b; }
 }
-customElements.define(Recipes.Element.is, Recipes.Element);
+customElements.define(RecipesElement.is, RecipesElement);

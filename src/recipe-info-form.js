@@ -15,9 +15,9 @@ import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 
 import '@rwestlund/responsive-dialog/responsive-dialog.js';
 
-import './form-mixin.js';
+import { FormMixin } from './form-mixin.js';
 
-class RecipeInfoForm extends Recipes.FormMixin(PolymerElement) {
+class RecipeInfoForm extends FormMixin(PolymerElement) {
     static get template() {
         return html`
 <style include="iron-flex iron-flex-alignment"></style>
