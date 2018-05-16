@@ -23,6 +23,7 @@ import '@polymer/polymer/lib/elements/dom-if.js';
 import { html } from '@polymer/polymer/polymer-element.js';
 import { GestureEventListeners } from '@polymer/polymer/lib/mixins/gesture-event-listeners.js';
 import { scroll } from '@polymer/app-layout/helpers/helpers.js';
+import { setPassiveTouchGestures } from '@polymer/polymer/lib/utils/settings.js';
 
 import './cookie-display.js';
 import './global-styles.js';
@@ -304,6 +305,11 @@ class RecipesApp extends GestureEventListeners(RecipesElement) {
             // old position.
             current_page: { type: String, value: "" },
         };
+    }
+    constructor() {
+        super();
+        // Make all event listeners passive so as not to block scrolling.
+        setPassiveTouchGestures(true);
     }
     // Make app-grid update properly.
     connectedCallback() {
