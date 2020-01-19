@@ -9,11 +9,14 @@
 package router
 
 import (
+	"context"
 	"database/sql"
+	"encoding/base64"
 	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/rwestlund/recipes/config"
 	"github.com/rwestlund/recipes/db"
@@ -27,7 +30,7 @@ var conf = &oauth2.Config{
 	ClientID:     config.OAuthClientID,
 	ClientSecret: config.OAuthClientSecret,
 	RedirectURL:  "https://" + config.LocalHostName + "/api/auth/oauth2callback",
-	Scopes:       []string{"profile", "email"},
+	Scopes:       []string{"openid", "profile", "email"},
 	Endpoint:     google.Endpoint,
 }
 
@@ -57,7 +60,7 @@ func handleOauthCallback(res http.ResponseWriter, req *http.Request) {
 	var code = req.URL.Query().Get("code")
 
 	// Use the validation code and our client secret to get a user token.
-	var token, err = conf.Exchange(oauth2.NoContext, code)
+	var token, err = conf.Exchange(context.Background(), code)
 	if err != nil {
 		log.Println(err)
 		res.WriteHeader(400)
@@ -65,37 +68,45 @@ func handleOauthCallback(res http.ResponseWriter, req *http.Request) {
 	}
 	// At this point, they have successfully proven authentication; they are
 	// who they claim to be. Now we need to see who they are.
-	var client = conf.Client(oauth2.NoContext, token)
-	resp, err := client.Get("https://www.googleapis.com/plus/v1/people/me")
-	if err != nil {
-		log.Println("error fetching profile")
-		log.Println(err)
-		res.WriteHeader(500)
+	var rawIDToken, ok = token.Extra("id_token").(string)
+	if !ok {
+		log.Println("missing id_token")
+		res.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	// Use this commented block to print the JSON response if necessary.
-	//var bytes []byte
-	//bytes, err = ioutil.ReadAll(resp.Body)
-	//fmt.Println(string(bytes))
-	//err = json.NewDecoder(strings.NewReader(string(bytes))).Decode(&oauthProfile)
-
-	// Decode the response from Google.
-	var oauthProfile oAuthProfile
-	err = json.NewDecoder(resp.Body).Decode(&oauthProfile)
-	resp.Body.Close()
+	var parts = strings.Split(rawIDToken, ".")
+	if len(parts) != 3 {
+		log.Println("token had wrong number of parts")
+		res.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	var bytes []byte
+	bytes, err = base64.RawURLEncoding.DecodeString(parts[1])
 	if err != nil {
-		log.Println("failed to decode google's response")
-		log.Println(err)
-		res.WriteHeader(500)
+		log.Println("can't decode token")
+		res.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	var data struct {
+		Email string
+		Name  string
+	}
+	err = json.Unmarshal(bytes, &data)
+	if err != nil {
+		log.Println("can't decode json")
+		res.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
+	// TODO Name isn't present in token?
+	if data.Name == "" {
+		data.Name = data.Email
+	}
 	// Now that we have their profile and token, record the login.
-	user, err := db.GoogleLogin(oauthProfile.Emails[0].Value,
-		oauthProfile.DisplayName, token.AccessToken)
+	user, err := db.GoogleLogin(data.Email, data.Name, token.AccessToken)
 	// If they don't exist in the database, then we haven't authorized them.
 	if err == sql.ErrNoRows {
-		log.Println("unauthorized user: " + oauthProfile.Emails[0].Value)
+		log.Println("unauthorized user: " + data.Email)
 		res.WriteHeader(403)
 		return
 	}
