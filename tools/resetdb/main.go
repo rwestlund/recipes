@@ -10,9 +10,10 @@
 package main
 
 import (
-	"config"
 	"database/sql"
 	"log"
+
+	"github.com/rwestlund/recipes/config"
 
 	_ "github.com/lib/pq"
 )
@@ -20,8 +21,7 @@ import (
 func main() {
 	var db *sql.DB
 	var err error
-	db, err = sql.Open("postgres", "user="+config.DatabaseUserName+
-		" dbname="+config.DatabaseName+" sslmode=disable")
+	db, err = sql.Open("postgres", "user="+config.DatabaseUserName+" dbname="+config.DatabaseName+" sslmode=disable")
 	if err != nil {
 		log.Println(err)
 		log.Fatal("ERROR: connection params are invalid")

@@ -29,7 +29,7 @@ import (
 var conf = &oauth2.Config{
 	ClientID:     config.OAuthClientID,
 	ClientSecret: config.OAuthClientSecret,
-	RedirectURL:  "https://" + config.LocalHostName + "/api/auth/oauth2callback",
+	RedirectURL:  config.OAuthRedirectBase + "/api/auth/oauth2callback",
 	Scopes:       []string{"openid", "profile", "email"},
 	Endpoint:     google.Endpoint,
 }

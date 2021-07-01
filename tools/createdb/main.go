@@ -10,16 +10,17 @@ package main
 
 import (
 	"database/sql"
+	"log"
+
 	_ "github.com/lib/pq"
 	"github.com/rwestlund/recipes/config"
-	"log"
 )
 
 func main() {
 	var db *sql.DB
 	var err error
 	/* This should be the superuser. It's pgsql on FreeBSD. */
-	db, err = sql.Open("postgres", "user=pgsql dbname=postgres sslmode=disable")
+	db, err = sql.Open("postgres", "user=postgres dbname=postgres sslmode=disable")
 	if err != nil {
 		log.Println(err)
 		log.Fatal("ERROR: connection params are invalid")

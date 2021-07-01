@@ -26,4 +26,4 @@ var OAuthClientID = your value here!
 var OAuthClientSecret = your value here!
 
 /* The hostname in the URL where this server can be found. */
-var LocalHostName = "recipes.textplain.net"
+var OAuthRedirectBase = "https://recipes.textplain.net"
