@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-    Copyright (c) 2016-2018, Randy Westlund. All rights reserved.
+    Copyright (c) 2016-2021, Randy Westlund. All rights reserved.
     This code is under the BSD-2-Clause license.
 -->
 <html lang="en-US">
@@ -16,15 +16,14 @@
     <!-- Add to homescreen for Chrome on Android -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Recipes">
-    <link rel="icon" sizes="192x192" href="s/src/images/touch/chrome-touch-icon-192x192.png">
+    <link rel="icon" sizes="192x192" href="public/images/touch/chrome-touch-icon-192x192.png">
 
     <!-- Add to homescreen for Safari on iOS -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="Recipes">
-    <link rel="apple-touch-icon" href="s/src/images/touch/apple-touch-icon.png">
+    <link rel="apple-touch-icon" href="public/images/touch/apple-touch-icon.png">
 
-    <script type="module" async src="/src/recipes-app.js"></script>
 <style>
     body {
         margin: 0;
@@ -33,8 +32,9 @@
 </style>
 </head>
 
-<body unresolved class="fullbleed layout vertical">
-    <recipes-app></recipes-app>
+<body>
+    <noscript>JavaScript is required to view this page.</noscript>
+    <div id="root"></div>
     <script>
         // Asyncronously load the Google Open Sans font.
         var font = document.createElement('link');
