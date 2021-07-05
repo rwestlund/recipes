@@ -1,4 +1,5 @@
 import { FC, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Recipe, LinkedRecipe } from '../types/Recipe';
 
 type RecipeCardProps = {
@@ -23,20 +24,23 @@ export const RecipeCard: FC<RecipeCardProps> = ({ recipe }) => {
         {recipe.directions.map((d, index) => <li key={index}>{d}</li>)}
       </ol>
 
-
       <table>
         <tbody>
-          {recipe.amount && <tr><td>Amount</td><td>{recipe.amount}</td></tr>}
-          {recipe.time && <tr><td>Time</td><td>{recipe.time}</td></tr>}
-          {recipe.oven && <tr><td>Oven</td><td>{recipe.oven}</td></tr>}
-          {recipe.author_name && <tr><td>Author</td><td>{recipe.author_name}</td></tr>}
-          {recipe.notes && <tr><td>Notes</td><td>{recipe.notes}</td></tr>}
-          {recipe.linked_recipes.length > 0 &&
-            <tr><td>Linked Recipes</td><td>{recipe.linked_recipes.map((r,i,o) => <LinkedRecipeLink key={r.id} recipe={r} showComma={i+1 !== o.length} />)}</td></tr>
+          {recipe.amount ? <tr><td>Amount</td><td>{recipe.amount}</td></tr> : null}
+          {recipe.time ? <tr><td>Time</td><td>{recipe.time}</td></tr>: null}
+          {recipe.oven ? <tr><td>Oven</td><td>{recipe.oven}</td></tr>: null}
+          {recipe.author_name ? <tr><td>Author</td><td>{recipe.author_name}</td></tr>: null}
+          {recipe.notes ? <tr><td>Notes</td><td>{recipe.notes}</td></tr>: null}
+          {recipe.linked_recipes.length > 0
+            ? <tr>
+                <td>Linked Recipes</td>
+                <td>{recipe.linked_recipes.map((r,i,o) =>
+                  <LinkedRecipeLink key={r.id} recipe={r} showComma={i+1 !== o.length} />)}</td>
+              </tr>
+            : null
           }
         </tbody>
       </table>
-
     </div>
   )
 }
@@ -47,7 +51,7 @@ type LinkedRecipeLinkProps = {
 }
 const LinkedRecipeLink: FC<LinkedRecipeLinkProps> = ({ recipe, showComma }) => {
   return <>
-    <a href={`/recipes/${recipe.id}`}>{recipe.title}</a>
+    <Link to={`/recipes/${recipe.id}`}>{recipe.title}</Link>
     {showComma && <span style={{marginRight: '8px'}}>,</span>}
   </>
 }
