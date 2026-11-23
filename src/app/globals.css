@@ -500,7 +500,6 @@ input[type="file"] { font: inherit; max-width: 100%; }
 
 .chooser img {
   display: block;
-  border-radius: 0.22rem;
 }
 
 .chooser img.favicon {
@@ -511,7 +510,6 @@ input[type="file"] { font: inherit; max-width: 100%; }
 .chooser img.header {
   width: 1.75rem;
   height: 1.75rem;
-  border-radius: 0.4rem;
 }
 
 @media print {

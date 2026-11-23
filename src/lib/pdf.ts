@@ -87,12 +87,11 @@ function compose(
   const leading = body + 3.4 * scale;
   const titleSize = 21 * scale;
   const titleStep = titleSize + 3 * scale;
-  const metaSize = 11.5 * scale;
-  const metaStep = metaSize + 2.6 * scale;
   const headSize = 12.5 * scale;
   const gutter = 15 * scale;
   const iconSize = 24 * scale;
   const columnGap = 12 * scale;
+  const valueIndent = fonts.bold.widthOfTextAtSize("Amount", headSize) + 11 * scale;
   const ops: Op[] = [];
   let y = PAGE_HEIGHT - MARGIN;
 
@@ -110,18 +109,64 @@ function compose(
   }
   y -= 3 * scale;
 
-  const timing = [recipe.amount ? `Amount  ${recipe.amount}` : "", recipe.time ? `Time  ${recipe.time}` : ""].filter(
-    Boolean,
-  );
-  for (const line of timing) {
-    for (const part of wrap(line, fonts.regular, metaSize, CONTENT_WIDTH)) {
-      ops.push({ type: "text", text: part, x: MARGIN, y, size: metaSize, font: "regular", color: ink });
-      y -= metaStep;
-    }
-  }
-  if (timing.length > 0) y -= 2 * scale;
+  const facts = [
+    recipe.amount ? { label: "Amount", value: recipe.amount } : null,
+    recipe.time ? { label: "Time", value: recipe.time } : null,
+  ].filter((fact): fact is { label: string; value: string } => fact !== null);
+  const hasIngredients = recipe.ingredients.some((line) => line.trim() !== "");
 
-  const photo = picture && photoMaxWidth > 0 ? photoBox(picture, photoMaxWidth, recipe.ingredients, fonts, body, leading, gutter, columnGap, scale) : null;
+  const stackHeight = (columnWidth: number) => {
+    const valueWidth = Math.max(36, columnWidth - valueIndent);
+    let height = 0;
+    for (const fact of facts) {
+      const lines = Math.max(1, wrap(fact.value, fonts.regular, body, valueWidth).length);
+      height += headSize + 3.2 * scale + (lines - 1) * leading;
+    }
+    if (hasIngredients) {
+      height += 9 * scale + headSize + 5 * scale;
+      height += ingredientHeight(recipe.ingredients, columnWidth, fonts, body, leading, gutter, scale);
+    }
+    return height;
+  };
+
+  let photo: PhotoBox | null = null;
+  if (picture && photoMaxWidth > 0 && (facts.length > 0 || hasIngredients)) {
+    const hard = 230 * scale;
+    let width = photoMaxWidth;
+    let height = (picture.height / picture.width) * width;
+    if (height > hard) {
+      height = hard;
+      width = (picture.width / picture.height) * height;
+    }
+    for (let pass = 0; pass < 2; pass += 1) {
+      const text = stackHeight(CONTENT_WIDTH - width - columnGap);
+      if (height <= text) break;
+      height = text;
+      width = (picture.width / picture.height) * height;
+    }
+    if (width >= 28 && height >= 28) photo = { width, height, bottom: 0 };
+  }
+
+  if (photo && facts.length > 0) placePhoto(ops, photo, y, headSize);
+
+  for (const fact of facts) {
+    const beside = photo ? y + headSize * 0.15 > photo.bottom : false;
+    const column = beside && photo ? CONTENT_WIDTH - photo.width - columnGap : CONTENT_WIDTH;
+    const lines = wrap(fact.value, fonts.regular, body, Math.max(36, column - valueIndent));
+    ops.push({ type: "text", text: fact.label, x: MARGIN, y, size: headSize, font: "bold", color: accent });
+    lines.forEach((line, index) => {
+      ops.push({
+        type: "text",
+        text: line,
+        x: MARGIN + valueIndent,
+        y: y - index * leading,
+        size: body,
+        font: "regular",
+        color: ink,
+      });
+    });
+    y -= headSize + 3.2 * scale + (Math.max(lines.length, 1) - 1) * leading;
+  }
 
   y = section(recipe.ingredients, "Ingredients", "bullet", y, photo, {
     ops,
@@ -175,21 +220,9 @@ function section(blocks: string[], title: string, kind: Kind, y: number, photo: 
   const { ops, fonts, body, leading, headSize, gutter, scale, columnGap } = style;
   y -= 9 * scale;
   if (filled) {
+    if (photo && photo.bottom === 0) placePhoto(ops, photo, y, headSize);
     ops.push({ type: "text", text: title, x: MARGIN, y, size: headSize, font: "bold", color: accent });
     y -= headSize + 5 * scale;
-  }
-
-  const firstBaseline = y;
-  if (photo) {
-    const top = firstBaseline + body * 0.7;
-    ops.push({
-      type: "photo",
-      x: MARGIN + CONTENT_WIDTH - photo.width,
-      y: top - photo.height,
-      width: photo.width,
-      height: photo.height,
-    });
-    photo.bottom = top - photo.height;
   }
 
   blocks.forEach((block, blockIndex) => {
@@ -230,33 +263,16 @@ function section(blocks: string[], title: string, kind: Kind, y: number, photo: 
 
 type PhotoBox = { width: number; height: number; bottom: number };
 
-function photoBox(
-  picture: PDFImage,
-  maxWidth: number,
-  ingredients: string[],
-  fonts: Fonts,
-  body: number,
-  leading: number,
-  gutter: number,
-  columnGap: number,
-  scale: number,
-): PhotoBox | null {
-  if (ingredients.every((line) => line.trim() === "")) return null;
-  const hardHeight = 206 * scale;
-  let width = maxWidth;
-  let height = (picture.height / picture.width) * width;
-  if (height > hardHeight) {
-    height = hardHeight;
-    width = (picture.width / picture.height) * height;
-  }
-  for (let pass = 0; pass < 2; pass += 1) {
-    const text = ingredientHeight(ingredients, CONTENT_WIDTH - width - columnGap, fonts, body, leading, gutter, scale);
-    if (height <= text) break;
-    height = text;
-    width = (picture.width / picture.height) * height;
-  }
-  if (width < 24 || height < 24) return null;
-  return { width, height, bottom: 0 };
+function placePhoto(ops: Op[], photo: PhotoBox, baseline: number, size: number) {
+  const top = baseline + size * 0.8;
+  ops.push({
+    type: "photo",
+    x: MARGIN + CONTENT_WIDTH - photo.width,
+    y: top - photo.height,
+    width: photo.width,
+    height: photo.height,
+  });
+  photo.bottom = top - photo.height;
 }
 
 function ingredientHeight(
