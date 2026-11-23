@@ -6,11 +6,12 @@ import { logout } from "@/app/actions";
 export function Header({ editor }: { editor: boolean }) {
   const path = usePathname();
   const onIndex = path === "/";
+  const onRecipe = /^\/recipes\/\d+$/.test(path);
 
   return (
     <header className="top">
       <a className="mark" href="/">
-        {onIndex ? <img className="mark-icon" src="/mark.svg" alt="" /> : null}
+        {onIndex || onRecipe ? <img className="mark-icon" src="/mark.svg" alt="" /> : null}
         <span>Westlund Family Recipes</span>
       </a>
       {editor && onIndex ? (

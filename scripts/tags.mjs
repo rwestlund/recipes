@@ -1,5 +1,12 @@
 // Imported labels, folded into one smaller set. Unknown labels are dropped.
 // Keep the case list in migrations/002_simplify.sql in step with this map.
+// "fresh-milled flour" is not an old-site label. withFreshMilledTag adds it
+// when the recipe text says fresh-milled, and migrations/003_fresh_milled.sql
+// does the same for a database that was already imported.
+export const FRESH_MILLED_TAG = "fresh-milled flour";
+
+const FRESH_MILLED = /fresh[\s-]*milled/i;
+
 export const TAG_MAP = {
   alcohol: ["drink"],
   appetizer: ["appetizer"],
@@ -23,6 +30,7 @@ export const TAG_MAP = {
   dressing: ["sauce"],
   drink: ["drink"],
   easy: ["easy"],
+  "fresh-milled flour": ["fresh-milled flour"],
   frosting: ["dessert"],
   "fruit dessert": ["dessert"],
   glaze: ["dessert"],
@@ -64,6 +72,14 @@ export function normalizeTags(tags) {
       out.push(tag);
     }
   }
+  out.sort((a, b) => a.localeCompare(b));
+  return out;
+}
+
+export function withFreshMilledTag(tags, text) {
+  if (!FRESH_MILLED.test(String(text))) return tags;
+  if (tags.includes(FRESH_MILLED_TAG)) return tags;
+  const out = [...tags, FRESH_MILLED_TAG];
   out.sort((a, b) => a.localeCompare(b));
   return out;
 }

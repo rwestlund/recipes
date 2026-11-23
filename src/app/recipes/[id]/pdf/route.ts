@@ -1,4 +1,4 @@
-import { getRecipe } from "@/lib/recipes";
+import { getRecipe, photoBytes, photoIds } from "@/lib/recipes";
 import { renderRecipePdf } from "@/lib/pdf";
 import { parseId, pdfFilename } from "@/lib/text";
 
@@ -10,7 +10,9 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
   if (!id) return new Response("Not found", { status: 404 });
   const recipe = await getRecipe(id);
   if (!recipe) return new Response("Not found", { status: 404 });
-  const bytes = await renderRecipePdf(recipe);
+  const ids = await photoIds(id);
+  const photo = ids[0] ? await photoBytes(ids[0]) : null;
+  const bytes = await renderRecipePdf(recipe, photo ? new Uint8Array(photo) : null);
   const filename = pdfFilename(recipe.title);
   return new Response(new Uint8Array(bytes), {
     headers: {

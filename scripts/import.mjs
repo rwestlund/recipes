@@ -2,7 +2,7 @@ import { mkdir, readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import pg from "pg";
 import { PGlite } from "@electric-sql/pglite";
-import { normalizeTags } from "./tags.mjs";
+import { normalizeTags, withFreshMilledTag } from "./tags.mjs";
 
 const SOURCE = "https://recipes.textplain.net/api/recipes";
 const DATA_DIR = path.join(process.cwd(), ".data", "pglite");
@@ -56,16 +56,23 @@ function prepare(payload) {
     seenIds.add(id);
     const title = text(raw.title);
     if (title.trim() === "") throw new Error(`recipe ${id} has no title`);
+    const summary = text(raw.summary);
+    const notes = text(raw.notes);
+    const ingredients = stringList(raw.ingredients, "ingredients", id);
+    const directions = stringList(raw.directions, "directions", id);
     recipes.push({
       id,
       title,
-      summary: text(raw.summary),
+      summary,
       amount: text(raw.amount),
       time: text(raw.time),
-      notes: text(raw.notes),
-      ingredients: stringList(raw.ingredients, "ingredients", id),
-      directions: stringList(raw.directions, "directions", id),
-      tags: normalizeTags(stringList(raw.tags, "tags", id)),
+      notes,
+      ingredients,
+      directions,
+      tags: withFreshMilledTag(
+        normalizeTags(stringList(raw.tags, "tags", id)),
+        [title, summary, notes, ingredients.join("\n"), directions.join("\n")].join("\n"),
+      ),
     });
     const related = raw.linked_recipes;
     if (!Array.isArray(related)) throw new Error(`recipe ${id} is missing linked_recipes`);

@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import fontkit from "@pdf-lib/fontkit";
-import { PDFDocument, PDFFont, rgb, type RGB } from "pdf-lib";
+import { PDFDocument, PDFFont, PDFImage, rgb, type RGB } from "pdf-lib";
 import type { Recipe } from "@/lib/recipes";
 
 const PAGE_WIDTH = 612;
@@ -15,12 +15,14 @@ const accent = rgb(0.08, 0.36, 0.28);
 
 type Fonts = { regular: PDFFont; bold: PDFFont };
 
-export async function renderRecipePdf(recipe: Recipe): Promise<Uint8Array> {
+export async function renderRecipePdf(recipe: Recipe, photo: Uint8Array | null = null): Promise<Uint8Array> {
   const pdf = await PDFDocument.create();
   pdf.registerFontkit(fontkit);
   const regular = await pdf.embedFont(await readFile(fontPath("SourceSans3-Regular.ttf")), { subset: true });
   const bold = await pdf.embedFont(await readFile(fontPath("SourceSans3-Semibold.ttf")), { subset: true });
   const fonts = { regular, bold };
+  const icon = await embedMark(pdf);
+  const picture = await embedPhoto(pdf, photo);
   pdf.setTitle(recipe.title);
   pdf.setAuthor("Recipes");
   pdf.setCreator("Recipes");
@@ -50,7 +52,28 @@ export async function renderRecipePdf(recipe: Recipe): Promise<Uint8Array> {
     }
   };
 
-  drawLines(wrap(recipe.title, fonts.bold, 22, CONTENT_WIDTH), fonts.bold, 22, ink, 0, 4);
+  const iconSize = 26;
+  const titleGap = 10;
+  const titleSize = 22;
+  const titleLines = wrap(recipe.title, fonts.bold, titleSize, CONTENT_WIDTH - iconSize - titleGap);
+  const titleStep = titleSize + 4;
+  ensure(Math.max(iconSize, titleLines.length * titleStep));
+  page.drawImage(icon, {
+    x: MARGIN,
+    y: y + titleSize * 0.32 - iconSize / 2,
+    width: iconSize,
+    height: iconSize,
+  });
+  for (const line of titleLines) {
+    page.drawText(line, {
+      x: MARGIN + iconSize + titleGap,
+      y,
+      size: titleSize,
+      font: fonts.bold,
+      color: ink,
+    });
+    y -= titleStep;
+  }
   y -= 6;
 
   const timing = [recipe.amount ? `Amount  ${recipe.amount}` : "", recipe.time ? `Time  ${recipe.time}` : ""].filter(
@@ -63,10 +86,28 @@ export async function renderRecipePdf(recipe: Recipe): Promise<Uint8Array> {
     y -= 8;
   }
 
-  section("Ingredients", recipe.ingredients.map((line, index) => `${index + 1}.  ${line}`), true);
-  section("Steps", recipe.directions.map((line, index) => `${index + 1}.  ${line}`), true);
+  if (picture) {
+    const maxHeight = 210;
+    let width = CONTENT_WIDTH;
+    let height = (picture.height / picture.width) * width;
+    if (height > maxHeight) {
+      height = maxHeight;
+      width = (picture.width / picture.height) * height;
+    }
+    ensure(height + 8);
+    page.drawImage(picture, {
+      x: MARGIN + (CONTENT_WIDTH - width) / 2,
+      y: y - height,
+      width,
+      height,
+    });
+    y -= height + 14;
+  }
+
+  section("Ingredients", recipe.ingredients, "bullet");
+  section("Steps", recipe.directions, "number");
   if (recipe.notes.trim() !== "") {
-    section("Notes", [recipe.notes], false);
+    section("Notes", [recipe.notes], "plain");
   }
 
   const pages = pdf.getPages();
@@ -84,30 +125,53 @@ export async function renderRecipePdf(recipe: Recipe): Promise<Uint8Array> {
 
   return pdf.save();
 
-  function section(title: string, blocks: string[], hanging: boolean) {
+  function section(title: string, blocks: string[], kind: "plain" | "bullet" | "number") {
     if (blocks.length === 0) return;
     ensure(36);
     y -= 10;
     page.drawText(title, { x: MARGIN, y, size: 13, font: fonts.bold, color: accent });
     y -= 18;
-    for (const block of blocks) {
+    const gutter = kind === "plain" ? 0 : 18;
+    blocks.forEach((block, blockIndex) => {
       const paragraphs = block.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
-      for (const paragraph of paragraphs) {
+      paragraphs.forEach((paragraph, paragraphIndex) => {
         if (paragraph.trim() === "") {
           y -= 8;
-          continue;
+          return;
         }
-        const lines = wrap(paragraph, fonts.regular, 11, CONTENT_WIDTH - (hanging ? 18 : 0));
-        lines.forEach((line, index) => {
+        const prefix = kind === "number" && paragraphIndex === 0 ? `${blockIndex + 1}.  ` : "";
+        const lines = wrap(`${prefix}${paragraph}`, fonts.regular, 11, CONTENT_WIDTH - gutter);
+        lines.forEach((line, lineIndex) => {
           ensure(15);
-          const indent = hanging && index > 0 ? 18 : 0;
-          page.drawText(line, { x: MARGIN + indent, y, size: 11, font: fonts.regular, color: ink });
+          const hung = kind === "bullet" || (kind === "number" && (lineIndex > 0 || paragraphIndex > 0));
+          if (kind === "bullet" && paragraphIndex === 0 && lineIndex === 0) {
+            page.drawCircle({
+              x: MARGIN + 4.5,
+              y: y + 3.2,
+              size: 3.1,
+              borderWidth: 0.9,
+              borderColor: accent,
+              color: rgb(1, 1, 1),
+            });
+          }
+          page.drawText(line, { x: MARGIN + (hung ? gutter : 0), y, size: 11, font: fonts.regular, color: ink });
           y -= 15;
         });
-      }
+      });
       y -= 4;
-    }
+    });
   }
+}
+
+async function embedMark(pdf: PDFDocument): Promise<PDFImage> {
+  const sharp = (await import("sharp")).default;
+  const png = await sharp(path.join(process.cwd(), "public", "mark.svg")).resize(128, 128).png().toBuffer();
+  return pdf.embedPng(png);
+}
+
+async function embedPhoto(pdf: PDFDocument, photo: Uint8Array | null): Promise<PDFImage | null> {
+  if (!photo || photo.length < 3 || photo[0] !== 0xff || photo[1] !== 0xd8) return null;
+  return pdf.embedJpg(photo);
 }
 
 function fontPath(name: string): string {
