@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { pdfFilename } from "@/lib/text";
 
 export function ShareRecipe({ id, title }: { id: number; title: string }) {
   const [available, setAvailable] = useState(false);
@@ -14,21 +13,8 @@ export function ShareRecipe({ id, title }: { id: number; title: string }) {
 
   async function onShare() {
     const url = new URL(`/recipes/${id}`, window.location.origin).href;
-    const payload: ShareData = { title, url };
     try {
-      const response = await fetch(`/recipes/${id}/pdf`);
-      if (response.ok) {
-        const file = new File([await response.blob()], pdfFilename(title), { type: "application/pdf" });
-        if (navigator.canShare?.({ files: [file] })) {
-          try {
-            await navigator.share({ title, url, files: [file] });
-            return;
-          } catch (error) {
-            if (aborted(error)) return;
-          }
-        }
-      }
-      await navigator.share(payload);
+      await navigator.share({ title, url });
     } catch (error) {
       if (aborted(error)) return;
     }

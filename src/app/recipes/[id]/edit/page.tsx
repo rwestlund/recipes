@@ -61,7 +61,7 @@ export default async function EditRecipePage({
           <form action={addPhotoAction} className="form" encType="multipart/form-data">
             <input type="hidden" name="recipe" value={id} />
             <label htmlFor="photo">Camera or library</label>
-            <input id="photo" name="photo" type="file" accept="image/*" capture="environment" required />
+            <input id="photo" name="photo" type="file" accept="image/*" required />
             <button className="secondary" type="submit">
               Add photo
             </button>
