@@ -2,6 +2,7 @@ import { mkdir, readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { PGlite } from "@electric-sql/pglite";
 import pg from "pg";
+import { pgClientConfig } from "./pg-config.mjs";
 
 const databaseUrl = process.env.DATABASE_URL?.trim() ?? "";
 const dataDir = path.join(process.cwd(), ".data", "pglite");
@@ -15,7 +16,7 @@ export async function sql<T = Record<string, unknown>>(
   params: unknown[] = [],
 ): Promise<T[]> {
   if (databaseUrl !== "") {
-    pool ??= new pg.Pool({ connectionString: databaseUrl, max: 5 });
+    pool ??= new pg.Pool({ ...pgClientConfig(databaseUrl), max: 5 });
     return (await pool.query(text, params)).rows as T[];
   }
   globalForDb.pglite ??= startLocal().catch((error: unknown) => {

@@ -1,5 +1,6 @@
 import { readdir, readFile } from "node:fs/promises";
 import pg from "pg";
+import { pgClientConfig } from "../src/lib/pg-config.mjs";
 
 const url = process.env.DATABASE_URL?.trim() ?? "";
 const files = (await readdir("migrations").catch(() => []))
@@ -11,7 +12,7 @@ if (url === "" || files.length === 0) {
 }
 // The session lock needs a direct connection: DATABASE_URL may go through a
 // transaction pooler, which would keep the lock after this script exits.
-const client = new pg.Client({ connectionString: process.env.DATABASE_URL_UNPOOLED?.trim() || url });
+const client = new pg.Client(pgClientConfig(process.env.DATABASE_URL_UNPOOLED?.trim() || url));
 await client.connect();
 try {
   await client.query("set lock_timeout = '60s'");

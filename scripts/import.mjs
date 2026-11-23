@@ -1,6 +1,7 @@
 import { mkdir, readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import pg from "pg";
+import { pgClientConfig } from "../src/lib/pg-config.mjs";
 import { PGlite } from "@electric-sql/pglite";
 import { normalizeTags, withFreshMilledTag } from "./tags.mjs";
 
@@ -207,7 +208,7 @@ async function load(db, payload) {
 async function withDatabase(fn) {
   const url = process.env.DATABASE_URL?.trim() ?? "";
   if (url !== "") {
-    const client = new pg.Client({ connectionString: process.env.DATABASE_URL_UNPOOLED?.trim() || url });
+    const client = new pg.Client(pgClientConfig(process.env.DATABASE_URL_UNPOOLED?.trim() || url));
     await client.connect();
     const db = {
       query: (text, params) => client.query(text, params ?? []),
