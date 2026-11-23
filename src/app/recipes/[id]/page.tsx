@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { CheckList } from "@/components/check-list";
 import { ShareRecipe } from "@/components/share-recipe";
 import { WakeLock } from "@/components/wake-lock";
 import { isEditor } from "@/lib/auth";
-import { getRecipe, incomingLinks, outgoingLinks, photoIds } from "@/lib/recipes";
+import { getRecipe, incomingLinks, outgoingLinks, photoIds, type Recipe } from "@/lib/recipes";
 import { parseId } from "@/lib/text";
 
 type Params = { id: string };
@@ -13,7 +14,33 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const id = parseId((await params).id);
   if (!id) return { title: "Recipe" };
   const recipe = await getRecipe(id);
-  return { title: recipe?.title ?? "Recipe" };
+  if (!recipe) return { title: "Recipe" };
+  const description = previewDescription(recipe);
+  const pageUrl = await absoluteUrl(`/recipes/${recipe.id}`);
+  const [photoId] = await photoIds(recipe.id);
+  const imageUrl = photoId ? await absoluteUrl(`/photos/${photoId}`) : "";
+  return {
+    title: recipe.title,
+    description,
+    alternates: pageUrl.startsWith("https://") ? { canonical: pageUrl } : undefined,
+    openGraph: {
+      title: recipe.title,
+      description,
+      url: pageUrl.startsWith("https://") ? pageUrl : undefined,
+      type: "article",
+      ...(imageUrl.startsWith("https://") ? { images: [{ url: imageUrl, type: "image/jpeg", alt: recipe.title }] } : {}),
+    },
+    ...(imageUrl.startsWith("https://")
+      ? {
+          twitter: {
+            card: "summary_large_image" as const,
+            title: recipe.title,
+            description,
+            images: [imageUrl],
+          },
+        }
+      : {}),
+  };
 }
 
 export default async function RecipePage({ params }: { params: Promise<Params> }) {
@@ -121,4 +148,24 @@ export default async function RecipePage({ params }: { params: Promise<Params> }
       </p>
     </article>
   );
+}
+
+function previewDescription(recipe: Recipe): string {
+  const summary = recipe.summary.replace(/\s+/g, " ").trim();
+  const ingredients = recipe.ingredients
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, 3)
+    .join(", ");
+  const text = summary || ingredients || "A Westlund family recipe.";
+  if (text.length <= 180) return text;
+  return `${text.slice(0, 179).trimEnd()}…`;
+}
+
+async function absoluteUrl(path: string): Promise<string> {
+  const headerList = await headers();
+  const raw = headerList.get("x-forwarded-host") ?? headerList.get("host") ?? "";
+  const host = raw.split(",")[0]?.trim() ?? "";
+  if (!/^[A-Za-z0-9.-]+(?::\d+)?$/.test(host)) return path;
+  return `https://${host}${path}`;
 }
