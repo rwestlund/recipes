@@ -15,6 +15,16 @@ export function searchWords(query: string): string[] {
     .map((word) => word.slice(0, 40));
 }
 
+export function matchesRecipe(title: string, tags: string[], words: string[]): boolean {
+  if (words.length === 0) return true;
+  const hayTitle = title.toLowerCase();
+  const hayTags = tags.map((tag) => tag.toLowerCase());
+  return words.every((word) => {
+    const needle = word.toLowerCase();
+    return hayTitle.includes(needle) || hayTags.some((tag) => tag.includes(needle));
+  });
+}
+
 export function likeContains(word: string): string {
   return `%${word.replace(/[\\%_]/g, (ch) => `\\${ch}`)}%`;
 }

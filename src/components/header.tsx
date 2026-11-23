@@ -10,7 +10,8 @@ export function Header({ editor }: { editor: boolean }) {
   return (
     <header className="top">
       <a className="mark" href="/">
-        Recipes
+        {onIndex ? <img className="mark-icon" src="/mark.svg" alt="" /> : null}
+        <span>Westlund Family Recipes</span>
       </a>
       {editor && onIndex ? (
         <nav>

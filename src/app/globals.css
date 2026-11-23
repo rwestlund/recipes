@@ -50,7 +50,7 @@ a { color: var(--accent); }
 .top {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   gap: 1rem;
   position: sticky;
   top: 0;
@@ -61,12 +61,23 @@ a { color: var(--accent); }
 }
 
 .mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
   font-family: var(--display);
-  font-size: 1.85rem;
-  line-height: 1;
+  font-size: clamp(1.05rem, 4.6vw, 1.55rem);
+  line-height: 1.05;
   letter-spacing: -0.03em;
   color: var(--ink);
   text-decoration: none;
+}
+
+.mark-icon {
+  width: 1.75rem;
+  height: 1.75rem;
+  display: block;
+  border-radius: 0.4rem;
 }
 
 .top nav {
@@ -127,8 +138,13 @@ h2 {
 .search .secondary { width: auto; }
 
 .clear {
+  font: inherit;
   font-weight: 650;
-  text-decoration: none;
+  color: var(--accent);
+  background: none;
+  border: 0;
+  padding: 0.35rem 0;
+  cursor: pointer;
 }
 
 .count {

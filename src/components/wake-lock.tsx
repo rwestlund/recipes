@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const STORAGE_KEY = "recipes-wake-lock";
 const FAILURE = "The browser would not keep the screen awake.";
 
 export function WakeLock() {
@@ -23,30 +22,12 @@ export function WakeLock() {
   function turnOff() {
     wanted.current = false;
     setOn(false);
-    localStorage.removeItem(STORAGE_KEY);
     void sentinel.current?.release();
     sentinel.current = null;
   }
 
   useEffect(() => {
-    let cancelled = false;
-    if (localStorage.getItem(STORAGE_KEY) === "1") {
-      wanted.current = true;
-      acquire()
-        .then(() => {
-          if (cancelled) return;
-          setOn(true);
-          setFailure("");
-        })
-        .catch(() => {
-          if (cancelled) return;
-          wanted.current = false;
-          localStorage.removeItem(STORAGE_KEY);
-          setOn(false);
-          setFailure(FAILURE);
-        });
-    }
-
+    localStorage.removeItem("recipes-wake-lock");
     const onVisible = () => {
       if (document.visibilityState !== "visible" || !wanted.current || sentinel.current) return;
       acquire()
@@ -56,14 +37,12 @@ export function WakeLock() {
         })
         .catch(() => {
           wanted.current = false;
-          localStorage.removeItem(STORAGE_KEY);
           setOn(false);
           setFailure(FAILURE);
         });
     };
     document.addEventListener("visibilitychange", onVisible);
     return () => {
-      cancelled = true;
       document.removeEventListener("visibilitychange", onVisible);
       void sentinel.current?.release();
     };
@@ -78,7 +57,6 @@ export function WakeLock() {
     try {
       await acquire();
       wanted.current = true;
-      localStorage.setItem(STORAGE_KEY, "1");
       setOn(true);
     } catch {
       turnOff();

@@ -6,9 +6,9 @@ import "./globals.css";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: { default: "Recipes", template: "%s · Recipes" },
+  title: { default: "Westlund Family Recipes", template: "%s · Westlund Family Recipes" },
   description: "A household recipe book.",
-  appleWebApp: { capable: true, title: "Recipes" },
+  appleWebApp: { capable: true, title: "Westlund Family Recipes" },
 };
 
 export const viewport: Viewport = {
