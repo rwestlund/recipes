@@ -182,7 +182,7 @@ function compose(
     ops,
     fonts,
     body,
-    leading,
+    leading: body * 1.5,
     headSize,
     gutter,
     scale,
@@ -320,7 +320,8 @@ function takeWords(words: string[], font: PDFFont, size: number, width: number):
 
 async function embedMark(pdf: PDFDocument): Promise<PDFImage> {
   const sharp = (await import("sharp")).default;
-  const png = await sharp(path.join(process.cwd(), "public", "mark.svg")).resize(128, 128).png().toBuffer();
+  const svg = await readFile(path.join(process.cwd(), "public", "mark.svg"));
+  const png = await sharp(svg).resize(128, 128).png().toBuffer();
   return pdf.embedPng(png);
 }
 

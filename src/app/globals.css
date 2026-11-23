@@ -77,7 +77,6 @@ a { color: var(--accent); }
   width: 1.75rem;
   height: 1.75rem;
   display: block;
-  border-radius: 0.4rem;
 }
 
 .top nav {
@@ -454,62 +453,6 @@ input[type="file"] { font: inherit; max-width: 100%; }
 :focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
-}
-
-.chooser {
-  list-style: none;
-  margin: 0.4rem 0 2rem;
-  padding: 0;
-}
-
-.chooser li {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.15rem 0.85rem;
-  align-items: start;
-  padding: 0.85rem 0;
-  border-top: 1px solid var(--line);
-}
-
-.chooser-num {
-  font-family: var(--display);
-  font-size: 1.4rem;
-  line-height: 1;
-  padding-top: 0.15rem;
-}
-
-.chooser p {
-  margin: 0.15rem 0 0.45rem;
-  color: var(--muted);
-}
-
-.chooser-sizes {
-  display: flex;
-  align-items: flex-end;
-  gap: 1.25rem;
-}
-
-.chooser-sizes span {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-  color: var(--muted);
-  font-size: 0.75rem;
-}
-
-.chooser img {
-  display: block;
-}
-
-.chooser img.favicon {
-  width: 16px;
-  height: 16px;
-}
-
-.chooser img.header {
-  width: 1.75rem;
-  height: 1.75rem;
 }
 
 @media print {
