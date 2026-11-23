@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Header } from "@/components/header";
+import { RegisterServiceWorker } from "@/components/register-service-worker";
 import { isEditor } from "@/lib/auth";
 import "./globals.css";
 
@@ -8,7 +9,10 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: { default: "Westlund Family Recipes", template: "%s · Westlund Family Recipes" },
   description: "A household recipe book.",
-  appleWebApp: { capable: true, title: "Westlund Family Recipes" },
+  appleWebApp: { capable: true, title: "Recipes", statusBarStyle: "default" },
+  icons: {
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }],
+  },
 };
 
 export const viewport: Viewport = {
@@ -22,6 +26,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en">
       <body>
+        <RegisterServiceWorker />
         <a className="skip" href="#content">
           Skip to content
         </a>
