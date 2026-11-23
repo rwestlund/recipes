@@ -22,7 +22,7 @@ export async function renderRecipePdf(recipe: Recipe): Promise<Uint8Array> {
   const bold = await pdf.embedFont(await readFile(fontPath("SourceSans3-Semibold.ttf")), { subset: true });
   const fonts = { regular, bold };
   pdf.setTitle(recipe.title);
-  pdf.setAuthor(recipe.authorName || "Recipes");
+  pdf.setAuthor("Recipes");
   pdf.setCreator("Recipes");
 
   let page = pdf.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
@@ -53,11 +53,9 @@ export async function renderRecipePdf(recipe: Recipe): Promise<Uint8Array> {
   drawLines(wrap(recipe.title, fonts.bold, 22, CONTENT_WIDTH), fonts.bold, 22, ink, 0, 4);
   y -= 6;
 
-  const timing = [
-    recipe.amount ? `Amount  ${recipe.amount}` : "",
-    recipe.time ? `Time  ${recipe.time}` : "",
-    recipe.oven ? `Oven  ${recipe.oven}` : "",
-  ].filter(Boolean);
+  const timing = [recipe.amount ? `Amount  ${recipe.amount}` : "", recipe.time ? `Time  ${recipe.time}` : ""].filter(
+    Boolean,
+  );
   if (timing.length > 0) {
     for (const line of timing) {
       drawLines(wrap(line, fonts.regular, 12, CONTENT_WIDTH), fonts.regular, 12, ink, 0, 3);
@@ -69,12 +67,6 @@ export async function renderRecipePdf(recipe: Recipe): Promise<Uint8Array> {
   section("Steps", recipe.directions.map((line, index) => `${index + 1}.  ${line}`), true);
   if (recipe.notes.trim() !== "") {
     section("Notes", [recipe.notes], false);
-  }
-
-  const credit = [recipe.source, recipe.authorName].filter((part) => part.trim() !== "").join("  ·  ");
-  if (credit !== "") {
-    y -= 8;
-    drawLines(wrap(credit, fonts.regular, 10, CONTENT_WIDTH), fonts.regular, 10, muted);
   }
 
   const pages = pdf.getPages();

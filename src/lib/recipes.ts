@@ -1,7 +1,7 @@
 import { sql } from "@/lib/db";
 import { likeContains, parseId } from "@/lib/text";
 
-export { parseId, searchWords, sourceHref, pdfFilename } from "@/lib/text";
+export { parseId, searchWords, pdfFilename } from "@/lib/text";
 
 export type Recipe = {
   id: number;
@@ -10,10 +10,7 @@ export type Recipe = {
   summary: string;
   amount: string;
   time: string;
-  oven: string;
-  source: string;
   notes: string;
-  authorName: string;
   ingredients: string[];
   directions: string[];
   tags: string[];
@@ -25,6 +22,7 @@ export type ListRecipe = {
   summary: string;
   time: string;
   tags: string[];
+  photoId: number | null;
 };
 
 export type LinkedRecipe = { id: number; title: string };
@@ -34,10 +32,7 @@ export type RecipeInput = {
   summary: string;
   amount: string;
   time: string;
-  oven: string;
-  source: string;
   notes: string;
-  authorName: string;
   ingredients: string[];
   directions: string[];
   tags: string[];
@@ -48,10 +43,7 @@ const LIMITS = {
   summary: 4000,
   amount: 300,
   time: 300,
-  oven: 200,
-  source: 500,
   notes: 20_000,
-  author: 200,
   line: 2000,
   lines: 80,
   tags: 30,
@@ -86,10 +78,7 @@ type RecipeRow = {
   summary: string;
   amount: string;
   time: string;
-  oven: string;
-  source: string;
   notes: string;
-  author_name: string;
   ingredients: unknown;
   directions: unknown;
   tags: unknown;
@@ -103,10 +92,7 @@ function toRecipe(row: RecipeRow): Recipe {
     summary: row.summary,
     amount: row.amount,
     time: row.time,
-    oven: row.oven,
-    source: row.source,
     notes: row.notes,
-    authorName: row.author_name,
     ingredients: asStringArray(row.ingredients),
     directions: asStringArray(row.directions),
     tags: asStringArray(row.tags),
@@ -127,8 +113,9 @@ export async function listRecipes(words: string[]): Promise<ListRecipe[]> {
     );
   }
   const where = clauses.length > 0 ? `where ${clauses.join(" and ")}` : "";
-  const rows = await sql<RecipeRow>(
-    `select id, title, summary, time, tags
+  const rows = await sql<RecipeRow & { photo_id: number | string | null }>(
+    `select id, title, summary, time, tags,
+       (select id from photos where recipe_id = recipes.id order by id limit 1) as photo_id
      from recipes
      ${where}
      order by lower(title), id`,
@@ -140,6 +127,7 @@ export async function listRecipes(words: string[]): Promise<ListRecipe[]> {
     summary: row.summary,
     time: row.time,
     tags: asStringArray(row.tags),
+    photoId: numberOrNull(row.photo_id),
   }));
 }
 
@@ -202,10 +190,7 @@ export function recipeInputFromForm(formData: FormData): RecipeInput {
     summary: limited(field(formData, "summary"), LIMITS.summary, "Summary"),
     amount: limited(field(formData, "amount"), LIMITS.amount, "Amount"),
     time: limited(field(formData, "time"), LIMITS.time, "Time"),
-    oven: limited(field(formData, "oven"), LIMITS.oven, "Oven"),
-    source: limited(field(formData, "source"), LIMITS.source, "Source"),
     notes: limited(rawField(formData, "notes").trim(), LIMITS.notes, "Notes"),
-    authorName: limited(field(formData, "author_name"), LIMITS.author, "Author"),
     ingredients: lines(rawField(formData, "ingredients"), "Ingredient"),
     directions: lines(rawField(formData, "directions"), "Step"),
     tags: tagList(field(formData, "tags")),
@@ -257,18 +242,15 @@ function tagList(value: string): string[] {
 export async function insertRecipe(input: RecipeInput): Promise<number> {
   const rows = await sql<{ id: number | string }>(
     `insert into recipes (
-       title, summary, amount, time, oven, source, notes, author_name, ingredients, directions, tags
-     ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10::jsonb, $11::jsonb)
+       title, summary, amount, time, notes, ingredients, directions, tags
+     ) values ($1, $2, $3, $4, $5, $6::jsonb, $7::jsonb, $8::jsonb)
      returning id`,
     [
       input.title,
       input.summary,
       input.amount,
       input.time,
-      input.oven,
-      input.source,
       input.notes,
-      input.authorName,
       JSON.stringify(input.ingredients),
       JSON.stringify(input.directions),
       JSON.stringify(input.tags),
@@ -284,13 +266,10 @@ export async function updateRecipe(id: number, input: RecipeInput): Promise<bool
        summary = $3,
        amount = $4,
        time = $5,
-       oven = $6,
-       source = $7,
-       notes = $8,
-       author_name = $9,
-       ingredients = $10::jsonb,
-       directions = $11::jsonb,
-       tags = $12::jsonb,
+       notes = $6,
+       ingredients = $7::jsonb,
+       directions = $8::jsonb,
+       tags = $9::jsonb,
        updated_at = now()
      where id = $1
      returning id`,
@@ -300,10 +279,7 @@ export async function updateRecipe(id: number, input: RecipeInput): Promise<bool
       input.summary,
       input.amount,
       input.time,
-      input.oven,
-      input.source,
       input.notes,
-      input.authorName,
       JSON.stringify(input.ingredients),
       JSON.stringify(input.directions),
       JSON.stringify(input.tags),

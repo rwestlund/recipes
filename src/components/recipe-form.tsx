@@ -24,9 +24,6 @@ export function RecipeForm({
       <label htmlFor="time">Time</label>
       <input id="time" name="time" defaultValue={recipe?.time ?? ""} />
 
-      <label htmlFor="oven">Oven</label>
-      <input id="oven" name="oven" defaultValue={recipe?.oven ?? ""} />
-
       <label htmlFor="tags">Tags</label>
       <input id="tags" name="tags" defaultValue={recipe?.tags.join(", ") ?? ""} placeholder="dessert, chocolate" />
 
@@ -44,12 +41,6 @@ export function RecipeForm({
 
       <label htmlFor="notes">Notes</label>
       <textarea id="notes" name="notes" rows={6} defaultValue={recipe?.notes ?? ""} />
-
-      <label htmlFor="source">Source</label>
-      <input id="source" name="source" defaultValue={recipe?.source ?? ""} />
-
-      <label htmlFor="author_name">Author</label>
-      <input id="author_name" name="author_name" defaultValue={recipe?.authorName ?? ""} />
 
       <div className="savebar">
         <button className="primary" type="submit">

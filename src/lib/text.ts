@@ -19,18 +19,6 @@ export function likeContains(word: string): string {
   return `%${word.replace(/[\\%_]/g, (ch) => `\\${ch}`)}%`;
 }
 
-export function sourceHref(source: string): string | null {
-  const trimmed = source.trim();
-  if (!/^https?:\/\//i.test(trimmed)) return null;
-  try {
-    const url = new URL(trimmed);
-    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
-    return url.toString();
-  } catch {
-    return null;
-  }
-}
-
 export function pdfFilename(title: string): string {
   const slug = title
     .toLowerCase()

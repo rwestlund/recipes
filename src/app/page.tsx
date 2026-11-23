@@ -44,9 +44,14 @@ export default async function HomePage({
             return (
               <li key={recipe.id}>
                 <a href={`/recipes/${recipe.id}`}>
-                  <span className="name">{recipe.title}</span>
-                  {recipe.summary ? <span className="dek">{recipe.summary}</span> : null}
-                  {meta.length > 0 ? <span className="rowmeta">{meta.join(" · ")}</span> : null}
+                  {recipe.photoId ? (
+                    <img className="thumb" src={`/photos/${recipe.photoId}`} alt="" />
+                  ) : null}
+                  <span className="copy">
+                    <span className="name">{recipe.title}</span>
+                    {recipe.summary ? <span className="dek">{recipe.summary}</span> : null}
+                    {meta.length > 0 ? <span className="rowmeta">{meta.join(" · ")}</span> : null}
+                  </span>
                 </a>
               </li>
             );

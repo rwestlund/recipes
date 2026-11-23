@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CheckList } from "@/components/check-list";
-import { ShareSheet } from "@/components/share-sheet";
+import { ShareRecipe } from "@/components/share-recipe";
+import { WakeLock } from "@/components/wake-lock";
 import { isEditor } from "@/lib/auth";
-import { getRecipe, incomingLinks, outgoingLinks, photoIds, sourceHref } from "@/lib/recipes";
+import { getRecipe, incomingLinks, outgoingLinks, photoIds } from "@/lib/recipes";
 import { parseId } from "@/lib/text";
 
 type Params = { id: string };
@@ -27,11 +28,9 @@ export default async function RecipePage({ params }: { params: Promise<Params> }
     isEditor(),
   ]);
   const usedIn = incoming.filter((link) => !outgoing.some((item) => item.id === link.id));
-  const href = sourceHref(recipe.source);
   const facts = [
     recipe.amount ? ["Amount", recipe.amount] : null,
     recipe.time ? ["Time", recipe.time] : null,
-    recipe.oven ? ["Oven", recipe.oven] : null,
   ].filter((fact): fact is [string, string] => fact !== null);
 
   return (
@@ -56,10 +55,11 @@ export default async function RecipePage({ params }: { params: Promise<Params> }
         </dl>
       ) : null}
       <div className="actions">
+        <WakeLock />
         <a className="primary" href={`/recipes/${recipe.id}/pdf`}>
-          Baking sheet
+          Print recipe
         </a>
-        <ShareSheet url={`/recipes/${recipe.id}/pdf`} title={recipe.title} />
+        <ShareRecipe id={recipe.id} title={recipe.title} />
       </div>
       {recipe.tags.length > 0 ? (
         <p className="tags">
@@ -111,18 +111,6 @@ export default async function RecipePage({ params }: { params: Promise<Params> }
             ))}
           </ul>
         </section>
-      ) : null}
-      {recipe.source || recipe.authorName ? (
-        <p className="credit">
-          {href ? (
-            <a href={href} rel="noreferrer">
-              {recipe.source}
-            </a>
-          ) : recipe.source ? (
-            <span>{recipe.source}</span>
-          ) : null}
-          {recipe.authorName ? <span>{recipe.authorName}</span> : null}
-        </p>
       ) : null}
       <p className="editlink">
         {editor ? (

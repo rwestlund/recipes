@@ -2,6 +2,7 @@ import { mkdir, readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import pg from "pg";
 import { PGlite } from "@electric-sql/pglite";
+import { normalizeTags } from "./tags.mjs";
 
 const SOURCE = "https://recipes.textplain.net/api/recipes";
 const DATA_DIR = path.join(process.cwd(), ".data", "pglite");
@@ -61,13 +62,10 @@ function prepare(payload) {
       summary: text(raw.summary),
       amount: text(raw.amount),
       time: text(raw.time),
-      oven: text(raw.oven),
-      source: text(raw.source),
       notes: text(raw.notes),
-      author_name: text(raw.author_name),
       ingredients: stringList(raw.ingredients, "ingredients", id),
       directions: stringList(raw.directions, "directions", id),
-      tags: stringList(raw.tags, "tags", id),
+      tags: normalizeTags(stringList(raw.tags, "tags", id)),
     });
     const related = raw.linked_recipes;
     if (!Array.isArray(related)) throw new Error(`recipe ${id} is missing linked_recipes`);
@@ -139,20 +137,17 @@ async function load(db, payload) {
     for (const recipe of recipes) {
       await tx.query(
         `insert into recipes (
-           id, legacy_id, title, summary, amount, time, oven, source, notes, author_name,
+           id, legacy_id, title, summary, amount, time, notes,
            ingredients, directions, tags
          ) values (
-           $1, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11::jsonb, $12::jsonb
+           $1, $1, $2, $3, $4, $5, $6, $7::jsonb, $8::jsonb, $9::jsonb
          )
          on conflict (legacy_id) do update set
            title = excluded.title,
            summary = excluded.summary,
            amount = excluded.amount,
            time = excluded.time,
-           oven = excluded.oven,
-           source = excluded.source,
            notes = excluded.notes,
-           author_name = excluded.author_name,
            ingredients = excluded.ingredients,
            directions = excluded.directions,
            tags = excluded.tags,
@@ -163,10 +158,7 @@ async function load(db, payload) {
           recipe.summary,
           recipe.amount,
           recipe.time,
-          recipe.oven,
-          recipe.source,
           recipe.notes,
-          recipe.author_name,
           JSON.stringify(recipe.ingredients),
           JSON.stringify(recipe.directions),
           JSON.stringify(recipe.tags),
